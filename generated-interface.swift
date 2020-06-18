@@ -1,4 +1,4 @@
-// Xcode 11.0
+// Xcode 11.1
 
 import Combine
 import CoreData
@@ -15,6 +15,7 @@ import os.signpost
 
 /// The kind of an Accessibility action. Includes name information for custom
 /// actions
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct AccessibilityActionKind : Equatable {
 
     public static let `default`: AccessibilityActionKind
@@ -39,6 +40,7 @@ public struct AccessibilityActionKind : Equatable {
 }
 
 /// Specifies which way an adjustment should be made.
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum AccessibilityAdjustmentDirection {
 
     case increment
@@ -80,9 +82,11 @@ public enum AccessibilityAdjustmentDirection {
     public func hash(into hasher: inout Hasher)
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AccessibilityAdjustmentDirection : Equatable {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AccessibilityAdjustmentDirection : Hashable {
 }
 
@@ -141,10 +145,12 @@ extension AccessibilityChildBehavior {
     /// Child accessibility elements are ignored
     public static let ignore: AccessibilityChildBehavior
 
-    /// Any child accessibility elements become children of the new accessibility element
+    /// Any child accessibility elements become children of the new
+    /// accessibility element
     public static let contain: AccessibilityChildBehavior
 
-    /// Combine any child accessibility element's properties for the new accessibility element
+    /// Combine any child accessibility element's properties for the
+    /// new accessibility element
     public static let combine: AccessibilityChildBehavior
 }
 
@@ -526,16 +532,15 @@ public protocol AlignmentID {
 
 /// An opaque value derived from an `Anchor<Value>.Source` and a
 /// particular view. It may be converted to a `Value` in the coordinate
-/// space of a target view, using a `LayoutContext` to specify the
-/// target view.
+/// space of a target view, using a `GeometryProxy` value to specify
+/// the target view.
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Anchor<Value> {
 
     /// A type-erased geometry value that produces an anchored value of
     /// type `Value`. Anchored geometry values are passed around the
     /// view tree via preference keys, and then converted back into the
-    /// local coordinate via a LayoutContext, e.g. in a layout's
-    /// situate() function.
+    /// local coordinate space via a `GeometryProxy` value.
     public struct Source {
     }
 }
@@ -577,6 +582,7 @@ extension Anchor.Source where Value == CGPoint {
     public static var bottomTrailing: Anchor<CGPoint>.Source { get }
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Anchor.Source {
 
     public init<T>(_ array: [Anchor<T>.Source]) where Value == [T]
@@ -1036,6 +1042,7 @@ extension AnyTransition {
     public static let opacity: AnyTransition
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// A transition that inserts by moving in from the leading edge, and
@@ -1232,6 +1239,7 @@ public enum Axis : Int8, CaseIterable {
     public static var allCases: [Axis] { get }
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Axis : CustomStringConvertible {
 
     /// A textual representation of this instance.
@@ -1307,9 +1315,12 @@ extension Binding {
     /// unwrapped value, or returns `nil` if the base value is `nil`.
     public init?(_ base: Binding<Value?>)
 
-    public init<V>(_ base: Binding<V>) where V : Hashable
+    /// Creates an instance by projecting the base `Hashable` value to an
+    /// `AnyHashable` value.
+    public init<V>(_ base: Binding<V>) where Value == AnyHashable, V : Hashable
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Binding {
 
     /// Create a new Binding that will apply `transaction` to any changes.
@@ -2539,7 +2550,8 @@ public struct DoubleColumnNavigationViewStyle : NavigationViewStyle {
 }
 
 /// A gesture that invokes an action as a drag event sequence changes.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 public struct DragGesture {
 
     /// The current state of the event sequence.
@@ -2590,7 +2602,8 @@ public struct DragGesture {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 extension DragGesture : Gesture {
 }
 
@@ -3299,12 +3312,14 @@ extension EnvironmentValues {
     public var verticalSizeClass: UserInterfaceSizeClass?
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// If an assistive technology is enabled
     public var accessibilityEnabled: Bool
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// Whether the system preference for Differentiate without Color is enabled.
@@ -3546,7 +3561,7 @@ extension ExclusiveGesture.Value : Equatable where First.Value : Equatable, Seco
 /// a fetch request. The managed object context used by the fetch request and
 /// its results is provided by @Environment(\.managedObjectContext).
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
-@propertyWrapper public struct FetchRequest<Result> where Result : NSFetchRequestResult {
+@propertyWrapper public struct FetchRequest<Result> : DynamicProperty where Result : NSFetchRequestResult {
 
     /// The current collection of fetched results.
     public var wrappedValue: FetchedResults<Result> { get }
@@ -3574,10 +3589,6 @@ extension ExclusiveGesture.Value : Equatable where First.Value : Equatable, Seco
     ///   - transaction: The transaction used for any changes to the fetched
     ///     results.
     public init(fetchRequest: NSFetchRequest<Result>, transaction: Transaction)
-}
-
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
-extension FetchRequest : DynamicProperty {
 
     /// Called immediately before the view's body() function is
     /// executed, after updating the values of any dynamic properties
@@ -5202,6 +5213,7 @@ public protocol ListStyle {
 }
 
 /// The key used to looked up in a .string or .stringdict file.
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct LocalizedStringKey : Equatable, ExpressibleByStringInterpolation {
 
     public init(_ value: String)
@@ -5305,7 +5317,8 @@ public struct LocalizedStringKey : Equatable, ExpressibleByStringInterpolation {
 
 /// A gesture that ends once a long-press event sequence has been
 /// recognized.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 public struct LongPressGesture {
 
     /// The duration that must elapse before the gesture ends.
@@ -5323,13 +5336,15 @@ public struct LongPressGesture {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 extension LongPressGesture : Gesture {
 }
 
 /// A gesture that tracks how a magnification event sequence changes.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
+@available(iOS 13.0, OSX 10.15, *)
 @available(watchOS, unavailable)
+@available(tvOS, unavailable)
 public struct MagnificationGesture : Gesture {
 
     /// The minimum delta required before the gesture starts.
@@ -5355,6 +5370,7 @@ public struct ModifiedContent<Content, Modifier> {
     @inlinable public init(content: Content, modifier: Modifier)
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Add an accessibility action to an element.
@@ -5429,6 +5445,7 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     public func accessibility(activationPoint: UnitPoint) -> ModifiedContent<Content, Modifier>
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Convenience function for attaching an AccessibilityScrollAction to a
@@ -5436,6 +5453,7 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     public func accessibilityScrollAction(_ handler: @escaping (Edge) -> Void) -> ModifiedContent<Content, Modifier>
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Convenience function for attaching an AccessibilityAdjustableAction to a
@@ -5586,11 +5604,14 @@ public struct NavigationView<Content> : View where Content : View {
 
     public init(@ViewBuilder content: () -> Content)
 
+    /// Declares the content and behavior of this view.
+    public var body: some View { get }
+
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
     /// implementation of the required `body` property.
-    public typealias Body = Never
+    public typealias Body = some View
 }
 
 /// A specification for the appearance and interaction of a `NavigationView`.
@@ -5655,6 +5676,7 @@ public struct OffsetShape<Content> : Shape where Content : Shape {
     public typealias Body
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension OffsetShape : InsettableShape where Content : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -6384,6 +6406,7 @@ public struct RotatedShape<Content> : Shape where Content : Shape {
     public typealias Body
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension RotatedShape : InsettableShape where Content : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -6394,7 +6417,8 @@ extension RotatedShape : InsettableShape where Content : InsettableShape {
 }
 
 /// A gesture that tracks how a rotation event sequence changes.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
+@available(iOS 13.0, OSX 10.15, *)
+@available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct RotationGesture : Gesture {
 
@@ -6688,6 +6712,7 @@ public struct SequenceGesture<First, Second> where First : Gesture, Second : Ges
 extension SequenceGesture : Gesture {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension SequenceGesture.Value : Equatable where First.Value : Equatable, Second.Value : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -7484,7 +7509,8 @@ extension TabView where SelectionValue == Int {
 
 /// A gesture that ends once a specified number of tap event sequences
 /// have been recognized.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 public struct TapGesture {
 
     /// The required number of tap events.
@@ -7499,7 +7525,8 @@ public struct TapGesture {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 extension TapGesture : Gesture {
 }
 
@@ -7834,6 +7861,7 @@ extension TextField where Label == Text {
 }
 
 /// A specification for the appearance and interaction of a `TextField`.
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol TextFieldStyle {
 }
 
@@ -8251,6 +8279,7 @@ public struct UnitPoint : Hashable {
     public func hash(into hasher: inout Hasher)
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UnitPoint : Animatable {
 
     /// The type defining the data to be animated.
@@ -8459,7 +8488,8 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 extension View {
 
     /// Returns a version of `self` that will invoke `action` after
@@ -9978,7 +10008,8 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 extension View {
 
     /// Returns a version of `self` that will invoke `action` after
@@ -10011,13 +10042,13 @@ extension View {
     /// Returns a view that reads the value of preference `Key` from
     /// `self`, uses that to produce another view which is displayed as
     /// an overlay on `self`.
-    @inlinable public func overlayPreferenceValue<Key, T>(_ key: Key.Type = Key.self, _ transform: @escaping (Key.Value) -> T) -> some View where Key : PreferenceKey, T : View
+    @inlinable public func overlayPreferenceValue<Key, T>(_ key: Key.Type = Key.self, @ViewBuilder _ transform: @escaping (Key.Value) -> T) -> some View where Key : PreferenceKey, T : View
 
 
     /// Returns a view that reads the value of preference `Key` from
     /// `self`, uses that to produce another view which is displayed as
     /// as the background to `self`.
-    @inlinable public func backgroundPreferenceValue<Key, T>(_ key: Key.Type = Key.self, _ transform: @escaping (Key.Value) -> T) -> some View where Key : PreferenceKey, T : View
+    @inlinable public func backgroundPreferenceValue<Key, T>(_ key: Key.Type = Key.self, @ViewBuilder _ transform: @escaping (Key.Value) -> T) -> some View where Key : PreferenceKey, T : View
 
 }
 
@@ -10082,6 +10113,7 @@ extension View {
 
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Convenience function for attaching an AccessibilityScrollAction to a
@@ -10173,6 +10205,7 @@ extension View {
 
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for `TextField` within the environment of `self`.
@@ -10187,6 +10220,7 @@ extension View {
 
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Convenience function for attaching an AccessibilityAdjustableAction to a
@@ -10496,42 +10530,55 @@ public func withAnimation<Result>(_ animation: Animation? = .default, _ body: ()
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public func withTransaction<Result>(_ transaction: Transaction, _ body: () throws -> Result) rethrows -> Result
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Int {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Int8 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Int16 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Int32 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Int64 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UInt {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UInt8 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UInt16 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UInt32 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UInt64 {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Float {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Double {
 }
 
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CGFloat {
 }
 
