@@ -1,4 +1,4 @@
-// Xcode 11.1
+// Xcode 11.2
 
 import Combine
 import CoreData
@@ -3229,7 +3229,6 @@ extension EnvironmentValues {
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
-    /// The default minimum height of a row in a `List`.
     public var defaultMinListRowHeight: CGFloat
 
     /// The minimum height of a header in a `List`.
@@ -4571,6 +4570,9 @@ extension Image {
     ///
     /// This image will be specifically ignored for accessibility purposes.
     public init(decorative name: String, bundle: Bundle? = nil)
+
+    @available(OSX, unavailable)
+    public init(systemName: String)
 }
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -4807,14 +4809,6 @@ extension Image {
     public func interpolation(_ interpolation: Image.Interpolation) -> Image
 
     public func antialiased(_ isAntialiased: Bool) -> Image
-}
-
-@available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
-extension Image {
-
-    @available(OSX, unavailable)
-    public init(systemName: String)
 }
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -5438,6 +5432,8 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     public func accessibility(identifier: String) -> ModifiedContent<Content, Modifier>
 
+    public func accessibility(selectionIdentifier: AnyHashable) -> ModifiedContent<Content, Modifier>
+
     public func accessibility(sortPriority: Double) -> ModifiedContent<Content, Modifier>
 
     public func accessibility(activationPoint: CGPoint) -> ModifiedContent<Content, Modifier>
@@ -5604,14 +5600,11 @@ public struct NavigationView<Content> : View where Content : View {
 
     public init(@ViewBuilder content: () -> Content)
 
-    /// Declares the content and behavior of this view.
-    public var body: some View { get }
-
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
     /// implementation of the required `body` property.
-    public typealias Body = some View
+    public typealias Body = Never
 }
 
 /// A specification for the appearance and interaction of a `NavigationView`.
@@ -7456,7 +7449,8 @@ extension SubscriptionView : View {
 }
 
 /// A `ToggleStyle` represented by a trailing switch.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(tvOS, unavailable)
 public struct SwitchToggleStyle : ToggleStyle {
 
     public init()
@@ -7648,9 +7642,9 @@ extension Text {
     /// - Returns: Text that uses the font weight you specify.
     public func fontWeight(_ weight: Font.Weight?) -> Text
 
-    /// Applies a bold font weight to this text.
+    /// Make the font weight of this text heavier.
     ///
-    /// - Returns: Bold text.
+    /// - Returns: Heavier text.
     public func bold() -> Text
 
     /// Applies italics to this text.
@@ -10071,6 +10065,10 @@ extension View {
     /// Set an identifier for the current accessibility element.
     /// This is not user-visible and is good for testing.
     public func accessibility(identifier: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Set a selection identifier for the current accessibility element.
+    /// Used by picker to determine what node to use for the accessibility value
+    public func accessibility(selectionIdentifier: AnyHashable) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 
     /// Set the sort priority value used to order the current accessibility
     /// element relative to other elements at it's level.
