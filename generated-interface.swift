@@ -1,4 +1,4 @@
-// Xcode 12.0b1
+// Xcode 12.0b2
 
 import AuthenticationServices
 import Combine
@@ -1189,13 +1189,11 @@ extension AnyTransition {
 /// protocol. Each scene contains the root view of a view hierarchy and has a
 /// life cycle managed by the system. SwiftUI provides some concrete scene types
 /// to handle common scenarios, like for displaying documents or settings. You
-/// can also create custom scenes. To include more than one scene in an app, add
-/// the ``SwiftUI/SceneBuilder`` attribute to the
-/// ``SwiftUI/App/body-swift.property``:
+/// can also create custom scenes.
 ///
 ///     @main
 ///     struct Mail: App {
-///         @SceneBuilder var body: some Scene {
+///         var body: some Scene {
 ///             WindowGroup {
 ///                 MailViewer()
 ///             }
@@ -1215,7 +1213,7 @@ extension AnyTransition {
 ///     struct Mail: App {
 ///         @StateObject private var model = MailModel()
 ///
-///         @SceneBuilder var body: some Scene {
+///         var body: some Scene {
 ///             WindowGroup {
 ///                 MailViewer()
 ///                     .environmentObject(model) // Passed through the environment.
@@ -1254,7 +1252,7 @@ public protocol App {
     ///
     /// Swift infers the app's ``SwiftUI/App/Body-swift.associatedtype``
     /// associated type based on the scene provided by the `body` property.
-    var body: Self.Body { get }
+    @SceneBuilder var body: Self.Body { get }
 
     /// Creates an instance of the app using the body that you define for its
     /// content.
@@ -1942,7 +1940,7 @@ extension BlendMode : Hashable {
 /// A button style that doesn't apply a border.
 ///
 /// To apply this style to a button, or to a view that contains buttons, use the
-/// ``View/buttonStyle(_:)`` modifier.
+/// ``View/buttonStyle(_:)-66fbx`` modifier.
 @available(iOS 13.0, OSX 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -1987,7 +1985,7 @@ public struct BorderlessButtonStyle : PrimitiveButtonStyle {
 /// - In tvOS, the user triggers a standard button by pressing "select" on an
 ///   external remote, like the Siri Remote, while focusing on the button.
 ///
-/// # Adding Buttons to Containers
+/// ### Adding Buttons to Containers
 ///
 /// Use buttons for any user interface element that triggers actions on press.
 /// Buttons automatically adapt their visual style to match the expected style
@@ -2016,7 +2014,7 @@ public struct BorderlessButtonStyle : PrimitiveButtonStyle {
 /// This pattern extends to most other container views in SwiftUI that have
 /// customizable, interactive content, like forms (instances of ``Form``).
 ///
-/// # Styling Buttons
+/// ### Styling Buttons
 ///
 /// You can customize a button's appearance and interaction behavior. To add a
 /// custom appearance with standard interaction behavior, create a style that
@@ -2115,7 +2113,7 @@ extension Button where Label == PrimitiveButtonStyleConfiguration.Label {
 /// all buttons within a view hierarchy.
 ///
 /// To configure the current button style for a view hierarchy, use the
-/// ``View/buttonStyle(_:)`` modifier. Specify a style that conforms to
+/// ``View/buttonStyle(_:)-7qx1`` modifier. Specify a style that conforms to
 /// ``ButtonStyle`` when creating a button that uses the standard button
 /// interaction behavior defined for each platform. To create a button with
 /// custom interaction behavior, use ``PrimitiveButtonStyle`` instead.
@@ -2475,20 +2473,48 @@ extension Color.RGBColorSpace : Hashable {
 }
 
 /// A control used to select a color from the system color picker UI.
+///
+/// The color picker provides a color well that shows the currently selected
+/// color, and displays the larger system color picker that allows users to
+/// select a new color.
+///
+/// By default color picker supports colors with opacity; to disable opacity
+/// support, set the `supportsOpacity` parameter to `false`.
+/// In this mode the color picker won't show controls for adjusting the opacity
+/// of the selected color, and strips out opacity from any color set
+/// programmatically or selected from the user's system favorites.
+///
+/// You use `ColorPicker` by embedding it inside a view hierarchy and
+/// initializing it with a title string and a ``Binding`` to a ``Color``:
+///
+///     struct FormattingControls: View {
+///         @State private var bgColor =
+///             Color(.sRGB, red: 0.98, green: 0.9, blue: 0.2)
+///
+///         var body: some View {
+///             VStack {
+///                 ColorPicker("Alignment Guides", selection: $bgColor)
+///             }
+///         }
+///     }
+///
 @available(iOS 14.0, OSX 10.16, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct ColorPicker<Label> : View where Label : View {
 
-    /// Creates an instance that selects a `Color`.
+    /// Creates an instance that selects a color.
     ///
     /// - Parameters:
-    ///     - selection: The color being displayed and selected.
-    ///     - supportsOpacity: Whether the color picker allows adjusting the
-    ///     selected color's opacity. Defaults to `true`.
-    ///     - label: A view that describes what the selected color is used for.
-    ///     Text from this view is used for the title of the system color
-    ///     picker UI.
+    ///     - selection: A ``Binding`` to the variable that displays the
+    ///       selected ``Color``.
+    ///     - supportsOpacity: A Boolean value that indicates whether the color
+    ///       picker allows adjusting the selected color's opacity; the default
+    ///       is `true`.
+    ///     - label: A view that describes the use of the selected color.
+    ///        The system color picker UI sets it's title using the text from
+    ///        this view.
+    ///
     public init(selection: Binding<Color>, supportsOpacity: Bool = true, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
@@ -2506,24 +2532,56 @@ public struct ColorPicker<Label> : View where Label : View {
 @available(watchOS, unavailable)
 extension ColorPicker where Label == Text {
 
-    /// Creates an instance with a `Text` label generated from a localized title
-    /// string.
+    /// Creates a color picker with a text label generated from a title string key.
+    ///
+    /// Use ``ColorPicker`` to create a color well that your app uses to allow
+    /// the selection of a ``Color``. The example below creates a color well
+    /// using a ``Binding`` to a property stored in a settings object and title
+    /// you provide:
+    ///
+    ///     final class Settings: ObservableObject {
+    ///         @Published var alignmentGuideColor =
+    ///             Color(.sRGB, red: 0.98, green: 0.9, blue: 0.2)
+    ///     }
+    ///
+    ///     struct FormattingControls: View {
+    ///         @State private var settings = Settings()
+    ///
+    ///         var body: some View {
+    ///             VStack {
+    ///                 // Other formatting controls.
+    ///                 ColorPicker("Alignment Guides",
+    ///                     selection: $settings.alignmentGuideColor
+    ///                 )
+    ///             }
+    ///         }
+    ///     }
     ///
     /// - Parameters:
-    ///     - titleKey: The key for the localized title of `self`, describing
-    ///       its purpose.
-    ///     - selection: The color being displayed and selected.
-    ///     - supportsOpacity: Whether the color picker allows adjusting the
-    ///     selected color's opacity. Defaults to `true`.
+    ///   - titleKey: The key for the localized title of the picker.
+    ///   - selection: A ``Binding`` to the variable that displays the
+    ///     selected ``Color``.
+    ///   - supportsOpacity: A Boolean value that indicates whether the color
+    ///     picker allows adjustments to the selected color's opacity; the
+    ///     default is `true`.
     public init(_ titleKey: LocalizedStringKey, selection: Binding<Color>, supportsOpacity: Bool = true)
 
-    /// Creates an instance with a `Text` label generated from a title string.
+    /// Creates a color picker with a text label generated from a title string.
+    ///
+    /// Use ``ColorPicker`` to create a color well that your app uses to allow
+    /// the selection of a ``Color``. The example below creates a color well
+    /// using a ``Binding`` and title you provide:
+    ///
+    ///     func showColorPicker(_ title: String, color: Binding<Color>) {
+    ///         ColorPicker(title, selection: color)
+    ///     }
     ///
     /// - Parameters:
-    ///     - title: The title of `self`, describing its purpose.
-    ///     - selection: The color being displayed and selected.
-    ///     - supportsOpacity: Whether the color picker allows adjusting the
-    ///     selected color's opacity. Defaults to `true`.
+    ///   - title: The title displayed by the color picker.
+    ///   - selection: A ``Binding`` to the variable containing a ``Color``.
+    ///   - supportsOpacity: A Boolean value that indicates whether the color
+    ///     picker allows adjustments to the selected color's opacity; the
+    ///     default is `true`.
     public init<S>(_ title: S, selection: Binding<Color>, supportsOpacity: Bool = true) where S : StringProtocol
 }
 
@@ -3254,7 +3312,7 @@ extension ContentSizeCategory {
 /// A container for views that you present as menu items in a contextual menu
 /// after completion of the standard system gesture.
 ///
-/// Relate the controls that a ``View/ContextMenu`` contains to the context from
+/// Relate the controls that a `ContextMenu` contains to the context from
 /// which you show them.
 @available(iOS 13.0, OSX 10.15, tvOS 14.0, *)
 @available(watchOS, introduced: 6.0, deprecated: 7.0)
@@ -3579,7 +3637,7 @@ public protocol DatePickerStyle {
 /// specific platform.
 ///
 /// You can override a button's style. To apply the default style to a button,
-/// or to a view that contains buttons, use the ``View/buttonStyle(_:)``
+/// or to a view that contains buttons, use the ``View/buttonStyle(_:)-66fbx``
 /// modifier.
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultButtonStyle : PrimitiveButtonStyle {
@@ -3640,10 +3698,10 @@ public struct DefaultLabelStyle : LabelStyle {
 
     /// Creates a view that represents the body of a label.
     ///
-    /// - Parameter configuration: The properties of the label.
-    ///
-    /// The system calls this method for each `Label` instance in a view
+    /// The system calls this method for each ``Label`` instance in a view
     /// hierarchy where this style is the current label style.
+    ///
+    /// - Parameter configuration: The properties of the label.
     public func makeBody(configuration: DefaultLabelStyle.Configuration) -> some View
 
 
@@ -3667,10 +3725,26 @@ public struct DefaultNavigationViewStyle : NavigationViewStyle {
     public init()
 }
 
-/// The default `Picker` style.
+/// The default picker style, based on the picker's context.
+///
+/// How a picker using the default picker style appears largely depends on the
+/// platform and the view type in which it appears. For example, in a standard
+/// view, the default picker styles by platform are:
+///
+/// * On iOS and watchOS the default is a wheel.
+/// * On macOS, the default is a pop-up button.
+/// * On tvOS, the default is a segmented control.
+///
+/// The default picker style may also take into account other factors — like
+/// whether the picker appears in a container view — when setting the appearance
+/// of a picker.
+///
+/// You can override a picker’s style. To apply the default style to a picker,
+/// or to a view that contains pickers, use the ``View/pickerStyle(_:)`` modifier.
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultPickerStyle : PickerStyle {
 
+    /// Creates a default picker style.
     public init()
 }
 
@@ -4071,12 +4145,12 @@ public struct DragGesture : Gesture {
 ///
 /// The ``DropDelegate`` protocol provides a comprehensive and flexible way to
 /// interact with a drop operation. Specify a drop delegate when you modify a
-/// view to accept drops with the ``View/onDrop(of:delegate:)`` method.
+/// view to accept drops with the ``View/onDrop(of:delegate:)-6lin8`` method.
 ///
 /// Alternatively, for simple drop cases that don't require the full
 /// functionality of a drop delegate, you can modify a view to accept drops
-/// using the ``View/onDrop(of:isTargeted:perform:)`` or the
-/// ``View/onDrop(of:isTargeted:perform:)`` method. These methods handle the
+/// using the ``View/onDrop(of:isTargeted:perform:)-f15m`` or the
+/// ``View/onDrop(of:isTargeted:perform:)-982eu`` method. These methods handle the
 /// drop using a closure you provide as part of the modifier.
 @available(iOS 13.4, OSX 10.15, *)
 @available(tvOS, unavailable)
@@ -7089,10 +7163,10 @@ public struct IconOnlyLabelStyle : LabelStyle {
 
     /// Creates a view that represents the body of a label.
     ///
-    /// - Parameter configuration: The properties of the label.
-    ///
-    /// The system calls this method for each `Label` instance in a view
+    /// The system calls this method for each ``Label`` instance in a view
     /// hierarchy where this style is the current label style.
+    ///
+    /// - Parameter configuration: The properties of the label.
     public func makeBody(configuration: IconOnlyLabelStyle.Configuration) -> some View
 
 
@@ -7784,6 +7858,75 @@ public struct KeyboardShortcut {
 
 /// A standard label for user interface items, consisting of an icon with a
 /// title.
+///
+/// One of the most common and recognizable user interface components is the
+/// combination of an icon and a label. This idiom appears across many kinds of
+/// apps and shows up in collections, lists, menus of action items, and
+/// disclosable lists, just to name a few.
+///
+/// You create a label, in its simplest form, by providing a title and the name
+/// of an image, such as an icon from the
+/// [SF Symbols](https://developer.apple.com/design/human-interface-guidelines/sf-symbols/overview/)
+/// collection:
+///
+///     Label("Lightning", systemImage: "bolt.fill")
+///
+/// You can also apply styles to labels in several ways. In the case of dynamic
+/// changes to the view after device rotation or change to a window size you
+/// might want to show only the text portion of the label using the title-only
+/// label style:
+///
+///     Label("Lightning", systemImage: "bolt.fill")
+///         .labelStyle(TitleOnlyLabelStyle())
+///
+/// Conversely, there's also an icon-only label style:
+///
+///     Label("Lightning", systemImage: "bolt.fill")
+///         .labelStyle(IconOnlyLabelStyle())
+///
+/// You can also create a customized label style by modifying an existing
+/// style; this example adds a red border to the default label style:
+///
+///     struct RedBorderedLabelStyle : LabelStyle {
+///         func makeBody(configuration: Configuration) -> some View {
+///             Label(configuration)
+///                 .border(Color.red)
+///         }
+///     }
+///
+/// For more extensive customization or to create a completely new label style,
+/// you'll need to adopt the ``LabelStyle`` protocol and implement a
+/// ``LabelStyleConfiguration`` for the new style.
+///
+/// To apply a common label style to a group of labels, apply the style
+/// to the view hierarchy that contains the labels:
+///
+///     VStack {
+///         Label("Rain", systemImage: "cloud.rain")
+///         Label("Snow", systemImage: "snow")
+///         Label("Sun", systemImage: "sun.max")
+///     }
+///     .labelStyle(IconOnlyLabelStyle())
+///
+/// It's also possible to make labels using views to compose the label's icon
+/// programmatically, rather than using a pre-made image. In this example, the
+/// icon portion of the label uses a filled ``Circle`` overlaid
+/// with the user's initials:
+///
+///     Label {
+///         Text(person.fullName)
+///             .font(.body)
+///             .foregroundColor(.primary)
+///         Text(person.title)
+///             .font(.subheadline)
+///             .foregroundColor(.secondary)
+///     } icon: {
+///         Circle()
+///             .fill(person.profileColor)
+///             .frame(width: 44, height: 44, alignment: .center)
+///             .overlay(Text(person.initials))
+///     }
+///
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
 public struct Label<Title, Icon> : View where Title : View, Icon : View {
 
@@ -7805,17 +7948,33 @@ extension Label where Title == Text, Icon == Image {
 
     /// Creates a label with an icon image and a title generated from a
     /// localized string.
+    ///
+    /// - Parameters:
+    ///    - titleKey: A title generated from a localized string.
+    ///    - image: The name of the image resource to lookup.
     public init(_ titleKey: LocalizedStringKey, image name: String)
 
     /// Creates a label with a system icon image and a title generated from a
     /// localized string.
+    ///
+    /// - Parameters:
+    ///    - titleKey: A title generated from a localized string.
+    ///    - systemImage: The name of the image resource to lookup.
     public init(_ titleKey: LocalizedStringKey, systemImage name: String)
 
     /// Creates a label with an icon image and a title generated from a string.
+    ///
+    /// - Parameters:
+    ///    - title: A string to used as the label's title.
+    ///    - image: The name of the image resource to lookup.
     public init<S>(_ title: S, image name: String) where S : StringProtocol
 
     /// Creates a label with a system icon image and a title generated from a
     /// string.
+    ///
+    /// - Parameters:
+    ///    - title: A string to used as the label's title.
+    ///    - systemImage: The name of the image resource to lookup.
     public init<S>(_ title: S, systemImage name: String) where S : StringProtocol
 }
 
@@ -7824,10 +7983,11 @@ extension Label where Title == LabelStyleConfiguration.Title, Icon == LabelStyle
 
     /// Creates a label representing the configuration of a style.
     ///
-    /// You can use this initializer within the `makeBody(configuration:)`
-    /// method of an `LabelStyle` to create an instance of the label that is
-    /// being styled. This is useful for custom label styles that only wish to
-    /// modify the current style, as opposed to implementing a brand new style.
+    /// You can use this initializer within the ``LabelStyle/makeBody(configuration:)``
+    /// method of a ``LabelStyle`` instance to create an instance of the label
+    /// that's being styled. This is useful for custom label styles that only
+    /// wish to modify the current style, as opposed to implementing a brand new
+    /// style.
     ///
     /// For example, the following style adds a red border around the label,
     /// but otherwise preserves the current style:
@@ -7839,13 +7999,14 @@ extension Label where Title == LabelStyleConfiguration.Title, Icon == LabelStyle
     ///         }
     ///     }
     ///
+    /// - Parameter configuration: The label style to use.
     public init(_ configuration: LabelStyleConfiguration)
 }
 
 /// A type that applies a custom appearance to all labels within a view.
 ///
-/// To configure the current label style for a view hiearchy, use the
-/// `labelStyle(_:)` modifier.
+/// To configure the current label style for a view hierarchy, use the
+/// ``View/labelStyle(_:)`` modifier.
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
 public protocol LabelStyle {
 
@@ -7854,10 +8015,10 @@ public protocol LabelStyle {
 
     /// Creates a view that represents the body of a label.
     ///
-    /// - Parameter configuration: The properties of the label.
-    ///
-    /// The system calls this method for each `Label` instance in a view
+    /// The system calls this method for each ``Label`` instance in a view
     /// hierarchy where this style is the current label style.
+    ///
+    /// - Parameter configuration: The properties of the label.
     func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a label.
@@ -8235,23 +8396,37 @@ public struct LinearProgressViewStyle : ProgressViewStyle {
     public typealias Body = some View
 }
 
-/// A `Link` provides a control for navigating to a URL.
+/// A control for navigating to a URL.
 ///
-/// When a user taps or clicks on a `Link`, the URL will be opened in the most
-/// appropriate format, taking into account the platform, type of device, and
-/// contents of the URL.
+/// You create a link by providing a destination URL and a title. The title
+/// tells the user the purpose of the link, which can be either a string, or a
+/// title key that returns a localized string used to construct a label
+/// displayed to the user in your app's UI. The example below creates a link to
+/// `example.com` and displays the title string you provide as a
+/// link-styled view in your app:
 ///
-/// For example, a Universal Link will be opened in the associated app, if
-/// installed, but otherwise in the user's web browser. On iOS, a Link will
-/// display the content within the app as a Safari view controller,
-/// while on macOS it will always open in the user's default web browser.
+///     Link("View Our Terms of Service",
+///           destination: URL(string: "https://www.example.com/TOS.html")!)
+///
+/// When a user taps or clicks a `Link`, where the URL opens depends on the
+/// contents of the URL. For example, a Universal Link will open in the
+/// associated app, if possible, but otherwise in the user's default web
+/// browser.
+///
+/// As with other views, you can style links using standard view modifiers
+/// depending on the view type of the link's label. For example, a ``Text``
+/// label could be modified with a custom ``View/font(_:)`` or
+/// ``View/foregroundColor(_:)`` to customize the appearance of the link in
+/// your app's UI.
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
 public struct Link<Label> : View where Label : View {
 
-    /// Creates an instance for navigating to `url`.
+    /// Creates a control, consisting of a URL and a label, used to navigate
+    /// to the given URL.
+    ///
     /// - Parameters:
-    ///     - destination: The URL to navigate to when `self` is triggered.
-    ///     - label: A view that describes the destination of `url`.
+    ///     - destination: The URL for the link.
+    ///     - label: A view that describes the destination of URL.
     public init(destination: URL, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
@@ -8267,19 +8442,40 @@ public struct Link<Label> : View where Label : View {
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
 extension Link where Label == Text {
 
-    /// Creates an instance for navigating to `url`, using the provided
-    /// `titleKey` to create a localized label.
+    /// Creates a control, consisting of a URL and a title key, used to
+    /// navigate to a URL.
+    ///
+    /// Use ``Link`` to create a control that your app uses to navigate to a
+    /// URL that you provide. The example below creates a link to
+    /// `example.com` and uses `Visit Example Co` as the title key to
+    /// generate a link-styled view in your app:
+    ///
+    ///     Link("Visit Example Co",
+    ///           destination: URL(string: "https://www.example.com/")!)
+    ///
     /// - Parameters:
-    ///     - titleKey: The key for the localized title of `self`, describing
-    ///     its purpose.
-    ///     - destination: The URL to navigate to when `self` is triggered.
+    ///     - titleKey: The key for the localized title that describes the
+    ///       purpose of this link.
+    ///     - destination: The URL for the link.
     public init(_ titleKey: LocalizedStringKey, destination: URL)
 
-    /// Creates an instance for navigating to `url`, using the provided string
-    /// as a label.
+    /// Creates a control, consisting of a URL and a title string, used to
+    /// navigate to a URL.
+    ///
+    /// Use ``Link`` to create a control that your app uses to navigate to a
+    /// URL that you provide. The example below creates a link to
+    /// `example.com` and displays the title string you provide as a
+    /// link-styled view in your app:
+    ///
+    ///     func marketingLink(_ callToAction: String) -> Link {
+    ///         Link(callToAction,
+    ///             destination: URL(string: "https://www.example.com/")!)
+    ///     }
+    ///
     /// - Parameters:
-    ///     - title: The title of `self`, describing its purpose.
-    ///     - destination: The URL to navigate to when `self` is triggered.
+    ///     - title: A text string used as the title for describing the
+    ///       underlying `destination` URL.
+    ///     - destination: The URL for the link.
     public init<S>(_ title: S, destination: URL) where S : StringProtocol
 }
 
@@ -9869,11 +10065,130 @@ extension Path {
 }
 
 /// A control for selecting from a set of mutually exclusive values.
+///
+/// You create a picker by providing a selection binding, a label, and the
+/// content for the picker to display. Set the `selection` parameter to a bound
+/// property that provides the value to display as the current selection. Set
+/// the label to a view that visually describes the purpose of selecting content
+/// in the picker, and then provide the content for the picker to display.
+///
+/// For example, consider the following enumeration of ice cream flavors:
+///
+///     enum Flavor: String, CaseIterable, Identifiable {
+///         case chocolate
+///         case vanilla
+///         case strawberry
+///
+///         var id: String { self.rawValue }
+///     }
+///     
+/// You can create a picker to select among these values by providing ``Text``
+/// views in the picker initializer's content. You can optionally provide a
+/// string as the first parameter; if you do, the picker creates a ``Text``
+/// label using this string:
+///
+///     @State private var selectedFlavor = Flavor.chocolate
+///
+///     Picker("Flavor", selection: $selectedFlavor) {
+///         Text("Chocolate").tag(Flavor.chocolate)
+///         Text("Vanilla").tag(Flavor.vanilla)
+///         Text("Strawberry").tag(Flavor.strawberry)
+///     }
+///     Text("Selected flavor: \(selectedFlavor.rawValue)")
+///
+/// You append a tag to each text view so that the type of each selection
+/// matches the type of the bound state variable.
+///
+/// ### Iterating Over a Picker’s Options
+///
+/// To provide selection values for the `Picker` without explicitly listing
+/// each option, you can create the picker with a ``ForEach`` construct, like
+/// this:
+///
+///     Picker("Flavor", selection: $selectedFlavor) {
+///         ForEach(Flavor.allCases) { flavor in
+///             Text(flavor.rawValue.capitalized)
+///         }
+///     }
+///
+/// In this case, ``ForEach`` automatically assigns a tag to the selection
+/// views, using each option's `id`, which it can do because `Flavor` conforms
+/// to the <doc://com.apple.documentation/documentation/Swift/Identifiable>
+/// protocol.
+///
+/// On the other hand, if the selection type doesn't match the input to the
+/// ``ForEach``, you need to provide an explicit tag. The following example
+/// shows a picker that's bound to a `Topping` type, even though the options
+/// are all `Flavor` instances. Each option uses ``View/tag(_:)`` to associate
+/// a topping with the flavor it displays.
+///
+///     enum Topping: String, CaseIterable, Identifiable {
+///         case nuts
+///         case cookies
+///         case blueberries
+///
+///         var id: String { self.rawValue }
+///     }
+///     extension Flavor {
+///         var suggestedTopping: Topping {
+///             switch self {
+///             case .chocolate: return .nuts
+///             case .vanilla: return .cookies
+///             case .strawberry: return .blueberries
+///             }
+///         }
+///     }
+///     @State var suggestedTopping: Topping = .cookies
+///
+///     Picker("Suggest a topping for:", selection: $suggestedTopping) {
+///         ForEach(Flavor.allCases) { flavor in
+///             Text(flavor.rawValue.capitalized)
+///                 .tag(flavor.suggestedTopping)
+///         }
+///     }
+///     Text("suggestedTopping: \(suggestedTopping.rawValue)")
+///
+/// ### Styling Pickers
+///
+/// You can customize the appearance and interaction of pickers by creating
+/// styles that conform to the ``PickerStyle`` protocol. You create your own style
+/// or use one of the styles provided by SwiftUI, like ``SegmentedPickerStyle``
+/// or ``PopUpButtonPickerStyle``.
+///
+/// To set a specific style for all picker instances within a view, use the
+/// ``View/pickerStyle(_:)`` modifier. The following example adds a second binding
+/// type, `Topping`, and applies the ``SegmentedPickerStyle`` to two pickers:
+///
+///     @State private var selectedFlavor = Flavor.chocolate
+///     @State private var selectedTopping = Topping.nuts
+///     
+///     VStack {
+///         Picker("Flavor", selection: $selectedFlavor) {
+///             ForEach(Flavor.allCases) { flavor in
+///                 Text(flavor.rawValue.capitalized)
+///             }
+///         }
+///         Picker("Topping", selection: $selectedTopping) {
+///             ForEach(Topping.allCases) { flavor in
+///                 Text(flavor.rawValue.capitalized)
+///             }
+///         }
+///
+///         Text("Selected flavor: \(selectedFlavor.rawValue)")
+///         Text("Selected toppping: \(selectedTopping.rawValue)")
+///     }
+///     .pickerStyle(SegmentedPickerStyle())
+///
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Picker<Label, SelectionValue, Content> : View where Label : View, SelectionValue : Hashable, Content : View {
 
-    /// Creates an instance that selects from content associated with
-    /// `Selection` values.
+    /// Creates a picker that displays a custom label.
+    ///
+    /// - Parameters:
+    ///     - selection: A binding to a property that determines the
+    ///       currently-selected option.
+    ///     - label: A view that describes the purpose of selecting an option.
+    ///     - content: A view that contains the set of options.
     public init(selection: Binding<SelectionValue>, label: Label, @ViewBuilder content: () -> Content)
 
     /// The content and behavior of the view.
@@ -9889,16 +10204,42 @@ public struct Picker<Label, SelectionValue, Content> : View where Label : View, 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Picker where Label == Text {
 
-    /// Creates an instance that selects from content associated with
-    /// `Selection` values.
+    /// Creates a picker that generates its label from a localized string key.
+    ///
+    /// - Parameters:
+    ///     - titleKey: A localized string key that describes the purpose of
+    ///       selecting an option.
+    ///     - selection: A binding to a property that determines the
+    ///       currently-selected option.
+    ///     - content: A view that contains the set of options.
+    ///
+    /// This initializer creates a ``Text`` view on your behalf, and treats the
+    /// localized key similar to ``Text/init(_:tableName:bundle:comment:)``. See
+    /// ``Text`` for more information about localizing strings.
+    ///
+    /// To initialize a picker with a string variable, use
+    /// ``init(_:selection:content:)-5njtq`` instead.
     public init(_ titleKey: LocalizedStringKey, selection: Binding<SelectionValue>, @ViewBuilder content: () -> Content)
 
-    /// Creates an instance that selects from content associated with
-    /// `Selection` values.
+    /// Creates a picker that generates its label from a string.
+    ///
+    /// - Parameters:
+    ///     - title: A string that describes the purpose of selecting an option.
+    ///     - selection: A binding to a property that determines the
+    ///       currently-selected option.
+    ///     - content: A view that contains the set of options.
+    ///
+    /// This initializer creates a ``Text`` view on your behalf, and treats the
+    /// title similar to ``Text/init(_:)-9d1g4``. See ``Text`` for more
+    /// information about localizing strings.
+    ///
+    /// To initialize a picker with a localized string key, use
+    /// ``init(_:selection:content:)-6lwfn`` instead.
     public init<S>(_ title: S, selection: Binding<SelectionValue>, @ViewBuilder content: () -> Content) where S : StringProtocol
 }
 
-/// A custom specification for the appearance and interaction of a `Picker`.
+/// A type that specifies the appearance and interaction of all pickers within
+/// a view hierarchy.
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol PickerStyle {
 }
@@ -9971,7 +10312,7 @@ public struct PinnedScrollableViews : OptionSet {
 /// of the button.
 ///
 /// To apply this style to a button, or to a view that contains buttons, use the
-/// ``View/buttonStyle(_:)`` modifier.
+/// ``View/buttonStyle(_:)-66fbx`` modifier.
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PlainButtonStyle : PrimitiveButtonStyle {
 
@@ -10275,7 +10616,7 @@ public protocol PreviewProvider : _PreviewProvider {
     ///                 .previewDevice("iPhone X")
     ///         }
     ///     }
-    static var previews: Self.Previews { get }
+    @ViewBuilder static var previews: Self.Previews { get }
 
     /// The platform on which to run the provider.
     ///
@@ -10302,7 +10643,7 @@ extension PreviewProvider {
 /// all buttons within a view hierarchy.
 ///
 /// To configure the current button style for a view hierarchy, use the
-/// ``View/buttonStyle(_:)`` modifier. Specify a style that conforms to
+/// ``View/buttonStyle(_:)-66fbx`` modifier. Specify a style that conforms to
 /// ``PrimitiveButtonStyle`` to create a button with custom interaction
 /// behavior. To create a button with the standard button interaction behavior
 /// defined for each platform, use ``ButtonStyle`` instead.
@@ -10351,42 +10692,22 @@ public struct PrimitiveButtonStyleConfiguration {
 /// completion. A progress view can show both determinate (percentage complete)
 /// and indeterminate (progressing or not) types of progress.
 ///
-/// Create a determinate progress view by initializing a ``ProgressView`` with
+/// Create a determinate progress view by initializing a `ProgressView` with
 /// a binding to a numeric value that indicates the progress, and a `total`
 /// value that represents completion of the task. By default, the progress is
 /// `0.0` and the total is `1.0`.
 ///
 /// The example below uses the state property `progress` to show progress in
-/// both a ``ProgressView`` and a ``Text``, and provides two buttons to increase
-/// and decrease the progress value:
+/// a determinate `ProgressView`. The progress view uses its default total of
+/// `1.0`, and because `progress` starts with an initial value of `0.5`,
+/// the progress view begins half-complete. A "More" button below the progress
+/// view allows the user to increment the progress in 5% increments:
 ///
-///     private var progFormatter: NumberFormatter = {
-///         let progFormatter = NumberFormatter()
-///         progFormatter.numberStyle = .percent
-///         return progFormatter
-///     }()
+///     @State private var progress = 0.5
 ///
-///     @State private var progress: Double = 0.5
-///
-///     var body: some View {
-///
-///         VStack(alignment: .center, spacing: 20) {
-///             HStack() {
-///                 Spacer(minLength: 20)
-///                 ProgressView("Progress:", value: progress, total: 1.0)
-///                 Spacer(minLength: 20)
-///             }
-///
-///             HStack(alignment: .firstTextBaseline, spacing: 20) {
-///                 Button("Less") {
-///                     progress -= 0.05
-///                 }
-///                 Text("\(progFormatter.string(from: NSNumber(value: $progress.wrappedValue)) ?? "??")").bold()
-///                 Button("More") {
-///                     progress += 0.05
-///                 }
-///             }
-///         }
+///     VStack {
+///         ProgressView(value: progress)
+///         Button("More", action: { progress += 0.05 })
 ///     }
 ///
 /// To create an indeterminate progress view, use an initializer that doesn't
@@ -10394,7 +10715,7 @@ public struct PrimitiveButtonStyleConfiguration {
 ///
 ///     var body: some View {
 ///         VStack {
-///             ProgressView("Working…")
+///             ProgressView()
 ///         }
 ///     }
 ///
@@ -10410,11 +10731,10 @@ public struct PrimitiveButtonStyleConfiguration {
 ///     struct ShadowedProgressViews: View {
 ///         var body: some View {
 ///             VStack {
-///                 Spacer()
 ///                 ProgressView(value: 0.25)
 ///                 ProgressView(value: 0.75)
-///                 Spacer()
-///             }.progressViewStyle(DarkBlueShadowProgressViewStyle())
+///             }
+///             .progressViewStyle(DarkBlueShadowProgressViewStyle())
 ///         }
 ///     }
 ///
@@ -10447,8 +10767,8 @@ extension ProgressView {
     /// Creates a progress view for showing indeterminate progress that displays
     /// a custom label.
     ///
-    /// To hide the label, apply the ``View/labelsHidden()`` modifier to the progress
-    /// view or its container.
+    /// To hide the label, apply the ``View/labelsHidden()`` modifier to the
+    /// progress view or its container.
     ///
     /// - Parameters:
     ///     - label: A view builder that creates a view that describes the task
@@ -10464,8 +10784,8 @@ extension ProgressView {
     ///  indeterminate progress view with a string variable, use
     ///  the corresponding initializer that takes a `StringProtocol` instance.
     ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the progress
-    /// view or its container.
+    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
+    /// progress view or its container.
     ///
     /// - Parameters:
     ///     - titleKey: The key for the progress view's localized title that
@@ -10484,8 +10804,8 @@ extension ProgressView {
     /// a localized string key, use the corresponding initializer that takes a
     ///  `LocalizedStringKey` instance.
     ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the progress
-    /// view or its container.
+    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
+    /// progress view or its container.
     public init<S>(_ title: S) where Label == Text, S : StringProtocol
 }
 
@@ -10515,8 +10835,8 @@ extension ProgressView {
     /// the nearest possible bound. A value of `nil` represents indeterminate
     /// progress, in which case the progress view ignores `total`.
     ///
-    /// To hide the label, apply the ``View/labelsHidden()`` modifier to the progress
-    /// view or its container.
+    /// To hide the label, apply the ``View/labelsHidden()`` modifier to the
+    /// progress view or its container.
     ///
     /// - Parameters:
     ///     - value: The completed amount of the task to this point, in a
@@ -10526,7 +10846,7 @@ extension ProgressView {
     ///         meaning the task is complete if `value` equals `total`. The
     ///         default value is `1.0`.
     ///     - label: A view builder that creates a view that describes the task
-    ///      in progress.
+    ///         in progress.
     public init<V>(value: V?, total: V = 1.0, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint
 
     /// Creates a progress view for showing determinate progress that generates
@@ -10543,8 +10863,8 @@ extension ProgressView {
     ///  determinate progress view with a string variable, use
     ///  the corresponding initializer that takes a `StringProtocol` instance.
     ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the progress
-    /// view or its container.
+    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
+    /// progress view or its container.
     ///
     /// - Parameters:
     ///     - titleKey: The key for the progress view's localized title that
@@ -10571,8 +10891,8 @@ extension ProgressView {
     /// progress view with a localized string key, use
     /// the corresponding initializer that takes a `LocalizedStringKey` instance.
     ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the progress
-    /// view or its container.
+    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
+    /// progress view or its container.
     ///
     /// - Parameters:
     ///     - title: The string that describes the task in progress.
@@ -10591,8 +10911,8 @@ extension ProgressView {
     ///
     /// The progress view synthesizes a default label using the
     /// `localizedDescription` of the given progress instance. To hide the
-    /// label, apply the ``View/labelsHidden()`` modifier to the progress view or its
-    /// container.
+    /// label, apply the ``View/labelsHidden()`` modifier to the progress view
+    /// or its container.
     public init(_ progress: Progress) where Label == DefaultProgressViewLabel
 }
 
@@ -11218,7 +11538,7 @@ public protocol Scene {
     ///
     /// Swift infers the scene's ``SwiftUI/Scene/Body-swift.associatedtype``
     /// associated type based on the contents of the `body` property.
-    var body: Self.Body { get }
+    @SceneBuilder var body: Self.Body { get }
 }
 
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
@@ -11568,7 +11888,8 @@ extension ScenePhase : Hashable {
 /// If the `Scene` is explictly destroyed (e.g. the switcher snapshot is
 /// destroyed on iPadOS or the window is closed on macOS), the data is also
 /// destroyed. Do not use `SceneStorage` with sensitive data.
-@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+@available(OSX, unavailable, message: "Unavailable in this beta.")
 @propertyWrapper public struct SceneStorage<Value> : DynamicProperty {
 
     /// The underlying value referenced by the state variable.
@@ -11586,7 +11907,8 @@ extension ScenePhase : Hashable {
     public var projectedValue: Binding<Value> { get }
 }
 
-@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+@available(OSX, unavailable)
 extension SceneStorage {
 
     /// Creates a property that can save and restore a boolean.
@@ -11675,7 +11997,8 @@ extension SceneStorage {
     public init(wrappedValue: Value, _ key: String) where Value : RawRepresentable, Value.RawValue == String
 }
 
-@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+@available(OSX, unavailable)
 extension SceneStorage where Value : ExpressibleByNilLiteral {
 
     /// Creates a property that can save and restore an Optional boolean.
@@ -11826,6 +12149,8 @@ extension Section : View where Parent : View, Content : View, Footer : View {
     public typealias Body = Never
 
     public init(header: Parent, footer: Footer, @ViewBuilder content: () -> Content)
+
+    public var internalBody: some View { get }
 }
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -11883,14 +12208,18 @@ extension SecureField where Label == Text {
     public init<S>(_ title: S, text: Binding<String>, onCommit: @escaping () -> Void = {}) where S : StringProtocol
 }
 
-/// A `PickerStyle` where the options are contained in a segmented control.
+/// A picker style that presents the options in a segmented control.
 ///
-/// > Note: Only supports segments of type `Label` and `Image`. Passing any
-///   other type of view will result in a visible, but empty, segment.
+/// To apply this style to a picker, or to a view that contains pickers, use the
+/// ``View/pickerStyle(_:)`` modifier.
+///
+/// > Note: The segmented picker style supports ``Text`` and ``Image`` segments only.
+/// Any other view results in a visible, but empty, segment.
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
 @available(watchOS, unavailable)
 public struct SegmentedPickerStyle : PickerStyle {
 
+    /// Creates a segmented picker style.
     public init()
 }
 
@@ -12285,30 +12614,34 @@ public struct SidebarListStyle : ListStyle {
     public init()
 }
 
-/// A control you add to your interface that enables users to initiate
-/// the Sign In with Apple flow.
+/// A control that you add to your interface to allow users to sign in with
+/// their Apple ID.
 ///
-/// ## Initialization
+/// You create a `SignInWithAppleButton` instance with a
+/// ``SignInWithAppleButton/Label`` value that indicates the purpose of the
+/// authorization, such as signing up or continuing a setup process. You also
+/// provide closures to configure the authorization and handle the result. The
+/// following sample shows how to create a `SignInWithAppleButton` instance:
 ///
-/// A SignInWithApple instance is initialized with a `Label`,
-/// an onRequest closure for configuring an authorization request,
-/// and a onCompletion closure for handling the results of the authorization request.
 ///
-///    SignInWithAppleButton(
-///        .signIn,
-///        onRequest: { request in
-///            request.requestedScopes = [.fullName, .email]
-///        },
-///        onCompletion: { result in
-///            switch result {
-///            case .success(let authResults)
-///                print("Auth Success!")
-///            case .failure(let error)
-///                print("Auth Failed: " + printError)
-///            }
-///        }
-///    })
+///     SignInWithAppleButton(
+///         .signIn,
+///         onRequest: { request in
+///             request.requestedScopes = [.fullName, .email]
+///         },
+///         onCompletion: { result in
+///             switch result {
+///             case .success (let authResults):
+///                 print("Authorization successful.")
+///             case .failure (let error):
+///                 print("Authorization failed: " + error.localizedDescription)
+///             }
+///         }
+///     )
 ///
+/// To style a `SignInWithAppleButton` instance, use the
+/// ``View/signInWithAppleButtonStyle(_:)`` modifier, passing in one of the
+/// styles defined in ``SignInWithAppleButton/Style``.
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, *)
 @available(watchOS, unavailable)
 public struct SignInWithAppleButton : View {
@@ -12316,10 +12649,15 @@ public struct SignInWithAppleButton : View {
     /// Creates an instance that displays a control to Sign in with Apple.
     ///
     /// - Parameters:
-    ///     - label: The label set on the control (see `ButtonType`).
-    ///             Defaults to .signIn.
-    ///     - onRequest: Closure for configuring the authorization request.
-    ///     - onCompletion: Handler for a completed authorization request.
+    ///   - label: The label to set on the button. Defaults to
+    ///     ``SignInWithAppleButton/Label/signIn``.
+    ///   - onRequest: A closure that configures the authorization request.
+    ///   - onCompletion: A closure that handles the result of the
+    ///     authorization process. The closure receives a
+    ///     <doc://com.apple.documentation/documentation/Swift/Result> instance
+    ///     which contains either an
+    ///     <doc://com.apple.documentation/documentation/AuthenticationServices/ASAuthorization>
+    ///     or an <doc://com.apple.documentation/documentation/Swift/Error>.
     public init(_ label: SignInWithAppleButton.Label = .signIn, onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void, onCompletion: @escaping ((Result<ASAuthorization, Error>) -> Void))
 
     /// The content and behavior of the view.
@@ -12336,29 +12674,30 @@ public struct SignInWithAppleButton : View {
 @available(watchOS, unavailable)
 extension SignInWithAppleButton {
 
-    /// Determines the label on the Sign In With Apple Button
+    /// A structure that determines the label on a Sign in with Apple Button.
     public struct Label {
 
-        /// Labels the button 'Sign in with Apple'
+        /// A button label that displays "Sign in with Apple".
         public static let signIn: SignInWithAppleButton.Label
 
-        /// Labels the button 'Continue with Apple'
+        ///  A button label that displays "Continue with Apple".
         public static let `continue`: SignInWithAppleButton.Label
 
-        /// Labels the button 'Sign up with Apple'
+        ///  A button label that displays "Sign up with Apple".
         public static let signUp: SignInWithAppleButton.Label
     }
 
-    /// Determines the color of the Sign In With Apple Button
+    /// A structure that determines the color of the Sign in with Apple Button.
     public struct Style {
 
-        /// Colors the button black
+        /// A style that sets the background color of the button to black.
         public static let black: SignInWithAppleButton.Style
 
-        /// Colors the button white
+        /// A style that sets the background color of the button to white.
         public static let white: SignInWithAppleButton.Style
 
-        /// Colors the button white, with a black border
+        /// A style that sets the background color of the button to white, and
+        /// places a black border around the button.
         public static let whiteOutline: SignInWithAppleButton.Style
     }
 }
@@ -13147,7 +13486,7 @@ public struct TapGesture : Gesture {
 /// ![A text view showing a truncated quote from Hamlet starting Brevity is t
 /// and ending with three dots.](SwiftUI-Text-truncated.png)
 ///
-/// # Localizing Strings
+/// ### Localizing Strings
 ///
 /// If you initialize a text view with a string literal, the view uses the
 /// ``Text/init(_:tableName:bundle:comment:)`` initializer, which interprets the
@@ -13169,7 +13508,7 @@ public struct TapGesture : Gesture {
 ///     Text(verbatim: "pencil") // Displays the string "pencil" in any locale.
 ///
 /// If you intialize a text view with a variable value, the view uses the
-/// ``Text/init(_:)`` initializer, which doesn't localize the string. However,
+/// ``Text/init(_:)-9d1g4`` initializer, which doesn't localize the string. However,
 /// you can request localization by creating a ``LocalizedStringKey`` instance
 /// first, which triggers the ``Text/init(_:tableName:bundle:comment:)``
 /// initializer instead:
@@ -13843,8 +14182,57 @@ public struct TextEditingCommands : Commands {
 
 /// A view that can display and edit long-form text.
 ///
-/// A text editor will use values inherited from the environment, like font,
-/// foregroundColor, and multilineTextAlignment.
+/// A text editor view allows you to display and edit multiline, scrollable
+/// text in your app's user interface. By default, the text editor view styles
+/// the text using characteristics inherited from the environment, like
+/// ``View/font(_:)``, ``View/foregroundColor(_:)``, and
+/// ``View/multilineTextAlignment(_:)``.
+///
+/// You create a text editor by adding a `TextEditor` instance to the
+/// body of your view, and initialize it by passing in a
+/// ``Binding`` to a string variable in your app:
+///
+///     struct TextEditingView: View {
+///         @State private var fullText: String = "This is some editable text..."
+///
+///         var body: some View {
+///             TextEditor(text: $fullText)
+///         }
+///     }
+///
+/// To style the text, use the standard view modifiers to configure a system
+/// font, set a custom font, or change the color of the view's text.
+///
+/// In this example, the view renders the editor's text in gray with a
+/// custom font:
+///
+///     struct TextEditingView: View {
+///         @State private var fullText: String = "This is some editable text..."
+///
+///         var body: some View {
+///             TextEditor(text: $fullText)
+///                 .foregroundColor(Color.gray)
+///                 .font(.custom("Helvetica Neue", size: 13))
+///         }
+///     }
+///
+/// If you want to change the spacing or font scaling aspects of the text, you
+/// can use modifiers like ``View/lineLimit(_:)``,
+/// ``View/lineSpacing(_:)``, and ``View/minimumScaleFactor(_:)`` to configure
+/// how the view displays text depending on the space constraints. For example,
+/// here the ``View/lineSpacing(_:)`` modifier sets the spacing between lines
+/// to 5 points:
+///
+///     struct TextEditingView: View {
+///         @State private var fullText: String = "This is some editable text..."
+///
+///         var body: some View {
+///             TextEditor(text: $fullText)
+///                 .foregroundColor(Color.gray)
+///                 .font(.custom("Helvetica Neue", size: 13))
+///                 .lineSpacing(5)
+///         }
+///     }
 @available(iOS 14.0, OSX 10.16, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -13852,10 +14240,33 @@ public struct TextEditor : View {
 
     /// Creates a plain text editor.
     ///
-    /// User editing of rich text attributes, such as color and font, will
-    /// not be enabled by this text editor.
+    /// Use a ``TextEditor`` instance to create a view in which users can enter
+    /// and edit long-form text.
     ///
-    /// - Parameter text: The text to be displayed and edited.
+    /// In this example, the text editor renders gray text using the 13
+    /// point Helvetica Neue font with 5 points of spacing between each line:
+    ///
+    ///     struct TextEditingView: View {
+    ///         @State private var fullText: String = "This is some editable text..."
+    ///
+    ///         var body: some View {
+    ///             TextEditor(text: $fullText)
+    ///                 .foregroundColor(Color.gray)
+    ///                 .font(.custom("Helvetica Neue", size: 13))
+    ///                 .lineSpacing(5)
+    ///         }
+    ///     }
+    ///
+    /// You can define the styling for the text within the view, including the
+    /// text color, font, and line spacing. You define these styles by applying
+    /// standard view modifiers to the view.
+    ///
+    /// The default text editor doesn't support rich text, such as styling of
+    /// individual elements within the editor's view. The styles you set apply
+    /// globally to all text in the view.
+    ///
+    /// - Parameter text: A ``Binding`` to the variable containing the
+    ///    text to edit.
     public init(text: Binding<String>)
 
     /// The content and behavior of the view.
@@ -13993,10 +14404,10 @@ public struct TitleOnlyLabelStyle : LabelStyle {
 
     /// Creates a view that represents the body of a label.
     ///
-    /// - Parameter configuration: The properties of the label.
-    ///
-    /// The system calls this method for each `Label` instance in a view
+    /// The system calls this method for each ``Label`` instance in a view
     /// hierarchy where this style is the current label style.
+    ///
+    /// - Parameter configuration: The properties of the label.
     public func makeBody(configuration: TitleOnlyLabelStyle.Configuration) -> some View
 
 
@@ -14029,7 +14440,7 @@ public struct TitleOnlyLabelStyle : LabelStyle {
 ///         Toggle("Vibrate on Ring", isOn: $vibrateOnRing)
 ///     }
 ///
-/// # Styling Toggles
+/// ### Styling Toggles
 ///
 /// You can customize the appearance and interaction of toggles by creating
 /// styles that conform to the ``ToggleStyle`` protocol. To set a specific style
@@ -14287,7 +14698,7 @@ extension ToolbarItem where ID == Void {
 @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarItem : Identifiable where ID : Hashable {
 
-    /// The stable identity of the entity associated with `self`.
+    /// The stable identity of the entity associated with this instance.
     public var id: ID { get }
 }
 
@@ -14525,33 +14936,116 @@ extension UIApplicationDelegateAdaptor where DelegateType : ObservableObject {
     public var projectedValue: ObservedObject<DelegateType>.Wrapper { get }
 }
 
+/// A UIKit view controller that manages a SwiftUI view hierarchy.
+///
+/// Create a `UIHostingController` object when you want to integrate SwiftUI
+/// views into a UIKit view hierarchy. At creation time, specify the SwiftUI
+/// view you want to use as the root view for this view controller; you can
+/// change that view later using the ``SwiftUI/UIHostingController/rootView``
+/// property. Use the hosting controller like you would any other view
+/// controller, by presenting it or embedding it as a child view controller
+/// in your interface.
 @available(iOS 13.0, tvOS 13.0, *)
 @available(OSX, unavailable)
 @available(watchOS, unavailable)
 open class UIHostingController<Content> : UIViewController where Content : View {
 
+    /// Creates a hosting controller object that wraps the specified SwiftUI
+    /// view.
+    ///
+    /// - Parameter rootView: The root view of the SwiftUI view hierarchy that
+    ///   you want to manage using the hosting view controller.
+    ///
+    /// - Returns: A `UIHostingController` object initialized with the
+    ///   specified SwiftUI view.
     public init(rootView: Content)
 
+    /// Creates a hosting controller object from an archive and the specified
+    /// SwiftUI view.
+    /// - Parameters:
+    ///   - coder: The decoder to use during initialization.
+    ///   - rootView: The root view of the SwiftUI view hierarchy that you want
+    ///     to manage using this view controller.
+    ///
+    /// - Returns: A `UIViewController` object that you can present from your
+    ///   interface.
     public init?(coder aDecoder: NSCoder, rootView: Content)
 
+    /// Creates a hosting controller object from the contents of the specified
+    /// archive.
+    ///
+    /// The default implementation of this method throws an exception. To create
+    /// your view controller from an archive, override this method and
+    /// initialize the superclass using the ``init(coder:rootView:)`` method
+    /// instead.
+    ///
+    /// -Parameter coder: The decoder to use during initialization.
     @objc required dynamic public init?(coder aDecoder: NSCoder)
 
+    /// Notifies the view controller that its view is about to be added to a
+    /// view hierarchy.
+    ///
+    /// SwiftUI calls this method before adding the hosting controller's root
+    /// view to the view hierarchy. You can override this method to perform
+    /// custom tasks asssociated with the appearance of the view. If you
+    /// override this method, you must call `super` at some point in your
+    /// implementation.
+    ///
+    /// - Parameter animated: If `true`, the view is being added
+    ///   using an animation.
     @objc override dynamic open func viewWillAppear(_ animated: Bool)
 
+    /// Notifies the view controller that its view has been added to a
+    /// view hierarchy.
+    ///
+    /// SwiftUI calls this method after adding the hosting controller's root
+    /// view to the view hierarchy. You can override this method to perform
+    /// custom tasks asssociated with the appearance of the view. If you
+    /// override this method, you must call `super` at some point in your
+    /// implementation.
+    ///
+    /// - Parameter animated: If `true`, the view is being added
+    ///   using an animation.
     @objc override dynamic open func viewDidAppear(_ animated: Bool)
 
+    /// Notifies the view controller that its view will be removed from a
+    /// view hierarchy.
+    ///
+    /// SwiftUI calls this method before removing the hosting controller's root
+    /// view from the view hierarchy. You can override this method to perform
+    /// custom tasks asssociated with the disappearance of the view. If you
+    /// override this method, you must call `super` at some point in your
+    /// implementation.
+    ///
+    /// - Parameter animated: If `true`, the view is being removed
+    ///   using an animation.
     @objc override dynamic open func viewWillDisappear(_ animated: Bool)
 
+    @objc override dynamic open func viewWillLayoutSubviews()
+
+    /// The root view of the SwiftUI view hierarchy managed by this view
+    /// controller.
     public var rootView: Content
 
+    /// Calculates and returns the most appropriate size for the current view.
+    ///
+    /// - Parameter size: The proposed new size for the view.
+    ///
+    /// - Returns: The size that offers the best fit for the root view and its
+    ///   contents.
     public func sizeThatFits(in size: CGSize) -> CGSize
 
     @objc override dynamic open func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer)
 
+    /// The preferred status bar style for the view controller.
     @objc override dynamic open var preferredStatusBarStyle: UIStatusBarStyle { get }
 
+    /// A Boolean value that indicates whether the view controller prefers the
+    /// status bar to be hidden or shown.
     @objc override dynamic open var prefersStatusBarHidden: Bool { get }
 
+    /// The animation style to use when hiding or showing the status bar for
+    /// this view controller.
     @objc override dynamic open var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { get }
 
     @objc override dynamic open var childForStatusBarHidden: UIViewController? { get }
@@ -15235,7 +15729,7 @@ public protocol View {
     associatedtype Body : View
 
     /// The content and behavior of the view.
-    var body: Self.Body { get }
+    @ViewBuilder var body: Self.Body { get }
 }
 
 @available(iOS 13.0, OSX 10.15, *)
@@ -15459,6 +15953,21 @@ extension View {
 
     /// Applies a modifier to a view.
     @inlinable public func modifier<T>(_ modifier: T) -> ModifiedContent<Self, T>
+}
+
+@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
+extension View {
+
+    /// Sets whether this view should ignore the system Smart Invert setting.
+    ///
+    /// Use this modifier to suppress Smart Invert in a view that shouldn't
+    /// be inverted. Or pass an `active` argument of `false` to begin following
+    /// the Smart Invert setting again when it was previously disabled.
+    ///
+    /// - Parameter active: A true value ignores the system Smart Invert
+    ///   setting. A false value follows the system setting.
+    @inlinable public func accessibilityIgnoresInvertColors(_ active: Bool = true) -> some View
+
 }
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -17192,7 +17701,7 @@ extension View {
     ///     image must be `1`.
     ///   - colorMode: One of the working color space and storage formats
     ///     defined in ``ColorRenderingMode``. The default is
-    ///     ``ColorRenderingMode/NonLinear``.
+    ///     ``ColorRenderingMode/nonLinear``.
     ///
     /// - Returns: A view that composites this view's contents into an offscreen
     ///   image before display.
@@ -17587,10 +18096,11 @@ extension View {
     @inlinable public func frame(width: CGFloat? = nil, height: CGFloat? = nil, alignment: Alignment = .center) -> some View
 
 
-    /// This function should never be used.
+    /// Positions this view within an invisible frame.
     ///
-    /// It is merely a hack to catch the case where the user writes .frame(),
-    /// which is nonsensical.
+    /// Use ``SwiftUI/View/frame(width:height:alignment:)`` or
+    /// ``SwiftUI/View/frame(minWidth:idealWidth:maxWidth:minHeight:idealHeight:maxHeight:alignment:)``
+    /// instead.
     @available(*, deprecated, message: "Please pass one or more parameters.")
     @inlinable public func frame() -> some View
 
@@ -17799,10 +18309,9 @@ extension View {
 @available(watchOS, unavailable)
 extension View {
 
-    /// Sets the style used for displaying the control
-    /// (see `SignInWithAppleButton.Style`).
+    /// Sets the style used for all Sign in with Apple buttons in the view.
     ///
-    /// - Parameter style: The sign in style to apply to this button.
+    /// - Parameter style: The style to apply to Sign in with Apple buttons.
     public func signInWithAppleButtonStyle(_ style: SignInWithAppleButton.Style) -> some View
 
 }
@@ -18330,7 +18839,7 @@ extension View {
     /// - Parameters:
     ///   - title: A title for this view to display in the navigation bar.
     ///   - displayMode: The way to display the title.
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use navigationTitle(_:) with navigationBarTitleDisplayMode(_:)")
+    @available(iOS, introduced: 14.0, deprecated: 100000.0, message: "Use navigationTitle(_:) with navigationBarTitleDisplayMode(_:)")
     @available(OSX, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -18542,12 +19051,12 @@ extension View {
     /// Sets a transform for the case of the text contained in this view when
     /// displayed.
     ///
-    /// The default value is `nil`, displaying the `Text` without any case
+    /// The default value is `nil`, displaying the text without any case
     /// changes.
     ///
-    /// - Parameter textCase: One of the ``Text.Case`` enumerations; the
+    /// - Parameter textCase: One of the ``Text/Case`` enumerations; the
     ///   default is `nil`.
-    /// - Returns: A view that transforms the case of `Text`.
+    /// - Returns: A view that transforms the case of the text.
     @available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
     @inlinable public func textCase(_ textCase: Text.Case?) -> some View
 
@@ -18982,7 +19491,8 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+@available(OSX, unavailable, message: "Unavailable in this beta.")
 extension View {
 
     /// Advertises a user activity type.
@@ -19019,10 +19529,6 @@ extension View {
     ///    advertisement.
     public func userActivity<P>(_ activityType: String, element: P?, _ update: @escaping (P, NSUserActivity) -> ()) -> some View
 
-}
-
-@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
-extension View {
 
     /// Registers a handler to invoke when the view receives the specified
     /// activity type for the scene or window the view is in.
@@ -19030,22 +19536,18 @@ extension View {
     /// - Parameters:
     ///   - activityType: The type of activity to handle.
     ///   - action: A function to call that takes a
-    ///     <doc://com.apple.documentation/Foundation/NSUserActivity>
+    ///     <doc://com.apple.documentation/documentation/Foundation/NSUserActivity>
     ///     object as its parameter
     ///     when delivering the activity to the scene or window the view is in.
     public func onContinueUserActivity(_ activityType: String, perform action: @escaping (NSUserActivity) -> ()) -> some View
 
-}
-
-@available(iOS 14.0, OSX 10.16, tvOS 14.0, watchOS 7.0, *)
-extension View {
 
     /// Registers a handler to invoke when the view receives a url for the
     /// scene or window the view is in.
     ///
     /// > Note: This method handles the reception of Universal Links,
     ///   rather than a
-    ///   <doc://com.apple.documentation/Foundation/NSUserActivity>.
+    ///   <doc://com.apple.documentation/documentation/Foundation/NSUserActivity>.
     ///
     /// - Parameter action: A function that takes a
     ///  <doc://com.apple.documentation/documentation/Foundation/URL>
@@ -19560,6 +20062,7 @@ extension View {
     /// - Parameters:
     ///   - leading: A view that appears on the leading edge of the title.
     ///   - trailing: A view that appears on the trailing edge of the title.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
     @available(OSX, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<L, T>(leading: L, trailing: T) -> some View where L : View, T : View
@@ -19606,6 +20109,7 @@ extension View {
     ///
     /// - Parameter leading: A view that appears on the leading edge of the
     ///   title.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
     @available(OSX, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<L>(leading: L) -> some View where L : View
@@ -19646,6 +20150,7 @@ extension View {
     ///     }
     ///
     /// - Parameter trailing: A view shown on the trailing edge of the title.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
     @available(OSX, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<T>(trailing: T) -> some View where T : View
@@ -19859,17 +20364,21 @@ public struct WheelDatePickerStyle : DatePickerStyle {
     public init()
 }
 
-/// A `PickerStyle` where the options are contained in a scrollable
-/// wheel, with the selected option and a few neighboring options are
-/// always visible.
+/// A picker style that presents the options in a scrollable wheel that shows
+/// the selected option and a few neighboring options.
 ///
-/// Because most options will not be visible, it's best to predictably
-/// order them, such as alphabetically.
+/// Because most options aren't visible, organize them in a predictable order,
+/// such as alphabetically.
+///
+/// To apply this style to a picker, or to a view that contains pickers, use the
+/// ``View/pickerStyle(_:)`` modifier.
 @available(iOS 13.0, watchOS 6.0, *)
 @available(OSX, unavailable)
 @available(tvOS, unavailable)
 public struct WheelPickerStyle : PickerStyle {
 
+    /// Sets the picker style to display an item wheel from which the user makes
+    /// a selection.
     public init()
 }
 
@@ -19934,13 +20443,10 @@ public protocol Widget {
 /// To support multiple types of widgets, add the `@main` attribute to a
 /// structure that conforms to `WidgetBundle`. For example, a game might have
 /// one widget to display summary information about the game and a second
-/// widget to display detailed information about individual characters. The
-/// `body` property uses the `@WidgetBundleBuilder` attribute to group
-/// both widgets together:
+/// widget to display detailed information about individual characters.
 ///
 ///     @main
 ///     struct GameWidgets: WidgetBundle {
-///        @WidgetBundleBuilder
 ///        var body: some Widget {
 ///            GameStatusWidget()
 ///            CharacterDetailWidget()
@@ -19971,14 +20477,13 @@ public protocol WidgetBundle {
     ///
     ///     @main
     ///     struct GameWidgets: WidgetBundle {
-    ///        @WidgetBundleBuilder
     ///        var body: some Widget {
     ///            GameStatusWidget()
     ///            CharacterDetailWidget()
     ///        }
     ///     }
     ///
-    var body: Self.Body { get }
+    @WidgetBundleBuilder var body: Self.Body { get }
 }
 
 /// A custom attribute that constructs a widget bundle's body.
@@ -20090,26 +20595,6 @@ public protocol WidgetConfiguration {
 /// example, for each new window created from the group the system allocates new
 /// storage for any ``State`` or ``StateObject`` variables instantiated by the
 /// scene's view hierarchy.
-///
-/// You can define different kinds of windows in your app by declaring more
-/// than one scene, including more than one window group. For example, a
-/// browser app might define a window with distinct behavior and appearance for
-/// private browsing:
-///
-///     @main
-///     struct Browser: App {
-///         @SceneBuilder var body: some Scene {
-///             WindowGroup {
-///                 BrowserView()
-///             }
-///             WindowGroup("Private") {
-///                 PrivateBrowserView()
-///             }
-///         }
-///     }
-///
-/// As shown above, you can initialize a window group with a title
-/// to help distinguish it from other groups in the user interface.
 ///
 /// You typically use a window group for the main interface of an app that isn't
 /// document-based. For document-based apps, use a ``DocumentGroup`` instead.
