@@ -1,4 +1,4 @@
-// Xcode 12.0b3
+// Xcode 12.0b4
 
 import AuthenticationServices
 import Combine
@@ -8,7 +8,6 @@ import CoreGraphics
 import Darwin
 import DeveloperToolsSupport
 import Foundation
-import StoreKit
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
@@ -18,7 +17,7 @@ import os.signpost
 
 /// The kind of an Accessibility action. Includes name information for custom
 /// actions
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct AccessibilityActionKind : Equatable {
 
     public static let `default`: AccessibilityActionKind
@@ -26,7 +25,7 @@ public struct AccessibilityActionKind : Equatable {
     public static let escape: AccessibilityActionKind
 
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     public static let magicTap: AccessibilityActionKind
 
     public init(named name: Text)
@@ -43,7 +42,7 @@ public struct AccessibilityActionKind : Equatable {
 }
 
 /// A directional indicator you use when making an accessibility adjustment.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum AccessibilityAdjustmentDirection {
 
     case increment
@@ -85,22 +84,22 @@ public enum AccessibilityAdjustmentDirection {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AccessibilityAdjustmentDirection : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AccessibilityAdjustmentDirection : Hashable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct AccessibilityAttachmentModifier : ViewModifier {
 
     /// The type of view representing the body.
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct AccessibilityChildBehavior : Hashable {
 
     /// Hashes the essential components of this value by feeding them into the
@@ -138,7 +137,7 @@ public struct AccessibilityChildBehavior : Hashable {
     public var hashValue: Int { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AccessibilityChildBehavior {
 
     /// Child accessibility elements are ignored
@@ -153,7 +152,59 @@ extension AccessibilityChildBehavior {
     public static let combine: AccessibilityChildBehavior
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+@frozen public enum AccessibilityLabeledPairRole {
+
+    /// This element represents the label part of the label / content pair.
+    ///
+    /// For example, it might be the explanatory text to the left of a control,
+    /// describing what the control does.
+    case label
+
+    /// This element represents the content part of the label / content pair.
+    ///
+    /// For example, it might be the custom control itself.
+    case content
+
+    /// Returns a Boolean value indicating whether two values are equal.
+    ///
+    /// Equality is the inverse of inequality. For any values `a` and `b`,
+    /// `a == b` implies that `a != b` is `false`.
+    ///
+    /// - Parameters:
+    ///   - lhs: A value to compare.
+    ///   - rhs: Another value to compare.
+    public static func == (a: AccessibilityLabeledPairRole, b: AccessibilityLabeledPairRole) -> Bool
+}
+
+extension AccessibilityLabeledPairRole : Hashable {
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
+
+    /// Hashes the essential components of this value by feeding them into the
+    /// given hasher.
+    ///
+    /// Implement this method to conform to the `Hashable` protocol. The
+    /// components used for hashing must be the same as the components compared
+    /// in your type's `==` operator implementation. Call `hasher.combine(_:)`
+    /// with each of these components.
+    ///
+    /// - Important: Never call `finalize()` on `hasher`. Doing so may become a
+    ///   compile-time error in the future.
+    ///
+    /// - Parameter hasher: The hasher to use when combining the components
+    ///   of this instance.
+    public func hash(into hasher: inout Hasher)
+}
+
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct AccessibilityTraits : SetAlgebra {
 
     /// The accessibility element is a button.
@@ -458,7 +509,7 @@ public struct AccessibilityTraits : SetAlgebra {
 
 /// A storage type for an action sheet presentation.
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 public struct ActionSheet {
 
     /// Creates an action sheet with the provided buttons.
@@ -469,7 +520,7 @@ public struct ActionSheet {
 }
 
 /// A representation for an alert presentation.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Alert {
 
     /// Creates an alert with one button.
@@ -508,7 +559,7 @@ public struct Alert {
 ///
 /// ![A table showing the various alignment guides next to each
 /// other.](SwiftUI-Alignment-table.png)
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Alignment : Equatable {
 
     /// The alignment on the horizontal axis.
@@ -567,7 +618,7 @@ public struct Alert {
 /// Types conforming to `AlignmentID` have a corresponding alignment guide
 /// value, typically declared as a static constant property of
 /// ``HorizontalAlignment`` or ``VerticalAlignment``.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol AlignmentID {
 
     /// The value of the corresponding guide in the given context when not
@@ -579,7 +630,7 @@ public protocol AlignmentID {
 ///
 /// You can convert the anchor to a `Value` in the coordinate space of a target
 /// view by using a ``GeometryProxy`` to specify the target view.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Anchor<Value> {
 
     /// A type-erased geometry value that produces an anchored value of a given
@@ -592,7 +643,7 @@ public protocol AlignmentID {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Anchor.Source where Value == CGRect {
 
     /// Returns an anchor source rect defined by `r` in the current view.
@@ -603,7 +654,7 @@ extension Anchor.Source where Value == CGRect {
     public static var bounds: Anchor<CGRect>.Source { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Anchor.Source where Value == CGPoint {
 
     public static func point(_ p: CGPoint) -> Anchor<Value>.Source
@@ -629,20 +680,20 @@ extension Anchor.Source where Value == CGPoint {
     public static var bottomTrailing: Anchor<CGPoint>.Source { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Anchor.Source {
 
     public init<T>(_ array: [Anchor<T>.Source]) where Value == [T]
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Anchor.Source {
 
     public init<T>(_ anchor: Anchor<T>.Source?) where Value == T?
 }
 
 /// A geometric angle whose value you access in either radians or degrees.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Angle {
 
     public var radians: Double
@@ -660,7 +711,7 @@ extension Anchor.Source {
     @inlinable public static func degrees(_ degrees: Double) -> Angle
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Angle : Hashable, Comparable {
 
     /// Returns a Boolean value indicating whether the value of the first
@@ -710,7 +761,7 @@ extension Angle : Hashable, Comparable {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Angle : Animatable {
 
     /// The data to animate.
@@ -732,7 +783,7 @@ extension Angle : Animatable {
 /// locations one and zero, transitioning between the two halfway across the
 /// missing area. The gradient maps the unit-space center point into the
 /// bounding rectangle of each shape filled with the gradient.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct AngularGradient : ShapeStyle, View {
 
     public init(gradient: Gradient, center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero)
@@ -747,7 +798,7 @@ extension Angle : Animatable {
 }
 
 /// A type that describes how to animate a property of a view.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol Animatable {
 
     /// The type defining the data to animate.
@@ -757,14 +808,14 @@ public protocol Animatable {
     var animatableData: Self.AnimatableData { get set }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animatable where Self : VectorArithmetic {
 
     /// The data to animate.
     public var animatableData: Self
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animatable where Self.AnimatableData == EmptyAnimatableData {
 
     /// The data to animate.
@@ -772,12 +823,12 @@ extension Animatable where Self.AnimatableData == EmptyAnimatableData {
 }
 
 /// A modifier that can create another modifier with animation.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol AnimatableModifier : Animatable, ViewModifier {
 }
 
 /// A pair of animatable values, which is itself animatable.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct AnimatablePair<First, Second> : VectorArithmetic where First : VectorArithmetic, Second : VectorArithmetic {
 
     /// The first value.
@@ -871,7 +922,7 @@ public protocol AnimatableModifier : Animatable, ViewModifier {
     public static func == (a: AnimatablePair<First, Second>, b: AnimatablePair<First, Second>) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Animation : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -885,7 +936,7 @@ public protocol AnimatableModifier : Animatable, ViewModifier {
     public static func == (lhs: Animation, rhs: Animation) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     /// A persistent spring animation. When mixed with other `spring()`
@@ -912,13 +963,13 @@ extension Animation {
     public static func interactiveSpring(response: Double = 0.15, dampingFraction: Double = 0.86, blendDuration: Double = 0.25) -> Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     public static let `default`: Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     public static func easeInOut(duration: Double) -> Animation
@@ -940,7 +991,7 @@ extension Animation {
     public static func timingCurve(_ c0x: Double, _ c0y: Double, _ c1x: Double, _ c1y: Double, duration: Double = 0.35) -> Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     /// An interpolating spring animation that uses a damped spring
@@ -960,13 +1011,13 @@ extension Animation {
     public static func interpolatingSpring(mass: Double = 1.0, stiffness: Double, damping: Double, initialVelocity: Double = 0.0) -> Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     public func delay(_ delay: Double) -> Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     /// Returns an animation that has its speed multiplied by `speed`. For
@@ -976,7 +1027,7 @@ extension Animation {
     public func speed(_ speed: Double) -> Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation {
 
     public func repeatCount(_ repeatCount: Int, autoreverses: Bool = true) -> Animation
@@ -984,7 +1035,7 @@ extension Animation {
     public func repeatForever(autoreverses: Bool = true) -> Animation
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Animation : CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
 
     /// A textual representation of this instance.
@@ -1045,7 +1096,7 @@ extension Animation : CustomStringConvertible, CustomDebugStringConvertible, Cus
 }
 
 /// A type-erased gesture.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct AnyGesture<Value> : Gesture {
 
     /// Creates an instance from another gesture.
@@ -1058,11 +1109,11 @@ extension Animation : CustomStringConvertible, CustomDebugStringConvertible, Cus
 }
 
 /// A type-erased transition.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct AnyTransition {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     public static func offset(_ offset: CGSize) -> AnyTransition
@@ -1070,7 +1121,7 @@ extension AnyTransition {
     public static func offset(x: CGFloat = 0, y: CGFloat = 0) -> AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     public static var scale: AnyTransition { get }
@@ -1078,7 +1129,7 @@ extension AnyTransition {
     public static func scale(scale: CGFloat, anchor: UnitPoint = .center) -> AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// A transition from transparent to opaque on insertion, and from opaque to
@@ -1086,7 +1137,7 @@ extension AnyTransition {
     public static let opacity: AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// A transition that inserts by moving in from the leading edge, and
@@ -1096,7 +1147,7 @@ extension AnyTransition {
     public static var slide: AnyTransition { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// Combines this transition with another, returning a new transition that
@@ -1104,7 +1155,7 @@ extension AnyTransition {
     public func combined(with other: AnyTransition) -> AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// Returns a transition defined between an active modifier and an identity
@@ -1112,14 +1163,14 @@ extension AnyTransition {
     public static func modifier<E>(active: E, identity: E) -> AnyTransition where E : ViewModifier
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// Attaches an animation to this transition.
     public func animation(_ animation: Animation?) -> AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// A transition that returns the input view, unmodified, as the output
@@ -1127,7 +1178,7 @@ extension AnyTransition {
     public static let identity: AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// Returns a transition that moves the view away, towards the specified
@@ -1135,7 +1186,7 @@ extension AnyTransition {
     public static func move(edge: Edge) -> AnyTransition
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension AnyTransition {
 
     /// Provides a composite transition that uses a different transition for
@@ -1148,7 +1199,7 @@ extension AnyTransition {
 /// An `AnyView` allows changing the type of view used in a given view
 /// hierarchy. Whenever the type of view used with an `AnyView` changes, the old
 /// hierarchy is destroyed and a new hierarchy is created for the new type.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct AnyView : View {
 
     /// Create an instance that type-erases `view`.
@@ -1224,7 +1275,7 @@ extension AnyTransition {
 ///         }
 ///     }
 ///
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol App {
 
     /// The type of scene representing the content of the app.
@@ -1263,7 +1314,7 @@ public protocol App {
     init()
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension App {
 
     /// Initializes and runs the app.
@@ -1279,7 +1330,7 @@ extension App {
 
 /// A property wrapper type that reflects a value from `UserDefaults` and
 /// invalidates a view on a change in value in that user default.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen @propertyWrapper public struct AppStorage<Value> : DynamicProperty {
 
     public var wrappedValue: Value { get nonmutating set }
@@ -1287,7 +1338,7 @@ extension App {
     public var projectedValue: Binding<Value> { get }
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension AppStorage {
 
     /// Creates a property that can read and write to a boolean user default.
@@ -1410,7 +1461,7 @@ extension AppStorage {
     public init(wrappedValue: Value, _ key: String, store: UserDefaults? = nil) where Value : RawRepresentable, Value.RawValue == String
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension AppStorage where Value : ExpressibleByNilLiteral {
 
     /// Creates a property that can read and write an Optional boolean user
@@ -1487,7 +1538,7 @@ extension AppStorage where Value : ExpressibleByNilLiteral {
 }
 
 /// The horizontal or vertical dimension in a 2D coordinate system.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public enum Axis : Int8, CaseIterable {
 
     /// The horizontal dimension.
@@ -1606,7 +1657,7 @@ extension AppStorage where Value : ExpressibleByNilLiteral {
     public static var allCases: [Axis] { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Axis : CustomStringConvertible {
 
     /// A textual representation of this instance.
@@ -1635,27 +1686,27 @@ extension Axis : CustomStringConvertible {
     public var description: String { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Axis : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Axis : Hashable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Axis : RawRepresentable {
 }
 
 /// A style that shows the correct fill for the background based on the current
 /// context.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen public struct BackgroundStyle {
 
     @inlinable public init()
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension BackgroundStyle : ShapeStyle {
 }
 
@@ -1705,7 +1756,7 @@ extension BackgroundStyle : ShapeStyle {
 ///
 /// Whenever the user taps the `PlayButton`, the `PlayerView` updates its
 /// `isPlaying` state.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen @propertyWrapper @dynamicMemberLookup public struct Binding<Value> {
 
     /// The binding's transaction.
@@ -1803,7 +1854,7 @@ extension BackgroundStyle : ShapeStyle {
     public subscript<Subject>(dynamicMember keyPath: WritableKeyPath<Value, Subject>) -> Binding<Subject> { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Binding {
 
     /// Creates a binding by projecting the base value to an optional value.
@@ -1825,7 +1876,7 @@ extension Binding {
     public init<V>(_ base: Binding<V>) where Value == AnyHashable, V : Hashable
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Binding {
 
     /// Specifies a transaction for the binding.
@@ -1844,12 +1895,12 @@ extension Binding {
     public func animation(_ animation: Animation? = .default) -> Binding<Value>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Binding : DynamicProperty {
 }
 
 /// Modes for compositing a view with overlapping content.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum BlendMode {
 
     case normal
@@ -1929,11 +1980,11 @@ public enum BlendMode {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension BlendMode : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension BlendMode : Hashable {
 }
 
@@ -1945,7 +1996,7 @@ extension BlendMode : Hashable {
 ///
 /// Pressing and then dragging into the contents triggers the chosen action on
 /// release.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct BorderlessButtonMenuStyle : MenuStyle {
@@ -1973,7 +2024,7 @@ public struct BorderlessButtonMenuStyle : MenuStyle {
 ///
 /// To apply this style to a button, or to a view that contains buttons, use the
 /// ``View/buttonStyle(_:)-66fbx`` modifier.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct BorderlessButtonStyle : PrimitiveButtonStyle {
@@ -2060,7 +2111,7 @@ public struct BorderlessButtonStyle : PrimitiveButtonStyle {
 ///         Button("Register", action: register)
 ///     }
 ///     .buttonStyle(BorderedButtonStyle())
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Button<Label> : View where Label : View {
 
     /// Creates a button that displays a custom label.
@@ -2080,7 +2131,7 @@ public struct Button<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Button where Label == Text {
 
     /// Creates a button that generates its label from a localized string key.
@@ -2113,7 +2164,7 @@ extension Button where Label == Text {
     public init<S>(_ title: S, action: @escaping () -> Void) where S : StringProtocol
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Button where Label == PrimitiveButtonStyleConfiguration.Label {
 
     /// Creates a button based on a configuration for a style with a custom
@@ -2137,7 +2188,7 @@ extension Button where Label == PrimitiveButtonStyleConfiguration.Label {
     ///
     /// - Parameter configuration: A configuration for a style with a custom
     ///   appearance and custom interaction behavior.
-    @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
     public init(_ configuration: PrimitiveButtonStyleConfiguration)
 }
 
@@ -2149,7 +2200,7 @@ extension Button where Label == PrimitiveButtonStyleConfiguration.Label {
 /// ``ButtonStyle`` when creating a button that uses the standard button
 /// interaction behavior defined for each platform. To create a button with
 /// custom interaction behavior, use ``PrimitiveButtonStyle`` instead.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ButtonStyle {
 
     /// A view that represents the body of a button.
@@ -2168,7 +2219,7 @@ public protocol ButtonStyle {
 }
 
 /// The properties of a button.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ButtonStyleConfiguration {
 
     /// A type-erased label of a button.
@@ -2193,7 +2244,7 @@ public struct ButtonStyleConfiguration {
 ///
 /// A capsule shape is equivalent to a rounded rectangle where the corner radius
 /// is chosen as half the length of the rectangle's smallest edge.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Capsule : Shape {
 
     public var style: RoundedCornerStyle
@@ -2217,7 +2268,7 @@ public struct ButtonStyleConfiguration {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Capsule : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -2232,7 +2283,7 @@ extension Capsule : InsettableShape {
 ///
 /// The circle's radius equals half the length of the frame rectangle's smallest
 /// edge.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Circle : Shape {
 
     /// Describes this shape as a path within a rectangular frame of reference.
@@ -2254,7 +2305,7 @@ extension Capsule : InsettableShape {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Circle : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -2266,7 +2317,7 @@ extension Circle : InsettableShape {
 }
 
 /// A progress view that visually indicates its progress using a circular gauge.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct CircularProgressViewStyle : ProgressViewStyle {
 
     /// Creates a circular progress view style.
@@ -2296,7 +2347,7 @@ public struct CircularProgressViewStyle : ProgressViewStyle {
 ///
 /// A `Color` is a late-binding token: SwiftUI only resolves it to a concrete
 /// value just before using it in a given environment.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Color : Hashable, CustomStringConvertible {
 
     /// Hashes the essential components of this value by feeding them into the
@@ -2359,7 +2410,7 @@ public struct CircularProgressViewStyle : ProgressViewStyle {
     public var hashValue: Int { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color : View {
 
     /// The type of view representing the body of this view.
@@ -2369,7 +2420,7 @@ extension Color : View {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color {
 
     public enum RGBColorSpace {
@@ -2422,7 +2473,7 @@ extension Color {
     public init(hue: Double, saturation: Double, brightness: Double, opacity: Double = 1)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color {
 
     /// A color that represents the system or application accent color.
@@ -2436,7 +2487,7 @@ extension Color {
     public static var accentColor: Color { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color {
 
     /// A set of colors that are used by system elements and applications.
@@ -2467,11 +2518,11 @@ extension Color {
     public static let secondary: Color
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color : ShapeStyle {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color {
 
     /// Creates a named color.
@@ -2483,24 +2534,24 @@ extension Color {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension Color {
 
     /// Creates a color from an instance of `UIColor`.
     public init(_ color: UIColor)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color {
 
     public func opacity(_ opacity: Double) -> Color
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color.RGBColorSpace : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Color.RGBColorSpace : Hashable {
 }
 
@@ -2530,7 +2581,7 @@ extension Color.RGBColorSpace : Hashable {
 ///         }
 ///     }
 ///
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct ColorPicker<Label> : View where Label : View {
@@ -2559,7 +2610,7 @@ public struct ColorPicker<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension ColorPicker where Label == Text {
@@ -2620,7 +2671,7 @@ extension ColorPicker where Label == Text {
 /// The working color space for color-compositing operations.
 ///
 /// Each color space guarantees to preserve a particular range of color values.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum ColorRenderingMode {
 
     /// The non-linear sRGB working color space, with color component values
@@ -2676,11 +2727,11 @@ public enum ColorRenderingMode {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ColorRenderingMode : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ColorRenderingMode : Hashable {
 }
 
@@ -2689,7 +2740,7 @@ extension ColorRenderingMode : Hashable {
 /// The color scheme enumerates the user setting options for Light or Dark Mode.
 /// It also provides the light or dark options for any particular view when the
 /// app wants to override the user setting.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum ColorScheme : CaseIterable {
 
     case light
@@ -2741,16 +2792,16 @@ extension ColorScheme {
 
     /// Create a color scheme from its UIUserInterfaceStyle equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init?(_ uiUserInterfaceStyle: UIUserInterfaceStyle)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ColorScheme : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ColorScheme : Hashable {
 }
 
@@ -2759,7 +2810,7 @@ extension ColorScheme : Hashable {
 ///
 /// The user sets the Increase Contrast option using the Settings app. Your app
 /// cannot override the user's choice.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum ColorSchemeContrast : CaseIterable {
 
     /// An option indicating that the system is using standard contrast between
@@ -2815,51 +2866,22 @@ extension ColorSchemeContrast {
 
     /// Create a contrast from its UIAccessibilityContrast equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init?(_ uiAccessibilityContrast: UIAccessibilityContrast)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ColorSchemeContrast : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ColorSchemeContrast : Hashable {
-}
-
-/// Command groups describe additional groupings of controls to add to existing
-/// command menus.
-///
-/// On macOS, command groups are realized as collections of menu items in a menu
-/// bar menu. On iOS, iPadOS, and tvOS, SwiftUI creates key commands for each of
-/// a group's commands that has a keyboard shortcut.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public struct CommandGroup<Content> : Commands where Content : View {
-
-    /// The composition of commands that comprise the command group.
-    public var body: some Commands { get }
-
-    /// A value describing the addition of the given views to the beginning of
-    /// the indicated group.
-    public init(before group: CommandGroupPlacement, @ViewBuilder addition: () -> Content)
-
-    /// A value describing the addition of the given views to the end of the
-    /// indicated group.
-    public init(after group: CommandGroupPlacement, @ViewBuilder addition: () -> Content)
-
-    /// A value describing the complete replacement of the contents of the
-    /// indicated group with the given views.
-    public init(replacing group: CommandGroupPlacement, @ViewBuilder addition: () -> Content)
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = some Commands
 }
 
 /// Identifier types for standard locations that new command groups can be
 /// placed relative to.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
 @available(watchOS, unavailable)
 public struct CommandGroupPlacement {
 
@@ -3012,145 +3034,12 @@ public struct CommandGroupPlacement {
     public static let help: CommandGroupPlacement
 }
 
-/// Command menus are stand-alone, top-level containers for controls that
-/// perform related, app-specific commands.
-///
-/// Command menus are realized as menu bar menus on macOS, inserted between the
-/// built-in View and Window menus in order of declaration. On iOS, iPadOS, and
-/// tvOS, SwiftUI creates key commands for each of a menu's commands that has a
-/// keyboard shortcut.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public struct CommandMenu<Content> : Commands where Content : View {
-
-    /// The composition of commands that comprise the command group.
-    public var body: some Commands { get }
-
-    /// Creates a new menu with a localized name for a collection of app-
-    /// specific commands, inserted in the standard location for app menus
-    /// (after the View menu, in order with other menus declared without an
-    /// explicit location).
-    public init(_ nameKey: LocalizedStringKey, @ViewBuilder content: () -> Content)
-
-    /// Creates a new menu for a collection of app-specific commands, inserted
-    /// in the standard location for app menus (after the View menu, in order
-    /// with other menus declared without an explicit location).
-    public init(_ name: Text, @ViewBuilder content: () -> Content)
-
-    /// Creates a new menu for a collection of app-specific commands, inserted
-    /// in the standard location for app menus (after the View menu, in order
-    /// with other menus declared without an explicit location).
-    public init<S>(_ name: S, @ViewBuilder content: () -> Content) where S : StringProtocol
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = some Commands
-}
-
-/// Conforming types represent a group of related commands that can be exposed
-/// to the user via the main menu on macOS and key commands on iOS.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public protocol Commands {
-
-    /// The type of command group representing the body of this command group.
-    associatedtype Body : Commands
-
-    /// The composition of commands that comprise the command group.
-    @CommandsBuilder var body: Self.Body { get }
-}
-
-/// Constructs command sets from multi-expression closures. Like `ViewBuilder`,
-/// it supports up to ten expressions in the closure body.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-@_functionBuilder public struct CommandsBuilder {
-
-    /// Builds an empty command set from an block containing no statements.
-    public static func buildBlock() -> EmptyCommands
-
-    /// Passes a single command group written as a child group through
-    /// modified.
-    public static func buildBlock<Content>(_ content: Content) -> Content where Content : Commands
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some Commands where C0 : Commands, C1 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands, C7 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands, C7 : Commands, C8 : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension CommandsBuilder {
-
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8, _ c9: C9) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands, C7 : Commands, C8 : Commands, C9 : Commands
-
-}
-
 /// A system style that displays the components in a compact, textual format.
 ///
 /// This style is useful when space is constrained and users expect to
 /// make specific date and time selections. Some variants may include rich
 /// editing controls in a popup.
-@available(iOS 14.0, macCatalyst 13.4, OSX 10.15.4, *)
+@available(iOS 14.0, macCatalyst 13.4, macOS 10.15.4, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct CompactDatePickerStyle : DatePickerStyle {
@@ -3161,7 +3050,7 @@ public struct CompactDatePickerStyle : DatePickerStyle {
 /// A shape that is replaced by an inset version of the current
 /// container shape. If no container shape was defined, is replaced by
 /// a rectangle.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen public struct ContainerRelativeShape : Shape {
 
     /// Describes this shape as a path within a rectangular frame of reference.
@@ -3183,7 +3072,7 @@ public struct CompactDatePickerStyle : DatePickerStyle {
     public typealias Body
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ContainerRelativeShape : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -3195,7 +3084,7 @@ extension ContainerRelativeShape : InsettableShape {
 }
 
 /// Constants that define how a view's content fills the available space.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public enum ContentMode : Hashable, CaseIterable {
 
     case fit
@@ -3243,7 +3132,7 @@ extension ContainerRelativeShape : InsettableShape {
     public static var allCases: [ContentMode] { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum ContentSizeCategory : Hashable, CaseIterable {
 
     case extraSmall
@@ -3272,7 +3161,7 @@ public enum ContentSizeCategory : Hashable, CaseIterable {
 
     /// A `Bool` value indicating whether the content size category is one that
     /// is associated with accessibility.
-    @available(iOS 13.4, OSX 10.15.4, tvOS 13.4, watchOS 6.2, *)
+    @available(iOS 13.4, macOS 10.15.4, tvOS 13.4, watchOS 6.2, *)
     public var isAccessibilityCategory: Bool { get }
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -3316,7 +3205,7 @@ public enum ContentSizeCategory : Hashable, CaseIterable {
     public static var allCases: [ContentSizeCategory] { get }
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ContentSizeCategory {
 
     /// Returns a Boolean value indicating whether the value of the first argument is less than that of the second argument.
@@ -3336,7 +3225,7 @@ extension ContentSizeCategory {
 
     /// Create a size category from its UIContentSizeCateogry equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init?(_ uiSizeCategory: UIContentSizeCategory)
 }
@@ -3346,14 +3235,16 @@ extension ContentSizeCategory {
 ///
 /// Relate the controls that a `ContextMenu` contains to the context from
 /// which you show them.
-@available(iOS 13.0, OSX 10.15, tvOS 14.0, *)
+@available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use `contextMenu(menuItems:)` instead.")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Use `contextMenu(menuItems:)` instead.")
+@available(tvOS, unavailable)
 @available(watchOS, introduced: 6.0, deprecated: 7.0)
 public struct ContextMenu<MenuItems> where MenuItems : View {
 
     public init(@ViewBuilder menuItems: () -> MenuItems)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum CoordinateSpace {
 
     case global
@@ -3363,7 +3254,7 @@ public enum CoordinateSpace {
     case named(AnyHashable)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CoordinateSpace {
 
     public var isGlobal: Bool { get }
@@ -3371,7 +3262,7 @@ extension CoordinateSpace {
     public var isLocal: Bool { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CoordinateSpace : Equatable, Hashable {
 
     /// Hashes the essential components of this value by feeding them into the
@@ -3413,7 +3304,7 @@ extension CoordinateSpace : Equatable, Hashable {
 ///
 /// It can be configured to only display specific components of the date, but
 /// still results in picking a complete `Date` instance.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DatePicker<Label> : View where Label : View {
@@ -3430,7 +3321,7 @@ public struct DatePicker<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DatePicker {
@@ -3483,7 +3374,7 @@ extension DatePicker {
     public init(selection: Binding<Date>, in range: PartialRangeThrough<Date>, displayedComponents: DatePicker<Label>.Components = [.hourAndMinute, .date], @ViewBuilder label: () -> Label)
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DatePicker where Label == Text {
@@ -3587,7 +3478,7 @@ extension DatePicker where Label == Text {
     public init<S>(_ title: S, selection: Binding<Date>, in range: PartialRangeThrough<Date>, displayedComponents: DatePicker<Label>.Components = [.hourAndMinute, .date]) where S : StringProtocol
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DatePickerComponents : OptionSet {
@@ -3652,7 +3543,7 @@ public struct DatePickerComponents : OptionSet {
 }
 
 /// A specification for the appearance and interaction of a `DatePicker`.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol DatePickerStyle {
@@ -3671,7 +3562,7 @@ public protocol DatePickerStyle {
 /// You can override a button's style. To apply the default style to a button,
 /// or to a view that contains buttons, use the ``View/buttonStyle(_:)-66fbx``
 /// modifier.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultButtonStyle : PrimitiveButtonStyle {
 
     /// Creates a default button style.
@@ -3691,7 +3582,7 @@ public struct DefaultButtonStyle : PrimitiveButtonStyle {
 }
 
 /// The default `DatePicker` style.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DefaultDatePickerStyle : DatePickerStyle {
@@ -3700,7 +3591,7 @@ public struct DefaultDatePickerStyle : DatePickerStyle {
 }
 
 /// The default `GroupBoxStyle`.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DefaultGroupBoxStyle : GroupBoxStyle {
@@ -3722,7 +3613,7 @@ public struct DefaultGroupBoxStyle : GroupBoxStyle {
 }
 
 /// The default label style in the current context.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct DefaultLabelStyle : LabelStyle {
 
     /// Creates a default label style.
@@ -3743,7 +3634,7 @@ public struct DefaultLabelStyle : LabelStyle {
 
 /// The instance that describes a platform's default behavior and appearance for
 /// a list.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultListStyle : ListStyle {
 
     /// Creates a default list style.
@@ -3769,7 +3660,7 @@ public struct DefaultListStyle : ListStyle {
 ///
 /// You can override a menu's style. To apply the default style to a menu, or to
 /// a view that contains a menu, use the ``View/menuStyle(_:)`` modifier.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DefaultMenuStyle : MenuStyle {
@@ -3791,7 +3682,7 @@ public struct DefaultMenuStyle : MenuStyle {
 }
 
 /// The default navigation view style.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 public struct DefaultNavigationViewStyle : NavigationViewStyle {
 
     public init()
@@ -3813,7 +3704,7 @@ public struct DefaultNavigationViewStyle : NavigationViewStyle {
 ///
 /// You can override a picker’s style. To apply the default style to a picker,
 /// or to a view that contains pickers, use the ``View/pickerStyle(_:)`` modifier.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultPickerStyle : PickerStyle {
 
     /// Creates a default picker style.
@@ -3823,7 +3714,7 @@ public struct DefaultPickerStyle : PickerStyle {
 /// A view representing a synthesized default label for a progress view.
 ///
 /// Don't use this type directly. Instead, use `ProgressView`.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct DefaultProgressViewLabel : View {
 
     /// The content and behavior of the view.
@@ -3842,7 +3733,7 @@ public struct DefaultProgressViewLabel : View {
 /// The default style represents the recommended style based on the original
 /// initialization parameters of the progress view, and the progress view's
 /// context within the view hierarchy.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct DefaultProgressViewStyle : ProgressViewStyle {
 
     /// Creates a default progress view style.
@@ -3866,13 +3757,13 @@ public struct DefaultProgressViewStyle : ProgressViewStyle {
 }
 
 /// The default `TabView` style.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 public struct DefaultTabViewStyle : TabViewStyle {
 
     public init()
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultTextFieldStyle : TextFieldStyle {
 
     public init()
@@ -3892,7 +3783,7 @@ public struct DefaultTextFieldStyle : TextFieldStyle {
 /// style to a toggle, or to a view that contains toggles, use the
 /// ``View/toggleStyle(_:)`` modifier. To revert a custom-styled toggle to the
 ///  default, use `toggleStyle(DefaultToggleStyle())`.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultToggleStyle : ToggleStyle {
 
     /// Creates a default toggle style.
@@ -3941,7 +3832,7 @@ public struct DefaultToggleStyle : ToggleStyle {
 ///             }
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DisclosureGroup<Label, Content> : View where Label : View, Content : View {
@@ -3973,7 +3864,7 @@ public struct DisclosureGroup<Label, Content> : View where Label : View, Content
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DisclosureGroup where Label == Text {
@@ -4023,7 +3914,7 @@ extension DisclosureGroup where Label == Text {
 ///
 /// When contained in a stack, the divider extends across the minor axis of the
 /// stack, or horizontally when not in a stack.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Divider : View {
 
     public init()
@@ -4036,7 +3927,7 @@ public struct Divider : View {
 }
 
 /// A scene that enables support for opening, creating, and saving documents.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DocumentGroup<Document, Content> : Scene where Content : View {
@@ -4060,7 +3951,7 @@ public struct DocumentGroup<Document, Content> : Scene where Content : View {
     public typealias Body = some Scene
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DocumentGroup where Document : FileDocument {
@@ -4083,7 +3974,7 @@ extension DocumentGroup where Document : FileDocument {
     public init(viewing documentType: Document.Type, @ViewBuilder viewer: @escaping (FileDocumentConfiguration<Document>) -> Content)
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DocumentGroup where Document : ReferenceFileDocument {
@@ -4120,7 +4011,7 @@ extension DocumentGroup where Document : ReferenceFileDocument {
 
 /// A navigation view style represented by a primary view stack that
 /// navigates to a detail view.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, *)
 @available(watchOS, unavailable)
 public struct DoubleColumnNavigationViewStyle : NavigationViewStyle {
 
@@ -4151,7 +4042,7 @@ public struct DoubleColumnNavigationViewStyle : NavigationViewStyle {
 ///                 .gesture(drag)
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 public struct DragGesture : Gesture {
 
@@ -4224,7 +4115,7 @@ public struct DragGesture : Gesture {
 /// using the ``View/onDrop(of:isTargeted:perform:)-f15m`` or the
 /// ``View/onDrop(of:isTargeted:perform:)-982eu`` method. These methods handle the
 /// drop using a closure you provide as part of the modifier.
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol DropDelegate {
@@ -4265,7 +4156,7 @@ public protocol DropDelegate {
     func dropExited(info: DropInfo)
 }
 
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DropDelegate {
@@ -4299,7 +4190,7 @@ extension DropDelegate {
 }
 
 /// The current state of a drop.
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DropInfo {
@@ -4312,7 +4203,7 @@ public struct DropInfo {
     ///
     /// - Parameter contentTypes: The uniform type identifiers to query for.
     /// - Returns: Whether at least one item conforms to one of `contentTypes`.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     public func hasItemsConforming(to contentTypes: [UTType]) -> Bool
 
     /// Finds item providers that conform to at least one of the specified
@@ -4322,12 +4213,12 @@ public struct DropInfo {
     ///
     /// - Parameter contentTypes: The uniform type identifiers to query for.
     /// - Returns: The item providers that conforms to `contentTypes`.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     public func itemProviders(for contentTypes: [UTType]) -> [NSItemProvider]
 }
 
 @available(iOS, introduced: 13.4, deprecated: 100000.0, message: "Provide `UTType`s as the `types` instead.")
-@available(OSX, introduced: 10.15, deprecated: 100000.0, message: "Provide `UTType`s as the `types` instead.")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Provide `UTType`s as the `types` instead.")
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DropInfo {
@@ -4345,7 +4236,7 @@ extension DropInfo {
 
 /// Operation types that determine how a drag and drop session resolves when the
 /// user drops a drag item.
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public enum DropOperation {
@@ -4397,20 +4288,20 @@ public enum DropOperation {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DropOperation : Equatable {
 }
 
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension DropOperation : Hashable {
 }
 
 /// The behavior of a drop.
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DropProposal {
@@ -4426,7 +4317,7 @@ public struct DropProposal {
 ///
 /// The view gives values to these properties prior to recomputing the view's
 /// ``View/body-swift.property``.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol DynamicProperty {
 
     /// Updates the underlying value of the stored value.
@@ -4437,7 +4328,7 @@ public protocol DynamicProperty {
     mutating func update()
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension DynamicProperty {
 
     /// Updates the underlying value of the stored value.
@@ -4449,7 +4340,7 @@ extension DynamicProperty {
 }
 
 /// A type of view that generates views from an underlying collection of data.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol DynamicViewContent : View {
 
     /// The type of the underlying collection of data.
@@ -4459,7 +4350,7 @@ public protocol DynamicViewContent : View {
     var data: Self.Data { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension DynamicViewContent {
 
     /// Sets the deletion action for the dynamic view.
@@ -4475,7 +4366,7 @@ extension DynamicViewContent {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension DynamicViewContent {
 
     /// Sets the move action for the dynamic view.
@@ -4492,7 +4383,7 @@ extension DynamicViewContent {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension DynamicViewContent {
 
     /// Sets the insert action for the dynamic view.
@@ -4509,7 +4400,7 @@ extension DynamicViewContent {
     ///
     /// - Returns: A view that calls `action` when elements are inserted into
     ///   the original view.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public func onInsert(of supportedContentTypes: [UTType], perform action: @escaping (Int, [NSItemProvider]) -> Void) -> some DynamicViewContent
 
 
@@ -4527,7 +4418,7 @@ extension DynamicViewContent {
     /// - Returns: A view that calls `action` when elements are inserted into
     ///   the original view.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
-    @available(OSX, introduced: 10.15, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
     public func onInsert(of acceptedTypeIdentifiers: [String], perform action: @escaping (Int, [NSItemProvider]) -> Void) -> some DynamicViewContent
@@ -4535,7 +4426,7 @@ extension DynamicViewContent {
 }
 
 /// An enumeration to indicate one edge of a rectangle.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public enum Edge : Int8, CaseIterable {
 
     case top
@@ -4669,20 +4560,20 @@ extension DynamicViewContent {
     public static var allCases: [Edge] { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Edge : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Edge : Hashable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Edge : RawRepresentable {
 }
 
 /// The inset distances for the sides of a rectangle.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EdgeInsets : Equatable {
 
     public var top: CGFloat
@@ -4711,12 +4602,12 @@ extension Edge : RawRepresentable {
 extension EdgeInsets {
 
     /// Create edge insets from the equivalent NSDirectionalEdgeInsets.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
     @available(watchOS, unavailable)
     public init(_ nsEdgeInsets: NSDirectionalEdgeInsets)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EdgeInsets : Animatable {
 
     /// The type defining the data to animate.
@@ -4728,7 +4619,7 @@ extension EdgeInsets : Animatable {
 
 /// A button that toggles the edit mode for the current edit scope.
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct EditButton : View {
@@ -4747,7 +4638,7 @@ public struct EditButton : View {
 
 /// The mode of a view indicating whether the user can edit its content.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public enum EditMode {
 
@@ -4803,19 +4694,19 @@ public enum EditMode {
 }
 
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 extension EditMode : Equatable {
 }
 
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 extension EditMode : Hashable {
 }
 
 /// An ellipse aligned inside the frame of the view containing it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Ellipse : Shape {
 
     /// Describes this shape as a path within a rectangular frame of reference.
@@ -4837,7 +4728,7 @@ extension EditMode : Hashable {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Ellipse : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -4852,7 +4743,7 @@ extension Ellipse : InsettableShape {
 ///
 /// This type is suitable for use as the `animatableData` property of
 /// types that do not have any animatable properties.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyAnimatableData : VectorArithmetic {
 
     @inlinable public init()
@@ -4939,18 +4830,8 @@ extension Ellipse : InsettableShape {
     public static func == (a: EmptyAnimatableData, b: EmptyAnimatableData) -> Bool
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public struct EmptyCommands : Commands {
-
-    public init()
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = Never
-}
-
 /// The empty, or identity, modifier.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyModifier : ViewModifier {
 
     public static let identity: EmptyModifier
@@ -4968,7 +4849,7 @@ public struct EmptyCommands : Commands {
 }
 
 /// The empty, or identity, modifier.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension EmptyModifier {
@@ -4977,7 +4858,7 @@ extension EmptyModifier {
     public typealias WidgetBody = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyView : View {
 
     @inlinable public init()
@@ -4990,7 +4871,7 @@ extension EmptyModifier {
 }
 
 /// An empty widget configuration.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 @frozen public struct EmptyWidgetConfiguration : WidgetConfiguration {
@@ -5006,7 +4887,7 @@ extension EmptyModifier {
 }
 
 /// A property wrapper type that reads a value from the view's environment.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen @propertyWrapper public struct Environment<Value> : DynamicProperty {
 
     /// Creates an environment property to read the specified key path.
@@ -5028,7 +4909,7 @@ extension EmptyModifier {
 ///
 ///         static var defaultValue: String = "default value"
 ///     }
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol EnvironmentKey {
 
     /// The associated type representing the data type of the environment key's
@@ -5046,7 +4927,7 @@ public protocol EnvironmentKey {
 /// object changes. If you declare a property as an environment object, be sure
 /// to set a corresponding model object on an ancestor view by calling its
 /// ``View/environmentObject(_:)`` modifier.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen @propertyWrapper public struct EnvironmentObject<ObjectType> : DynamicProperty where ObjectType : ObservableObject {
 
     /// A wrapper of the underlying environment object that can create bindings
@@ -5084,7 +4965,7 @@ public protocol EnvironmentKey {
 }
 
 /// A collection of environment values propagated through a view hierarchy.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct EnvironmentValues : CustomStringConvertible {
 
     /// Creates an environment values instance.
@@ -5104,12 +4985,12 @@ extension EnvironmentValues {
     ///
     /// When the value is `nil`, SwiftUI uses the system default. The default
     /// value is `nil`.
-    @available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, *)
     @available(watchOS, unavailable)
     public var disableAutocorrection: Bool?
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// The preferred size of the content.
@@ -5118,13 +4999,13 @@ extension EnvironmentValues {
     public var sizeCategory: ContentSizeCategory
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     public var managedObjectContext: NSManagedObjectContext
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// The undo manager used to register a view's undo operations.
@@ -5135,7 +5016,7 @@ extension EnvironmentValues {
     public var undoManager: UndoManager? { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// The layout direction associated with the current environment.
@@ -5145,21 +5026,14 @@ extension EnvironmentValues {
     public var layoutDirection: LayoutDirection
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension EnvironmentValues {
 
     /// The current redaction reasons applied to the view hierarchy.
     public var redactionReasons: RedactionReasons
 }
 
-@available(*, deprecated, message: "Use redactionReasons instead.")
-extension EnvironmentValues {
-
-    /// Whether views with this environment should show placeholder data.
-    public var isPlaceholder: Bool
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension EnvironmentValues {
 
     /// The current phase of the scene.
@@ -5171,7 +5045,7 @@ extension EnvironmentValues {
     public var scenePhase: ScenePhase
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// The default minimum height of a row in a list.
@@ -5184,7 +5058,7 @@ extension EnvironmentValues {
     public var defaultMinListHeaderHeight: CGFloat?
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// A Boolean value that indicates whether the view associated with this
@@ -5199,11 +5073,11 @@ extension EnvironmentValues {
     /// Returns whether the nearest focusable ancestor has focus.
     ///
     /// If there is no focusable ancestor, the value is `false`.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public var isFocused: Bool { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// The default font of this environment.
@@ -5213,7 +5087,7 @@ extension EnvironmentValues {
     public var displayScale: CGFloat
 
     /// The image scale for this environment.
-    @available(OSX 11.0, *)
+    @available(macOS 11.0, *)
     public var imageScale: Image.Scale
 
     /// The size of a pixel on the screen.
@@ -5263,25 +5137,25 @@ extension EnvironmentValues {
 }
 
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension EnvironmentValues {
 
     /// The horizontal size class of this environment.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public var horizontalSizeClass: UserInterfaceSizeClass?
 
     /// The vertical size class of this environment.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public var verticalSizeClass: UserInterfaceSizeClass?
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension EnvironmentValues {
@@ -5291,7 +5165,7 @@ extension EnvironmentValues {
     public var exportFiles: ExportFilesAction { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// A Boolean value that indicates whether the user has enabled an assistive
@@ -5299,7 +5173,7 @@ extension EnvironmentValues {
     public var accessibilityEnabled: Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// Whether the system preference for Differentiate without Color is enabled.
@@ -5335,14 +5209,14 @@ extension EnvironmentValues {
     public var accessibilityShowButtonShapes: Bool { get }
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension EnvironmentValues {
 
     /// Opens a URL using the appropriate system service.
     public var openURL: OpenURLAction { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// A value that indicates how text instance aligns its lines when the
@@ -5411,23 +5285,23 @@ extension EnvironmentValues {
     ///
     /// The default value is `nil`, displaying the `Text` without any case
     /// changes.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public var textCase: Text.Case?
 }
 
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 extension EnvironmentValues {
 
     /// The mode indicating whether the user can edit the contents of a view
     /// associated with this environment.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public var editMode: Binding<EditMode>?
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension EnvironmentValues {
@@ -5437,18 +5311,18 @@ extension EnvironmentValues {
     public var importFiles: ImportFilesAction { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
     /// A binding to the current presentation mode of the view associated with
     /// this environment.
-    @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
     public var presentationMode: Binding<PresentationMode> { get }
 }
 
 /// A modifier that must resolve to a concrete modifier in an environment before
 /// use.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
 
     /// The type of modifier to use after being resolved.
@@ -5460,7 +5334,7 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
 
 /// A view type that compares itself against its previous value and prevents its
 /// child updating if its new value is the same as its old value.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EquatableView<Content> : View where Content : Equatable, Content : View {
 
     public var content: Content
@@ -5475,7 +5349,7 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
 }
 
 /// A set of key modifiers that you can add to a gesture.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EventModifiers : OptionSet {
 
     /// The raw value.
@@ -5532,7 +5406,7 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
 /// A gesture that consists of two gestures where only one of them can succeed.
 ///
 /// The `ExclusiveGesture` gives precedence to its first gesture.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ExclusiveGesture<First, Second> : Gesture where First : Gesture, Second : Gesture {
 
     /// The value of an exclusive gesture that indicates which of two gestures
@@ -5564,7 +5438,7 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ExclusiveGesture.Value : Equatable where First.Value : Equatable, Second.Value : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -5583,7 +5457,7 @@ extension ExclusiveGesture.Value : Equatable where First.Value : Equatable, Seco
 /// An `ExportFilesAction` should be obtained from the environment,
 /// and can be used to export either a single file, or multiple files
 /// via a standard system dialog.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct ExportFilesAction {
@@ -5640,7 +5514,7 @@ public struct ExportFilesAction {
 ///
 /// The fetch request and its results use the managed object context provided by
 /// the environment value ``EnvironmentValues/managedObjectContext``.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @propertyWrapper public struct FetchRequest<Result> : DynamicProperty where Result : NSFetchRequestResult {
 
     /// The fetched results of the fetch request.
@@ -5680,7 +5554,7 @@ public struct ExportFilesAction {
     public mutating func update()
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension FetchRequest where Result : NSManagedObject {
 
     /// Creates an instance by defining a fetch request based on the parameters.
@@ -5697,7 +5571,7 @@ extension FetchRequest where Result : NSManagedObject {
 /// The FetchedResults collection type represents the results of performing a
 /// fetch request. Internally, it may use strategies such as batching and
 /// transparent futures to minimize memory use and I/O.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct FetchedResults<Result> : RandomAccessCollection where Result : NSFetchRequestResult {
 
     /// The position of the first element in a nonempty collection.
@@ -5780,7 +5654,7 @@ public struct FetchedResults<Result> : RandomAccessCollection where Result : NSF
 /// Conformance to `FileDocument` is expected to have value semantics and be
 /// thread-safe. Serialization and deserialization will be done on a background
 /// thread.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol FileDocument {
@@ -5806,7 +5680,7 @@ public protocol FileDocument {
     func write(to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension FileDocument {
@@ -5818,7 +5692,7 @@ extension FileDocument {
 }
 
 /// The properties of an open file document.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct FileDocumentConfiguration<Document> where Document : FileDocument {
@@ -5845,7 +5719,7 @@ public struct FileDocumentConfiguration<Document> where Document : FileDocument 
 }
 
 /// A style for rasterizing vector shapes.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct FillStyle : Equatable {
 
     /// A Boolean value that indicates whether to use the even-odd rule when
@@ -5885,7 +5759,7 @@ public struct FileDocumentConfiguration<Document> where Document : FileDocument 
 ///
 /// If multiple views publish bindings using the same key, the wrapped property
 /// will reflect the value of the binding from the view closest to focus.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @propertyWrapper public struct FocusedBinding<Value> : DynamicProperty {
 
     /// A new property wrapper for the given key path.
@@ -5912,7 +5786,7 @@ public struct FileDocumentConfiguration<Document> where Document : FileDocument 
 ///
 /// If multiple views publish values using the same key, the wrapped property
 ///  will reflect the value from the view closest to focus.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @propertyWrapper public struct FocusedValue<Value> : DynamicProperty {
 
     /// A new property wrapper for the given key path.
@@ -5936,14 +5810,14 @@ public struct FileDocumentConfiguration<Document> where Document : FileDocument 
 ///
 /// Unlike `EnvironmentKey`, `FocusedValuesHostKey` has no default value
 /// requirement, because the default value for a key is always `nil`.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol FocusedValueKey {
 
     associatedtype Value
 }
 
 /// A collection of state exported by the focused view and its ancestors.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct FocusedValues {
 
     /// Reads and writes values associated with a given environment key.
@@ -5957,7 +5831,7 @@ public struct FocusedValues {
 ///
 /// The system resolves a font's value at the time it uses the font in a given
 /// environment because ``Font`` is a late-binding token.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Font : Hashable {
 
     /// Hashes the essential components of this value by feeding them into the
@@ -5995,7 +5869,7 @@ public struct FocusedValues {
     public var hashValue: Int { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Font {
 
     /// A font with the large title text style.
@@ -6005,11 +5879,11 @@ extension Font {
     public static let title: Font
 
     /// Create a font for second level hierarchical headings.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static let title2: Font
 
     /// Create a font for third level hierarchical headings.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static let title3: Font
 
     /// A font with the headline text style.
@@ -6031,7 +5905,7 @@ extension Font {
     public static let caption: Font
 
     /// Create a font with the alternate caption text style.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static let caption2: Font
 
     /// Gets a system font with the given style and design.
@@ -6047,11 +5921,11 @@ extension Font {
         case title
 
         /// The font used for second level hierarchical headings.
-        @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+        @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
         case title2
 
         /// The font used for third level hierarchical headings.
-        @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+        @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
         case title3
 
         /// The font used for headings.
@@ -6073,7 +5947,7 @@ extension Font {
         case caption
 
         /// The font used for alternate captions.
-        @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+        @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
         case caption2
 
         /// A collection of all values of this type.
@@ -6118,7 +5992,7 @@ extension Font {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Font {
 
     /// Adds italics to the font.
@@ -6162,7 +6036,7 @@ extension Font {
     /// For example, `Font.body.tightLeading()` will return a `Font` in `body`
     /// text style with tight line spacing. This modifier may return the
     /// original `Font` unchanged for some fonts.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public func leading(_ leading: Font.Leading) -> Font
 
     /// A weight to use for fonts.
@@ -6221,7 +6095,7 @@ extension Font {
         public func hash(into hasher: inout Hasher)
     }
 
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public enum Leading {
 
         case standard
@@ -6266,7 +6140,7 @@ extension Font {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Font {
 
     /// Specifies a system font to use, along with the style, weight, and any
@@ -6340,7 +6214,7 @@ extension Font {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Font {
 
     /// Create a custom font with the given `name` and `size` that scales with
@@ -6349,12 +6223,12 @@ extension Font {
 
     /// Create a custom font with the given `name` and `size` that scales
     /// relative to the given `textStyle`.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static func custom(_ name: String, size: CGFloat, relativeTo textStyle: Font.TextStyle) -> Font
 
     /// Create a custom font with the given `name` and a fixed `size` that does
     /// not scale with Dynamic Type.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static func custom(_ name: String, fixedSize: CGFloat) -> Font
 
     /// Creates a custom font from a platform font instance.
@@ -6374,25 +6248,25 @@ extension Font {
     public init(_ font: CTFont)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Font.TextStyle : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Font.TextStyle : Hashable {
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Font.Leading : Equatable {
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Font.Leading : Hashable {
 }
 
 /// A structure that computes views on demand from an underlying collection of
 /// of identified data.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ForEach<Data, ID, Content> where Data : RandomAccessCollection, ID : Hashable {
 
     /// The collection of underlying identified data that SwiftUI uses to create
@@ -6404,11 +6278,11 @@ public struct ForEach<Data, ID, Content> where Data : RandomAccessCollection, ID
     public var content: (Data.Element) -> Content
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForEach : DynamicViewContent where Content : View {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForEach : View where Content : View {
 
     /// The type of view representing the body of this view.
@@ -6418,7 +6292,7 @@ extension ForEach : View where Content : View {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForEach where ID == Data.Element.ID, Content : View, Data.Element : Identifiable {
 
     /// Creates an instance that uniquely identifies and creates views across
@@ -6436,7 +6310,7 @@ extension ForEach where ID == Data.Element.ID, Content : View, Data.Element : Id
     public init(_ data: Data, @ViewBuilder content: @escaping (Data.Element) -> Content)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForEach where Content : View {
 
     /// Creates an instance that uniquely identifies and creates views across
@@ -6457,7 +6331,7 @@ extension ForEach where Content : View {
     public init(_ data: Data, id: KeyPath<Data.Element, ID>, @ViewBuilder content: @escaping (Data.Element) -> Content)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForEach where Data == Range<Int>, ID == Int, Content : View {
 
     /// Creates an instance that computes views on demand over a given constant
@@ -6475,13 +6349,13 @@ extension ForEach where Data == Range<Int>, ID == Int, Content : View {
 
 /// A style that shows the correct fill for the foreground based on the current
 /// context.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ForegroundStyle {
 
     @inlinable public init()
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForegroundStyle : ShapeStyle {
 }
 
@@ -6491,7 +6365,7 @@ extension ForegroundStyle : ShapeStyle {
 /// SwiftUI renders forms in a manner appropriate for the platform. For example,
 /// on iOS, forms appear as grouped lists. Use ``Section`` to group different
 /// parts of a form's content.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Form<Content> : View where Content : View {
 
     public init(@ViewBuilder content: () -> Content)
@@ -6511,14 +6385,14 @@ public struct Form<Content> : View where Content : View {
 ///
 /// The only change the effect makes to the view's ancestors and descendants is
 /// to change the coordinate transform to and from them.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol GeometryEffect : Animatable, ViewModifier where Self.Body == Never {
 
     /// Returns the current value of the effect.
     func effectValue(size: CGSize) -> ProjectionTransform
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension GeometryEffect {
 
     /// Returns an effect that produces the same geometry transform as this
@@ -6532,7 +6406,7 @@ extension GeometryEffect {
 
 /// A proxy for access to the size and coordinate space (for anchor resolution)
 /// of the container view.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct GeometryProxy {
 
     /// The size of the container view.
@@ -6553,7 +6427,7 @@ public struct GeometryProxy {
 /// coordinate space.
 ///
 /// This view returns a flexible preferred size to its parent layout.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct GeometryReader<Content> : View where Content : View {
 
     public var content: (GeometryProxy) -> Content
@@ -6572,7 +6446,7 @@ public struct GeometryProxy {
 ///
 /// Create custom gestures by declaring types that conform to the `Gesture`
 /// protocol.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol Gesture {
 
     /// The type representing the gesture's value.
@@ -6585,7 +6459,7 @@ public protocol Gesture {
     var body: Self.Body { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture {
 
     /// Sequences a gesture with another one to create a new gesture, which
@@ -6599,7 +6473,7 @@ extension Gesture {
     @inlinable public func sequenced<Other>(before other: Other) -> SequenceGesture<Self, Other> where Other : Gesture
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture {
 
     /// Combines a gesture with another gesture to create a new gesture that
@@ -6612,7 +6486,7 @@ extension Gesture {
     @inlinable public func simultaneously<Other>(with other: Other) -> SimultaneousGesture<Self, Other> where Other : Gesture
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture {
 
     /// Adds an action to perform when the gesture ends.
@@ -6624,7 +6498,7 @@ extension Gesture {
     public func onEnded(_ action: @escaping (Self.Value) -> Void) -> _EndedGesture<Self>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture where Self.Value : Equatable {
 
     /// Adds an action to perform when the gesture's value changes.
@@ -6638,7 +6512,7 @@ extension Gesture where Self.Value : Equatable {
     public func onChanged(_ action: @escaping (Self.Value) -> Void) -> _ChangedGesture<Self>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture {
 
     /// Returns a gesture that's the result of mapping the given closure over
@@ -6646,7 +6520,7 @@ extension Gesture {
     public func map<T>(_ body: @escaping (Self.Value) -> T) -> _MapGesture<Self, T>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture {
 
     /// Combines two gestures exclusively to create a new gesture where only one
@@ -6661,7 +6535,7 @@ extension Gesture {
     @inlinable public func exclusively<Other>(before other: Other) -> ExclusiveGesture<Self, Other> where Other : Gesture
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Gesture {
 
     /// Updates the provided gesture state property as the gesture's value
@@ -6685,7 +6559,7 @@ extension Gesture {
 
 /// Options that control how adding a gesture to a view affect's other gestures
 /// recognized by the view and its subviews.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct GestureMask : OptionSet {
 
     /// The corresponding value of the raw type.
@@ -6787,7 +6661,7 @@ extension Gesture {
 ///                 .gesture(longPress)
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @propertyWrapper @frozen public struct GestureState<Value> : DynamicProperty {
 
     /// Creates a view state that's derived from a gesture.
@@ -6844,7 +6718,7 @@ extension Gesture {
     public var projectedValue: GestureState<Value> { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension GestureState where Value : ExpressibleByNilLiteral {
 
     /// Creates a view state that's derived from a gesture with a transaction to
@@ -6866,7 +6740,7 @@ extension GestureState where Value : ExpressibleByNilLiteral {
 /// A gesture's ``Gesture/updating(_:body:)`` callback returns a
 /// `GestureStateGesture` instance for updating a transient state property
 /// that's annotated with the ``GestureState`` property wrapper.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct GestureStateGesture<Base, State> : Gesture where Base : Gesture {
 
     /// The type representing the gesture's value.
@@ -6897,7 +6771,7 @@ extension GestureState where Value : ExpressibleByNilLiteral {
 
 /// A color gradient represented as an array of color stops, each having a
 /// parametric location value.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Gradient : Equatable {
 
     /// One color stop in the gradient.
@@ -6953,7 +6827,7 @@ extension GestureState where Value : ExpressibleByNilLiteral {
 ///
 /// This style is useful when wanting to allow browsing through days in a
 /// calendar, or when the look of a clock face is appropriate.
-@available(iOS 14.0, OSX 10.15, *)
+@available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct GraphicalDatePickerStyle : DatePickerStyle {
@@ -6967,7 +6841,7 @@ public struct GraphicalDatePickerStyle : DatePickerStyle {
 /// ``LazyHGrid`` and ``LazyVGrid`` views. Each grid item specifies layout
 /// properties like spacing and alignment, which the grid view uses to size and
 /// position all items in a given column or row.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct GridItem {
 
     /// The size in the minor axis of one or more rows or columns in a grid
@@ -7021,7 +6895,7 @@ public struct GridItem {
 }
 
 /// An affordance for grouping view content.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Group<Content> {
 
     /// The type of scene that represents the body of this scene.
@@ -7032,7 +6906,7 @@ public struct GridItem {
     public typealias Body = Never
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Group where Content : _Widget {
@@ -7046,28 +6920,21 @@ extension Group where Content : _Widget {
     @inlinable public init(@_WidgetBuilder content: () -> Content)
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Group : Scene where Content : Scene {
 
     @inlinable public init(@SceneBuilder content: () -> Content)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Group : View where Content : View {
 
     @inlinable public init(@ViewBuilder content: () -> Content)
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension Group : Commands where Content : Commands {
-
-    @inlinable public init(@CommandsBuilder content: () -> Content)
-}
-
 /// A stylized view with an optional label that is associated with a logical
 /// grouping of content.
-@available(iOS 14.0, OSX 10.15, *)
+@available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct GroupBox<Label, Content> : View where Label : View, Content : View {
@@ -7084,7 +6951,7 @@ public struct GroupBox<Label, Content> : View where Label : View, Content : View
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 10.15, *)
+@available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension GroupBox where Label == GroupBoxStyleConfiguration.Label, Content == GroupBoxStyleConfiguration.Content {
@@ -7093,7 +6960,7 @@ extension GroupBox where Label == GroupBoxStyleConfiguration.Label, Content == G
     public init(_ configuration: GroupBoxStyleConfiguration)
 }
 
-@available(iOS 14.0, OSX 10.15, *)
+@available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension GroupBox where Label == EmptyView {
@@ -7106,7 +6973,7 @@ extension GroupBox where Label == EmptyView {
 ///
 /// To configure the current `GroupBoxStyle` for a view hiearchy, use the
 /// `.groupBoxStyle()` modifier.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol GroupBoxStyle {
@@ -7128,7 +6995,7 @@ public protocol GroupBoxStyle {
 }
 
 /// The properties of a `GroupBox` instance being created.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct GroupBoxStyleConfiguration {
@@ -7162,7 +7029,7 @@ public struct GroupBoxStyleConfiguration {
 
 /// The instance that describes the behavior and appearance of a grouped list.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public struct GroupedListStyle : ListStyle {
 
@@ -7171,7 +7038,7 @@ public struct GroupedListStyle : ListStyle {
 }
 
 /// A view that arranges its children in a horizontal line.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct HStack<Content> : View where Content : View {
 
     /// Creates an instance with the given spacing and vertical alignment.
@@ -7193,7 +7060,7 @@ public struct GroupedListStyle : ListStyle {
 }
 
 /// An alignment position along the horizontal axis.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct HorizontalAlignment : Equatable {
 
     /// Creates an instance with the given identifier.
@@ -7215,7 +7082,7 @@ public struct GroupedListStyle : ListStyle {
     public static func == (a: HorizontalAlignment, b: HorizontalAlignment) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension HorizontalAlignment {
 
     /// A guide marking the leading edge of the view.
@@ -7230,7 +7097,7 @@ extension HorizontalAlignment {
 
 /// An effect applied when the pointer hovers over a view.
 @available(iOS 13.4, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct HoverEffect {
@@ -7252,7 +7119,7 @@ public struct HoverEffect {
 ///
 /// The title of the label is still used for non-visual descriptions, such as
 /// VoiceOver.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct IconOnlyLabelStyle : LabelStyle {
 
     /// Creates an icon-only label style.
@@ -7275,7 +7142,7 @@ public struct IconOnlyLabelStyle : LabelStyle {
 ///
 /// An `Image` is a late-binding token; the system resolves its actual value
 /// only when it's about to use the image in a given environment.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Image : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -7289,7 +7156,7 @@ public struct IconOnlyLabelStyle : LabelStyle {
     public static func == (lhs: Image, rhs: Image) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     /// Creates a labeled image that you can use as content for controls.
@@ -7331,11 +7198,11 @@ extension Image {
     /// - Parameters:
     ///   - systemName: The name of the system symbol image.
     ///     Use the SF Symbols app to look up the names of system symbol images.
-    @available(OSX 11.0, *)
+    @available(macOS 11.0, *)
     public init(systemName: String)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image : View {
 
     /// The type of view representing the body of this view.
@@ -7345,13 +7212,13 @@ extension Image : View {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     public func renderingMode(_ renderingMode: Image.TemplateRenderingMode?) -> Image
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     /// The orientation of an image.
@@ -7424,7 +7291,7 @@ extension Image {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     public enum TemplateRenderingMode {
@@ -7469,7 +7336,7 @@ extension Image {
     }
 
     /// The scale to apply to vector images relative to text.
-    @available(OSX 11.0, *)
+    @available(macOS 11.0, *)
     public enum Scale {
 
         case small
@@ -7514,7 +7381,7 @@ extension Image {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     public enum Interpolation {
@@ -7563,7 +7430,7 @@ extension Image {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     public func interpolation(_ interpolation: Image.Interpolation) -> Image
@@ -7571,7 +7438,7 @@ extension Image {
     public func antialiased(_ isAntialiased: Bool) -> Image
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     /// Creates a labeled image based on a `CGImage`, usable as content for
@@ -7599,13 +7466,13 @@ extension Image {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension Image {
 
     public init(uiImage: UIImage)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
     public enum ResizingMode {
@@ -7652,44 +7519,44 @@ extension Image {
     public func resizable(capInsets: EdgeInsets = EdgeInsets(), resizingMode: Image.ResizingMode = .stretch) -> Image
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.Orientation : RawRepresentable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.TemplateRenderingMode : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.TemplateRenderingMode : Hashable {
 }
 
-@available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 11.0, *)
+@available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 11.0, *)
 extension Image.Scale : Equatable {
 }
 
-@available(iOS 13.0, tvOS 13.0, watchOS 6.0, OSX 11.0, *)
+@available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 11.0, *)
 extension Image.Scale : Hashable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.Interpolation : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.Interpolation : Hashable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.ResizingMode : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image.ResizingMode : Hashable {
 }
 
 /// A shape style that fills a shape by repeating a region of an image.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ImagePaint : ShapeStyle {
 
     /// The image to be drawn.
@@ -7720,7 +7587,7 @@ extension Image.ResizingMode : Hashable {
 /// An `ImportFilesAction` should be obtained from the environment,
 /// and can be used to import either a single file, or multiple files
 /// via a standard system dialog.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct ImportFilesAction {
@@ -7758,14 +7625,23 @@ public struct ImportFilesAction {
 /// To configure the current `IndexViewStyle` for a view hierarchy, use the
 /// `.indexViewStyle()` modifier.
 @available(iOS 14.0, tvOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public protocol IndexViewStyle {
 }
 
+/// A `PickerStyle` where each option is displayed inline with
+/// other views in the current container.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+public struct InlinePickerStyle : PickerStyle {
+
+    /// Creates an inline picker style.
+    public init()
+}
+
 /// The instance that describes the behavior and appearance of an inset grouped list.
 @available(iOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct InsetGroupedListStyle : ListStyle {
@@ -7775,7 +7651,7 @@ public struct InsetGroupedListStyle : ListStyle {
 }
 
 /// The behavior and appearance of an inset list.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct InsetListStyle : ListStyle {
@@ -7785,7 +7661,7 @@ public struct InsetListStyle : ListStyle {
 }
 
 /// A shape type that is able to inset itself to produce another shape.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol InsettableShape : Shape {
 
     /// The type of the inset shape.
@@ -7795,7 +7671,7 @@ public protocol InsettableShape : Shape {
     func inset(by amount: CGFloat) -> Self.InsetShape
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension InsettableShape {
 
     /// Returns a view that is the result of insetting `self` by
@@ -7823,134 +7699,6 @@ extension InsettableShape {
     /// stroking the resulting shape with `width` as the line-width.
     @inlinable public func strokeBorder(lineWidth: CGFloat = 1, antialiased: Bool = true) -> some View
 
-}
-
-/// Key equivalents consist of a letter, punctuation, or function key that can
-/// be combined with an optional set of modifier keys to specify a keyboard
-/// shortcut.
-///
-/// Key equivalents are used to establish keyboard shortcuts to app
-/// functionality. Any key can be used as a key equivalent as long as pressing
-/// it produces a single character value. Key equivalents are typically
-/// initialized using a single-character string literal, with constants for
-/// unprintable or hard-to-type values.
-///
-/// The modifier keys necessary to type a key equivalent are factored in to the
-/// resulting keyboard shortcut. That is, a key equivalent whose raw value is
-/// the capitalized string "A" corresponds with the keyboard shortcut
-/// Command-Shift-A. The exact mapping may depend on the keyboard layout—for
-/// example, a key equivalent whith the character value "}" produces a shortcut
-/// equivalent to Command-Shift-] on ANSI keyboards, but would produce a
-/// different shortcut for keyboard layouts where punctuation characters are in
-/// different locations.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public struct KeyEquivalent {
-
-    /// Up Arrow (U+F700)
-    public static let upArrow: KeyEquivalent
-
-    /// Down Arrow (U+F701)
-    public static let downArrow: KeyEquivalent
-
-    /// Left Arrow (U+F702)
-    public static let leftArrow: KeyEquivalent
-
-    /// Right Arrow (U+F703)
-    public static let rightArrow: KeyEquivalent
-
-    /// Escape (U+001B)
-    public static let escape: KeyEquivalent
-
-    /// Delete (U+0008)
-    public static let delete: KeyEquivalent
-
-    /// Delete Forward (U+F728)
-    public static let deleteForward: KeyEquivalent
-
-    /// Home (U+F729)
-    public static let home: KeyEquivalent
-
-    /// End (U+F72B)
-    public static let end: KeyEquivalent
-
-    /// Page Up (U+F72C)
-    public static let pageUp: KeyEquivalent
-
-    /// Page Down (U+F72D)
-    public static let pageDown: KeyEquivalent
-
-    /// Clear (U+F739)
-    public static let clear: KeyEquivalent
-
-    /// Tab (U+0009)
-    public static let tab: KeyEquivalent
-
-    /// Space (U+0020)
-    public static let space: KeyEquivalent
-
-    /// Return (U+000D)
-    public static let `return`: KeyEquivalent
-
-    /// The character value that the key equivalent represents.
-    public var character: Character
-
-    /// Creates a new key equivalent from the given character value.
-    public init(_ character: Character)
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension KeyEquivalent : ExpressibleByExtendedGraphemeClusterLiteral {
-
-    /// Creates an instance initialized to the given value.
-    ///
-    /// - Parameter value: The value of the new instance.
-    public init(extendedGraphemeClusterLiteral: Character)
-
-    /// A type that represents an extended grapheme cluster literal.
-    ///
-    /// Valid types for `ExtendedGraphemeClusterLiteralType` are `Character`,
-    /// `String`, and `StaticString`.
-    public typealias ExtendedGraphemeClusterLiteralType = Character
-
-    /// A type that represents a Unicode scalar literal.
-    ///
-    /// Valid types for `UnicodeScalarLiteralType` are `Unicode.Scalar`,
-    /// `Character`, `String`, and `StaticString`.
-    public typealias UnicodeScalarLiteralType = Character
-}
-
-/// Keyboard shortcuts describe combinations of keys on a keyboard that the user
-/// can press in order to activate a button or toggle.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public struct KeyboardShortcut {
-
-    /// The standard keyboard shortcut for the default button, consisting of
-    /// the Return (↩) key and no modifiers.
-    ///
-    /// On macOS, the default button is designated with special coloration. If
-    /// more than one control is assigned this shortcut, only the first one is
-    /// emphasized.
-    public static let defaultAction: KeyboardShortcut
-
-    /// The standard keyboard shortcut for cancelling the in-progress action
-    /// or dismissing a prompt, consisting of the Escape (⎋) key and no
-    /// modifiers.
-    public static let cancelAction: KeyboardShortcut
-
-    /// The key equivalent that the user presses in conjunction with any
-    /// specified modifier keys to activate the shortcut.
-    public var key: KeyEquivalent
-
-    /// The modifier keys that the user presses in conjunction with a key
-    /// equivalent to activate the shortcut.
-    public var modifiers: EventModifiers
-
-    /// Creates a new keyboard shortcut with the given key equivalent and set of
-    /// modifier keys.
-    public init(_ key: KeyEquivalent, modifiers: EventModifiers = .command)
 }
 
 /// A standard label for user interface items, consisting of an icon with a
@@ -8024,7 +7772,7 @@ public struct KeyboardShortcut {
 ///             .overlay(Text(person.initials))
 ///     }
 ///
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct Label<Title, Icon> : View where Title : View, Icon : View {
 
     /// Creates a label with a custom title and icon.
@@ -8040,7 +7788,7 @@ public struct Label<Title, Icon> : View where Title : View, Icon : View {
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Label where Title == Text, Icon == Image {
 
     /// Creates a label with an icon image and a title generated from a
@@ -8075,7 +7823,7 @@ extension Label where Title == Text, Icon == Image {
     public init<S>(_ title: S, systemImage name: String) where S : StringProtocol
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Label where Title == LabelStyleConfiguration.Title, Icon == LabelStyleConfiguration.Icon {
 
     /// Creates a label representing the configuration of a style.
@@ -8104,7 +7852,7 @@ extension Label where Title == LabelStyleConfiguration.Title, Icon == LabelStyle
 ///
 /// To configure the current label style for a view hierarchy, use the
 /// ``View/labelStyle(_:)`` modifier.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol LabelStyle {
 
     /// A view that represents the body of a label.
@@ -8123,7 +7871,7 @@ public protocol LabelStyle {
 }
 
 /// The properties of a label.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct LabelStyleConfiguration {
 
     /// A type-erased title view of a label.
@@ -8153,15 +7901,15 @@ public struct LabelStyleConfiguration {
     public var icon: LabelStyleConfiguration.Icon { get }
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LabelStyleConfiguration.Title : View {
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LabelStyleConfiguration.Icon : View {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum LayoutDirection : Hashable, CaseIterable {
 
     case leftToRight
@@ -8213,7 +7961,7 @@ extension LayoutDirection {
 
     /// Create a direction from its UITraitEnvironmentLayoutDirection equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init?(_ uiLayoutDirection: UITraitEnvironmentLayoutDirection)
 }
@@ -8245,7 +7993,7 @@ extension LayoutDirection {
 ///             }
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct LazyHGrid<Content> : View where Content : View {
 
     /// Creates a grid that grows horizontally, given the provided properties.
@@ -8284,7 +8032,7 @@ public struct LazyHGrid<Content> : View where Content : View {
 ///             }
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct LazyHStack<Content> : View where Content : View {
 
     /// Creates a lazy horizontal stack view with the given spacing,
@@ -8330,7 +8078,7 @@ public struct LazyHStack<Content> : View where Content : View {
 ///              }
 ///          }.font(.largeTitle)
 ///      }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct LazyVGrid<Content> : View where Content : View {
 
     /// Creates a grid that grows vertically, given the provided properties.
@@ -8370,7 +8118,7 @@ public struct LazyVGrid<Content> : View where Content : View {
 ///             }
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct LazyVStack<Content> : View where Content : View {
 
     /// Creates a lazy vertical stack view with the given spacing,
@@ -8396,7 +8144,7 @@ public struct LazyVStack<Content> : View where Content : View {
 /// The Accessibility Bold Text user setting options.
 ///
 /// The app can't override the user's choice.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum LegibilityWeight : Hashable {
 
     /// Use regular font weight (no Accessibility Bold).
@@ -8444,7 +8192,7 @@ extension LegibilityWeight {
 
     /// Creates a legibility weight from its UILegibilityWeight equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init?(_ uiLegibilityWeight: UILegibilityWeight)
 }
@@ -8454,7 +8202,7 @@ extension LegibilityWeight {
 /// The gradient applies the color function along an axis, as defined by its
 /// start and end points. The gradient maps the unit-space points into the
 /// bounding rectangle of each shape filled with the gradient.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct LinearGradient : ShapeStyle, View {
 
     public init(gradient: Gradient, startPoint: UnitPoint, endPoint: UnitPoint)
@@ -8467,7 +8215,7 @@ extension LegibilityWeight {
 }
 
 /// A progress view that visually indicates its progress using a horizontal bar.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct LinearProgressViewStyle : ProgressViewStyle {
 
     /// Creates a linear progress view style.
@@ -8515,7 +8263,7 @@ public struct LinearProgressViewStyle : ProgressViewStyle {
 /// label could be modified with a custom ``View/font(_:)`` or
 /// ``View/foregroundColor(_:)`` to customize the appearance of the link in
 /// your app's UI.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct Link<Label> : View where Label : View {
 
     /// Creates a control, consisting of a URL and a label, used to navigate
@@ -8536,7 +8284,7 @@ public struct Link<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Link where Label == Text {
 
     /// Creates a control, consisting of a URL and a title key, used to
@@ -8577,7 +8325,7 @@ extension Link where Label == Text {
 }
 
 /// A container that presents rows of data arranged in a single column.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct List<SelectionValue, Content> : View where SelectionValue : Hashable, Content : View {
 
     /// Creates a list with the given content that supports selecting multiple
@@ -8614,7 +8362,7 @@ public struct List<SelectionValue, Content> : View where SelectionValue : Hashab
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension List {
 
     /// Creates a list that computes its rows on demand from an underlying
@@ -8638,10 +8386,10 @@ extension List {
     ///   - selection: A binding to a set that identifies selected rows.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    public init<Data, RowContent>(_ data: Data, children: KeyPath<Data.Element, Data?>, selection: Binding<Set<SelectionValue>>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, Data.Element.ID, HStack<RowContent>, HStack<RowContent>, DisclosureGroup<HStack<RowContent>, OutlineSubgroupChildren>>, Data : RandomAccessCollection, RowContent : View, Data.Element : Identifiable
+    public init<Data, RowContent>(_ data: Data, children: KeyPath<Data.Element, Data?>, selection: Binding<Set<SelectionValue>>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, Data.Element.ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, RowContent : View, Data.Element : Identifiable
 
     /// Creates a list that identifies its rows based on a key path to the
     /// identifier of the underlying data, optionally allowing users to select
@@ -8672,10 +8420,10 @@ extension List {
     ///   - selection: A binding to a set that identifies selected rows.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, selection: Binding<Set<SelectionValue>>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, HStack<RowContent>, HStack<RowContent>, DisclosureGroup<HStack<RowContent>, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
+    public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, selection: Binding<Set<SelectionValue>>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
 
     /// Creates a list that computes its views on demand over a constant range.
     ///
@@ -8718,10 +8466,10 @@ extension List {
     ///   - selection: A binding to a selected value.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    public init<Data, RowContent>(_ data: Data, children: KeyPath<Data.Element, Data?>, selection: Binding<SelectionValue?>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, Data.Element.ID, HStack<RowContent>, HStack<RowContent>, DisclosureGroup<HStack<RowContent>, OutlineSubgroupChildren>>, Data : RandomAccessCollection, RowContent : View, Data.Element : Identifiable
+    public init<Data, RowContent>(_ data: Data, children: KeyPath<Data.Element, Data?>, selection: Binding<SelectionValue?>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, Data.Element.ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, RowContent : View, Data.Element : Identifiable
 
     /// Creates a list that identifies its rows based on a key path to the
     /// identifier of the underlying data, optionally allowing users to select a
@@ -8752,10 +8500,10 @@ extension List {
     ///   - selection: A binding to a selected value.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, selection: Binding<SelectionValue?>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, HStack<RowContent>, HStack<RowContent>, DisclosureGroup<HStack<RowContent>, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
+    public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, selection: Binding<SelectionValue?>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
 
     /// Creates a list that computes its views on demand over a constant range.
     ///
@@ -8772,7 +8520,7 @@ extension List {
     public init<RowContent>(_ data: Range<Int>, selection: Binding<SelectionValue?>?, @ViewBuilder rowContent: @escaping (Int) -> RowContent) where Content == ForEach<Range<Int>, Int, HStack<RowContent>>, RowContent : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension List where SelectionValue == Never {
 
     /// Creates a list with the given content.
@@ -8802,10 +8550,10 @@ extension List where SelectionValue == Never {
     ///     like a regular file in a file system.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    public init<Data, RowContent>(_ data: Data, children: KeyPath<Data.Element, Data?>, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, Data.Element.ID, HStack<RowContent>, HStack<RowContent>, DisclosureGroup<HStack<RowContent>, OutlineSubgroupChildren>>, Data : RandomAccessCollection, RowContent : View, Data.Element : Identifiable
+    public init<Data, RowContent>(_ data: Data, children: KeyPath<Data.Element, Data?>, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, Data.Element.ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, RowContent : View, Data.Element : Identifiable
 
     /// Creates a list that identifies its rows based on a key path to the
     /// identifier of the underlying data.
@@ -8831,10 +8579,10 @@ extension List where SelectionValue == Never {
     ///     like a regular file in a file system.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
-    @available(iOS 14.0, OSX 11.0, *)
+    @available(iOS 14.0, macOS 11.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, HStack<RowContent>, HStack<RowContent>, DisclosureGroup<HStack<RowContent>, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
+    public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
 
     /// Creates a list that computes its views on demand over a constant range.
     ///
@@ -8852,7 +8600,7 @@ extension List where SelectionValue == Never {
 /// The configuration of a tint effect applied to content within a List.
 ///
 /// - See Also: `View.listItemTint(_:)`
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ListItemTint {
 
     /// An explicit tint color.
@@ -8875,13 +8623,13 @@ public struct ListItemTint {
 }
 
 /// A protocol that describes the behavior and appearance of a list.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ListStyle {
 }
 
 /// The key used to look up a string in a strings file or strings dictionary
 /// file.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct LocalizedStringKey : Equatable, ExpressibleByStringInterpolation {
 
     public init(_ value: String)
@@ -8951,7 +8699,7 @@ public protocol ListStyle {
 
         public mutating func appendInterpolation<T>(_ value: T, specifier: String) where T : _FormatSpecifiable
 
-        @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+        @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
         public mutating func appendInterpolation(_ text: Text)
 
         /// The type that should be used for literal segments.
@@ -8986,13 +8734,13 @@ public protocol ListStyle {
     public static func == (a: LocalizedStringKey, b: LocalizedStringKey) -> Bool
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LocalizedStringKey.StringInterpolation {
 
     public mutating func appendInterpolation(_ image: Image)
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LocalizedStringKey.StringInterpolation {
 
     public mutating func appendInterpolation(_ date: Date, style: Text.DateStyle)
@@ -9036,7 +8784,7 @@ extension LocalizedStringKey.StringInterpolation {
 ///                 .gesture(longPress)
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, tvOS 14.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 14.0, *)
 public struct LongPressGesture : Gesture {
 
     /// The minimum duration of the long press that must elapse before the
@@ -9098,7 +8846,7 @@ public struct LongPressGesture : Gesture {
 ///     }
 ///
 /// The circle's size resets to its original size when the gesture finishes.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
 public struct MagnificationGesture : Gesture {
@@ -9122,7 +8870,7 @@ public struct MagnificationGesture : Gesture {
 
 /// A set of view properties that may be synchronized between views
 /// using the `View.matchedGeometryEffect()` function.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen public struct MatchedGeometryProperties : OptionSet {
 
     /// The corresponding value of the raw type.
@@ -9226,7 +8974,7 @@ public struct MagnificationGesture : Gesture {
 ///     }
 ///     .menuStyle(EditingControlsMenuStyle())
 ///
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct Menu<Label, Content> : View where Label : View, Content : View {
@@ -9241,7 +8989,7 @@ public struct Menu<Label, Content> : View where Label : View, Content : View {
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Menu {
@@ -9272,7 +9020,7 @@ extension Menu {
     public init<S>(_ title: S, @ViewBuilder content: () -> Content) where Label == Text, S : StringProtocol
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Menu where Label == MenuStyleConfiguration.Label, Content == MenuStyleConfiguration.Content {
@@ -9297,12 +9045,33 @@ extension Menu where Label == MenuStyleConfiguration.Label, Content == MenuStyle
     public init(_ configuration: MenuStyleConfiguration)
 }
 
+/// A picker style that presents the options as a menu when the user presses a
+/// button, or as a submenu when nested within a larger menu.
+///
+/// Use this style when there are more than five options. Consider using
+/// ``InlinePickerStyle`` when there are fewer than five options.
+///
+/// The button itself indicates the selected option. You can include additional
+/// controls in the set of options, such as a button to customize the list of
+/// options.
+///
+/// To apply this style to a picker, or to a view that contains pickers, use the
+/// ``View/pickerStyle(_:)`` modifier.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct MenuPickerStyle : PickerStyle {
+
+    /// Creates a menu picker style.
+    public init()
+}
+
 /// A type that applies standard interaction behavior and a custom appearance
 /// to all menus within a view hierarchy.
 ///
 /// To configure the current menu style for a view hiearchy, use the
 /// ``View/menuStyle(_:)`` modifier.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol MenuStyle {
@@ -9337,7 +9106,7 @@ public protocol MenuStyle {
 ///                 .border(Color.red)
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct MenuStyleConfiguration {
@@ -9364,7 +9133,7 @@ public struct MenuStyleConfiguration {
 }
 
 /// A value with a modifier applied to it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ModifiedContent<Content, Modifier> {
 
     /// The type of view representing the body of this view.
@@ -9380,7 +9149,7 @@ public struct MenuStyleConfiguration {
     @inlinable public init(content: Content, modifier: Modifier)
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension ModifiedContent where Content : _Widget, Modifier : _WidgetModifier {
@@ -9395,7 +9164,7 @@ extension ModifiedContent where Content : _Widget, Modifier : _WidgetModifier {
     public var body: ModifiedContent<Content, Modifier>.WidgetBody { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Adds an accessibility action to this view.
@@ -9405,7 +9174,7 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     public func accessibilityAction(named name: Text, _ handler: @escaping () -> Void) -> ModifiedContent<Content, Modifier>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent : Equatable where Content : Equatable, Modifier : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -9419,18 +9188,18 @@ extension ModifiedContent : Equatable where Content : Equatable, Modifier : Equa
     public static func == (a: ModifiedContent<Content, Modifier>, b: ModifiedContent<Content, Modifier>) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent : View where Content : View, Modifier : ViewModifier {
 
     /// The content and behavior of the view.
     public var body: ModifiedContent<Content, Modifier>.Body { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent : ViewModifier where Content : ViewModifier, Modifier : ViewModifier {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent : DynamicViewContent where Content : DynamicViewContent, Modifier : ViewModifier {
 
     /// The collection of underlying data.
@@ -9440,7 +9209,7 @@ extension ModifiedContent : DynamicViewContent where Content : DynamicViewConten
     public typealias Data = Content.Data
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ModifiedContent : Scene where Content : Scene, Modifier : _SceneModifier {
 
     /// The content and behavior of the scene.
@@ -9455,7 +9224,7 @@ extension ModifiedContent : Scene where Content : Scene, Modifier : _SceneModifi
     public var body: ModifiedContent<Content, Modifier>.Body { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Specifies whether to hide this view from system accessibility features.
@@ -9517,14 +9286,14 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     public func accessibility(activationPoint: UnitPoint) -> ModifiedContent<Content, Modifier>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Adds an accessibility scroll action to the view.
     public func accessibilityScrollAction(_ handler: @escaping (Edge) -> Void) -> ModifiedContent<Content, Modifier>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Adds an accessibility adjustable action to the view.
@@ -9534,7 +9303,7 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 /// A dynamic property type that allows access to a namespace defined
 /// by the persistent identity of the object containing the property
 /// (e.g. a view).
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen @propertyWrapper public struct Namespace : DynamicProperty {
 
     @inlinable public init()
@@ -9584,7 +9353,7 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 /// A configuration for a navigation bar that represents a view at the top of a
 /// navigation stack.
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 public struct NavigationBarItem {
 
     /// A style for displaying the title of a navigation bar.
@@ -9638,17 +9407,17 @@ public struct NavigationBarItem {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension NavigationBarItem.TitleDisplayMode : Equatable {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension NavigationBarItem.TitleDisplayMode : Hashable {
 }
 
 /// A view that controls a navigation presentation.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct NavigationLink<Label, Destination> : View where Label : View, Destination : View {
 
     /// Creates an instance that presents `destination`.
@@ -9671,7 +9440,7 @@ public struct NavigationLink<Label, Destination> : View where Label : View, Dest
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension NavigationLink where Label == Text {
 
     /// Creates an instance that presents `destination`, with a `Text` label
@@ -9700,7 +9469,7 @@ extension NavigationLink where Label == Text {
 }
 
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension NavigationLink {
@@ -9709,7 +9478,7 @@ extension NavigationLink {
     /// as the "detail" component of the containing `NavigationView`.
     ///
     /// If not set, defaults to `true`.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func isDetailLink(_ isDetailLink: Bool) -> some View
@@ -9718,7 +9487,7 @@ extension NavigationLink {
 
 /// A view for presenting a stack of views representing a visible path in a
 /// navigation hierarchy.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 public struct NavigationView<Content> : View where Content : View {
 
     public init(@ViewBuilder content: () -> Content)
@@ -9731,13 +9500,13 @@ public struct NavigationView<Content> : View where Content : View {
 }
 
 /// A specification for the appearance and interaction of a `NavigationView`.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 public protocol NavigationViewStyle {
 }
 
 /// A property wrapper type that subscribes to an observable object and
 /// invalidates a view whenever the observable object changes.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @propertyWrapper @frozen public struct ObservedObject<ObjectType> : DynamicProperty where ObjectType : ObservableObject {
 
     /// A wrapper of the underlying observable object that can create bindings to
@@ -9785,7 +9554,7 @@ public protocol NavigationViewStyle {
 }
 
 /// A shape with a translation offset transform applied to it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct OffsetShape<Content> : Shape where Content : Shape {
 
     public var shape: Content
@@ -9814,7 +9583,7 @@ public protocol NavigationViewStyle {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension OffsetShape : InsettableShape where Content : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -9843,7 +9612,7 @@ extension OffsetShape : InsettableShape where Content : InsettableShape {
 ///             openURL(mailToSupport)
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct OpenURLAction {
 
     /// Requests that a URL be opened, following system conventions.
@@ -9931,13 +9700,13 @@ public struct OpenURLAction {
 /// - `Subgroup`: A type of a view that groups a parent view and a view
 ///   representing its children, typically with some mechanism for showing and
 ///   hiding the children
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct OutlineGroup<Data, ID, Parent, Leaf, Subgroup> where Data : RandomAccessCollection, ID : Hashable {
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension OutlineGroup where ID == Data.Element.ID, Parent : View, Parent == Leaf, Subgroup == DisclosureGroup<Parent, OutlineSubgroupChildren>, Data.Element : Identifiable {
@@ -9994,7 +9763,7 @@ extension OutlineGroup where ID == Data.Element.ID, Parent : View, Parent == Lea
     public init<DataElement>(_ data: Data, children: KeyPath<DataElement, Data?>, @ViewBuilder content: @escaping (DataElement) -> Leaf) where ID == DataElement.ID, DataElement : Identifiable, DataElement == Data.Element
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension OutlineGroup where Parent : View, Parent == Leaf, Subgroup == DisclosureGroup<Parent, OutlineSubgroupChildren> {
@@ -10053,7 +9822,7 @@ extension OutlineGroup where Parent : View, Parent == Leaf, Subgroup == Disclosu
     public init<DataElement>(_ data: Data, id: KeyPath<DataElement, ID>, children: KeyPath<DataElement, Data?>, @ViewBuilder content: @escaping (DataElement) -> Leaf) where DataElement == Data.Element
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension OutlineGroup : View where Parent : View, Leaf : View, Subgroup : View {
@@ -10072,7 +9841,7 @@ extension OutlineGroup : View where Parent : View, Leaf : View, Subgroup : View 
 ///
 /// ``OutlineGroup`` uses this type as a generic constraint for the `Content`
 /// of the ``DisclosureGroup`` instances it creates.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct OutlineSubgroupChildren : View {
@@ -10086,7 +9855,7 @@ public struct OutlineSubgroupChildren : View {
 
 /// An index view style that places a page index view over its content.
 @available(iOS 14.0, tvOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public struct PageIndexViewStyle : IndexViewStyle {
 
@@ -10115,7 +9884,7 @@ public struct PageIndexViewStyle : IndexViewStyle {
 
 /// A `TabViewStyle` that implements a paged scrolling `TabView`.
 @available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 public struct PageTabViewStyle : TabViewStyle {
 
     /// A style for displaying the page index view
@@ -10138,7 +9907,7 @@ public struct PageTabViewStyle : TabViewStyle {
 }
 
 /// The outline of a 2D shape.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Path : Equatable, LosslessStringConvertible {
 
     /// Creates an empty path.
@@ -10255,7 +10024,7 @@ public struct PageTabViewStyle : TabViewStyle {
     public static func == (a: Path, b: Path) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Path : Shape {
 
     /// Describes this shape as a path within a rectangular frame of reference.
@@ -10275,7 +10044,7 @@ extension Path : Shape {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Path {
 
     /// Begins a new subpath at the specified point.
@@ -10452,7 +10221,7 @@ extension Path {
 ///     }
 ///     .pickerStyle(SegmentedPickerStyle())
 ///
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Picker<Label, SelectionValue, Content> : View where Label : View, SelectionValue : Hashable, Content : View {
 
     /// Creates a picker that displays a custom label.
@@ -10474,7 +10243,7 @@ public struct Picker<Label, SelectionValue, Content> : View where Label : View, 
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Picker where Label == Text {
 
     /// Creates a picker that generates its label from a localized string key.
@@ -10513,12 +10282,12 @@ extension Picker where Label == Text {
 
 /// A type that specifies the appearance and interaction of all pickers within
 /// a view hierarchy.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol PickerStyle {
 }
 
 /// A set of view types that may be pinned to the bounds of a scroll view.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct PinnedScrollableViews : OptionSet {
 
     /// The corresponding value of the raw type.
@@ -10586,7 +10355,7 @@ public struct PinnedScrollableViews : OptionSet {
 ///
 /// To apply this style to a button, or to a view that contains buttons, use the
 /// ``View/buttonStyle(_:)-66fbx`` modifier.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PlainButtonStyle : PrimitiveButtonStyle {
 
     /// Creates a plain button style.
@@ -10606,7 +10375,7 @@ public struct PlainButtonStyle : PrimitiveButtonStyle {
 }
 
 /// The instance that describes the behavior and appearance of a plain list.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PlainListStyle : ListStyle {
 
     /// Creates a plain list style.
@@ -10614,14 +10383,14 @@ public struct PlainListStyle : ListStyle {
 }
 
 /// A text field style with no decoration.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PlainTextFieldStyle : TextFieldStyle {
 
     public init()
 }
 
 /// An attachment anchor for a popover.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum PopoverAttachmentAnchor {
 
     case rect(Anchor<CGRect>.Source)
@@ -10633,7 +10402,7 @@ public enum PopoverAttachmentAnchor {
 ///
 /// A view with multiple children automatically combines its values for a given
 /// preference into a single value visible to its ancestors.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol PreferenceKey {
 
     /// The type of value produced by this preference.
@@ -10661,7 +10430,7 @@ public protocol PreferenceKey {
     static func reduce(value: inout Self.Value, nextValue: () -> Self.Value)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension PreferenceKey where Self.Value : ExpressibleByNilLiteral {
 
     /// Let nil-expressible values default-initialize to nil.
@@ -10669,7 +10438,7 @@ extension PreferenceKey where Self.Value : ExpressibleByNilLiteral {
 }
 
 /// A key for specifying the preferred color scheme.
-@available(iOS 13.0, OSX 11.0, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 11.0, tvOS 13.0, watchOS 6.0, *)
 public struct PreferredColorSchemeKey : PreferenceKey {
 
     /// The type of value produced by this preference.
@@ -10690,7 +10459,7 @@ public struct PreferredColorSchemeKey : PreferenceKey {
 }
 
 /// An indication whether a view is currently presented by another view.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PresentationMode {
 
     /// Indicates whether a view is currently presented.
@@ -10703,7 +10472,7 @@ public struct PresentationMode {
 }
 
 /// A specification for the context of a `PreviewContext`
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol PreviewContext {
 
     /// Returns the context's value of `Key`, or `Key.defaultValue`
@@ -10714,7 +10483,7 @@ public protocol PreviewContext {
 /// The key for a preview context.
 ///
 /// The default value is nil.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol PreviewContextKey {
 
     /// The type of the value returned by the key.
@@ -10728,7 +10497,7 @@ public protocol PreviewContextKey {
 ///
 /// Refer to a preview device by its name as shown Xcode's run destination menu,
 /// like "iPhone X", or using a model number, like "iPad8,1".
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PreviewDevice : RawRepresentable, ExpressibleByStringLiteral {
 
     /// The corresponding value of the raw type.
@@ -10798,7 +10567,7 @@ public struct PreviewDevice : RawRepresentable, ExpressibleByStringLiteral {
 }
 
 /// The size constraint for a preview.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum PreviewLayout {
 
     /// Center the preview in a container the size of the device on which the
@@ -10814,7 +10583,7 @@ public enum PreviewLayout {
 }
 
 /// The operating system on which to run the preview.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum PreviewPlatform {
 
     case iOS
@@ -10860,11 +10629,11 @@ public enum PreviewPlatform {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension PreviewPlatform : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension PreviewPlatform : Hashable {
 }
 
@@ -10872,7 +10641,7 @@ extension PreviewPlatform : Hashable {
 ///
 /// Xcode statically discovers types that conform to the ``PreviewProvider``
 /// protocol in your app, and generates previews for each provider it discovers.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol PreviewProvider : _PreviewProvider {
 
     /// The type to preview.
@@ -10900,7 +10669,7 @@ public protocol PreviewProvider : _PreviewProvider {
     static var platform: PreviewPlatform? { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension PreviewProvider {
 
     /// The platform on which to run the provider.
@@ -10920,7 +10689,7 @@ extension PreviewProvider {
 /// ``PrimitiveButtonStyle`` to create a button with custom interaction
 /// behavior. To create a button with the standard button interaction behavior
 /// defined for each platform, use ``ButtonStyle`` instead.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol PrimitiveButtonStyle {
 
     /// A view that represents the body of a button.
@@ -10939,7 +10708,7 @@ public protocol PrimitiveButtonStyle {
 }
 
 /// The properties of a button.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PrimitiveButtonStyleConfiguration {
 
     /// A type-erased label of a button.
@@ -11018,7 +10787,7 @@ public struct PrimitiveButtonStyleConfiguration {
 ///                         radius: 4.0, x: 1.0, y: 2.0)
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ProgressView<Label> : View where Label : View {
 
     /// The content and behavior of the view.
@@ -11189,7 +10958,7 @@ extension ProgressView {
     public init(_ progress: Progress) where Label == DefaultProgressViewLabel
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView {
 
     /// Creates a progress view based on a style configuration.
@@ -11219,7 +10988,7 @@ extension ProgressView {
 ///
 /// To configure the current progress view style for a view hiearchy, use the
 /// ``View/progressViewStyle(_:)`` modifier.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol ProgressViewStyle {
 
     /// A view representing the body of a progress view.
@@ -11242,7 +11011,7 @@ public protocol ProgressViewStyle {
 }
 
 /// The properties of a progress view instance.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ProgressViewStyleConfiguration {
 
     /// A type-erased label describing the task represented by the progress
@@ -11291,7 +11060,7 @@ public struct ProgressViewStyleConfiguration {
     public var valueLabel: ProgressViewStyleConfiguration.ValueLabel?
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ProjectionTransform {
 
     public var m11: CGFloat
@@ -11327,7 +11096,7 @@ public struct ProgressViewStyleConfiguration {
     public func inverted() -> ProjectionTransform
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ProjectionTransform : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -11341,7 +11110,7 @@ extension ProjectionTransform : Equatable {
     public static func == (a: ProjectionTransform, b: ProjectionTransform) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ProjectionTransform {
 
     @inlinable public func concatenating(_ rhs: ProjectionTransform) -> ProjectionTransform
@@ -11353,7 +11122,7 @@ extension ProjectionTransform {
 /// scaled to fit within the defined start and end radii. The gradient maps the
 /// unit-space center point into the bounding rectangle of each shape filled
 /// with the gradient.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct RadialGradient : ShapeStyle, View {
 
     public init(gradient: Gradient, center: UnitPoint, startRadius: CGFloat, endRadius: CGFloat)
@@ -11366,7 +11135,7 @@ extension ProjectionTransform {
 }
 
 /// A rectangular shape aligned inside the frame of the view containing it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Rectangle : Shape {
 
     /// Describes this shape as a path within a rectangular frame of reference.
@@ -11388,7 +11157,7 @@ extension ProjectionTransform {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Rectangle : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -11400,7 +11169,7 @@ extension Rectangle : InsettableShape {
 }
 
 /// The reasons to apply a redaction to data displayed on screen.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct RedactionReasons : OptionSet {
 
     /// The raw value.
@@ -11443,7 +11212,7 @@ public struct RedactionReasons : OptionSet {
 ///
 /// Conformance to `ReferenceFileDocument` is expected to be thread-safe, and
 /// deserialization and serialization will be done on a background thread.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol ReferenceFileDocument : ObservableObject {
@@ -11489,7 +11258,7 @@ public protocol ReferenceFileDocument : ObservableObject {
     func write(snapshot: Self.Snapshot, to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension ReferenceFileDocument {
@@ -11501,7 +11270,7 @@ extension ReferenceFileDocument {
 }
 
 /// The properties of an open reference file document.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct ReferenceFileDocumentConfiguration<Document> where Document : ReferenceFileDocument {
@@ -11526,7 +11295,7 @@ public struct ReferenceFileDocumentConfiguration<Document> where Document : Refe
 }
 
 /// A shape with a rotation transform applied to it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct RotatedShape<Content> : Shape where Content : Shape {
 
     public var shape: Content
@@ -11557,7 +11326,7 @@ public struct ReferenceFileDocumentConfiguration<Document> where Document : Refe
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension RotatedShape : InsettableShape where Content : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -11594,7 +11363,7 @@ extension RotatedShape : InsettableShape where Content : InsettableShape {
 ///                 .gesture(rotation)
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct RotationGesture : Gesture {
@@ -11617,7 +11386,7 @@ public struct RotationGesture : Gesture {
 }
 
 /// A text field style with a system-defined rounded border.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct RoundedBorderTextFieldStyle : TextFieldStyle {
@@ -11626,7 +11395,7 @@ public struct RoundedBorderTextFieldStyle : TextFieldStyle {
 }
 
 /// Defines the shape of a rounded rectangle's corners.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum RoundedCornerStyle {
 
     /// Quarter-circle rounded rect corners.
@@ -11670,17 +11439,17 @@ public enum RoundedCornerStyle {
     public func hash(into hasher: inout Hasher)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension RoundedCornerStyle : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension RoundedCornerStyle : Hashable {
 }
 
 /// A rectangular shape with rounded corners, aligned inside the frame of the
 /// view containing it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct RoundedRectangle : Shape {
 
     public var cornerSize: CGSize
@@ -11711,7 +11480,7 @@ extension RoundedCornerStyle : Hashable {
     public typealias Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension RoundedRectangle : InsettableShape {
 
     /// Returns `self` inset by `amount`.
@@ -11723,7 +11492,7 @@ extension RoundedRectangle : InsettableShape {
 }
 
 /// A set of symbolic safe area regions.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen public struct SafeAreaRegions : OptionSet {
 
     /// The corresponding value of the raw type.
@@ -11791,7 +11560,7 @@ extension RoundedRectangle : InsettableShape {
 }
 
 /// A dynamic property that scales a numeric value.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @propertyWrapper public struct ScaledMetric<Value> : DynamicProperty where Value : BinaryFloatingPoint {
 
     /// Creates the scaled metric with an unscaled value and a text style to
@@ -11807,7 +11576,7 @@ extension RoundedRectangle : InsettableShape {
 }
 
 /// A shape with a scale transform applied to it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ScaledShape<Content> : Shape where Content : Shape {
 
     public var shape: Content
@@ -11899,7 +11668,7 @@ extension RoundedRectangle : InsettableShape {
 ///             }
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol Scene {
 
     /// The type of scene that represents the body of this scene.
@@ -11921,7 +11690,7 @@ public protocol Scene {
     @SceneBuilder var body: Self.Body { get }
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Scene {
 
     /// Adds an action to perform when the given value changes.
@@ -11976,26 +11745,7 @@ extension Scene {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension Scene {
-
-    /// Adds commands to the scene.
-    ///
-    /// Commands are realized in different ways on different platforms. On
-    /// macOS, the main menu uses the available command menus and groups to
-    /// organize its main menu items. Each menu is represented as a top-level
-    /// menu bar menu, and each command group has a corresponding set of menu
-    /// items in one of the top-level menus, delimited by separator menu items.
-    ///
-    /// On iPadOS, commands with keyboard shortcuts are exposed in the shortcut
-    /// discoverability HUD that users see when they hold down the Command (⌘)
-    /// key.
-    public func commands<Content>(@CommandsBuilder content: () -> Content) -> some Scene where Content : Commands
-
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Scene {
 
     /// The default store used by `AppStorage` contained within the scene and
@@ -12014,70 +11764,70 @@ extension Scene {
 
 /// A function builder for composing a collection of scenes into a single
 /// composite scene.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @_functionBuilder public struct SceneBuilder {
 
     /// Passes a single scene written as a child scene through unmodified.
     public static func buildBlock<Content>(_ content: Content) -> Content where Content : Scene
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some Scene where C0 : Scene, C1 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene, C4 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene, C4 : Scene, C5 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene, C4 : Scene, C5 : Scene, C6 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene, C4 : Scene, C5 : Scene, C6 : Scene, C7 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene, C4 : Scene, C5 : Scene, C6 : Scene, C7 : Scene, C8 : Scene
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8, _ c9: C9) -> some Scene where C0 : Scene, C1 : Scene, C2 : Scene, C3 : Scene, C4 : Scene, C5 : Scene, C6 : Scene, C7 : Scene, C8 : Scene, C9 : Scene
@@ -12157,18 +11907,19 @@ extension SceneBuilder {
 ///             }
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public enum ScenePhase : Comparable {
 
-    /// The scene is in the foreground and interactive.
+    /// The scene isn't currently visible in the UI.
     ///
-    /// An active scene isn't necessarily front-most. For example, a macOS
-    /// window might be active even if it doesn't currently have focus.
-    /// Nevertheless, all scenes should operate normally in this phase.
+    /// Do as little as possible in a scene that's in the `background` phase.
+    /// The `background` phase can precede termination, so do any cleanup work
+    /// immediately upon entering this state. For example, close any open files
+    /// and network connections. However, a scene can also return to the
+    /// the ``ScenePhase/active`` phase from the background.
     ///
-    /// An app or custom scene in this phase contains at least one active scene
-    /// instance.
-    case active
+    /// Expect an app that enters the `background` phase to terminate.
+    case background
 
     /// The scene is in the foreground but should pause its work.
     ///
@@ -12182,16 +11933,15 @@ public enum ScenePhase : Comparable {
     /// ``ScenePhase/active`` phase.
     case inactive
 
-    /// The scene isn't currently visible in the UI.
+    /// The scene is in the foreground and interactive.
     ///
-    /// Do as little as possible in a scene that's in the `background` phase.
-    /// The `background` phase can precede termination, so do any cleanup work
-    /// immediately upon entering this state. For example, close any open files
-    /// and network connections. However, a scene can also return to the
-    /// the ``ScenePhase/active`` phase from the background.
+    /// An active scene isn't necessarily front-most. For example, a macOS
+    /// window might be active even if it doesn't currently have focus.
+    /// Nevertheless, all scenes should operate normally in this phase.
     ///
-    /// Expect an app that enters the `background` phase to terminate.
-    case background
+    /// An app or custom scene in this phase contains at least one active scene
+    /// instance.
+    case active
 
     /// Returns a Boolean value indicating whether two values are equal.
     ///
@@ -12240,7 +11990,7 @@ public enum ScenePhase : Comparable {
     public static func < (a: ScenePhase, b: ScenePhase) -> Bool
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ScenePhase : Hashable {
 }
 
@@ -12268,7 +12018,7 @@ extension ScenePhase : Hashable {
 /// If the `Scene` is explictly destroyed (e.g. the switcher snapshot is
 /// destroyed on iPadOS or the window is closed on macOS), the data is also
 /// destroyed. Do not use `SceneStorage` with sensitive data.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @propertyWrapper public struct SceneStorage<Value> : DynamicProperty {
 
     /// The underlying value referenced by the state variable.
@@ -12286,7 +12036,7 @@ extension ScenePhase : Hashable {
     public var projectedValue: Binding<Value> { get }
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneStorage {
 
     /// Creates a property that can save and restore a boolean.
@@ -12375,7 +12125,7 @@ extension SceneStorage {
     public init(wrappedValue: Value, _ key: String) where Value : RawRepresentable, Value.RawValue == String
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension SceneStorage where Value : ExpressibleByNilLiteral {
 
     /// Creates a property that can save and restore an Optional boolean.
@@ -12424,7 +12174,7 @@ extension SceneStorage where Value : ExpressibleByNilLiteral {
 /// A scrollable view.
 ///
 /// The scroll view displays its content within the scrollable content region.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ScrollView<Content> : View where Content : View {
 
     /// The scroll view's content.
@@ -12467,7 +12217,7 @@ public struct ScrollView<Content> : View where Content : View {
 
 /// A proxy value allowing the scrollable views within a view hierarchy
 /// to be scrolled programmatically.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ScrollViewProxy {
 
     /// Scans all scroll views contained by the proxy for the first
@@ -12489,7 +12239,7 @@ public struct ScrollViewProxy {
 
 /// A view whose child is defined as a function of a `ScrollViewProxy`
 /// targeting the scrollable views within the child.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen public struct ScrollViewReader<Content> : View where Content : View {
 
     public var content: (ScrollViewProxy) -> Content
@@ -12512,11 +12262,11 @@ public struct ScrollViewProxy {
 }
 
 /// An affordance for creating hierarchical view content.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Section<Parent, Content, Footer> {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section : View where Parent : View, Content : View, Footer : View {
 
     /// The type of view representing the body of this view.
@@ -12530,26 +12280,26 @@ extension Section : View where Parent : View, Content : View, Footer : View {
     public var internalBody: some View { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent == EmptyView, Content : View, Footer : View {
 
     public init(footer: Footer, @ViewBuilder content: () -> Content)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent : View, Content : View, Footer == EmptyView {
 
     public init(header: Parent, @ViewBuilder content: () -> Content)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent == EmptyView, Content : View, Footer == EmptyView {
 
     public init(@ViewBuilder content: () -> Content)
 }
 
 /// A control into which the user securely enters private text.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct SecureField<Label> : View where Label : View {
 
     /// The content and behavior of the view.
@@ -12562,7 +12312,7 @@ public struct SecureField<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension SecureField where Label == Text {
 
     /// Creates an instance.
@@ -12592,7 +12342,7 @@ extension SecureField where Label == Text {
 ///
 /// > Note: The segmented picker style supports ``Text`` and ``Image`` segments only.
 /// Any other view results in a visible, but empty, segment.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, *)
 @available(watchOS, unavailable)
 public struct SegmentedPickerStyle : PickerStyle {
 
@@ -12604,7 +12354,7 @@ public struct SegmentedPickerStyle : PickerStyle {
 ///
 /// Read <doc:Composing-SwiftUI-Gestures> to learn how you can create a sequence
 /// of two gestures.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct SequenceGesture<First, Second> : Gesture where First : Gesture, Second : Gesture {
 
     /// The value of a sequence gesture that helps to detect whether the first
@@ -12635,7 +12385,7 @@ public struct SegmentedPickerStyle : PickerStyle {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension SequenceGesture.Value : Equatable where First.Value : Equatable, Second.Value : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -12657,7 +12407,7 @@ extension SequenceGesture.Value : Equatable where First.Value : Equatable, Secon
 /// You can define shapes in relation to an implicit frame of reference, such as
 /// the natural size of the view that contains it. Alternatively, you can define
 /// shapes in terms of absolute coordinates.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol Shape : Animatable, View {
 
     /// Describes this shape as a path within a rectangular frame of reference.
@@ -12668,7 +12418,7 @@ public protocol Shape : Animatable, View {
     func path(in rect: CGRect) -> Path
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Shape {
 
     /// Trims this shape by a fractional amount based on its representation as a
@@ -12716,7 +12466,7 @@ extension Shape {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Shape {
 
     /// Changes the relative position of this shape using the specified size.
@@ -12839,7 +12589,7 @@ extension Shape {
     @inlinable public func transform(_ transform: CGAffineTransform) -> TransformedShape<Self>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Shape {
 
     /// Returns a new version of self representing the same shape, but
@@ -12857,7 +12607,7 @@ extension Shape {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Shape {
 
     /// Fills this shape with a color or gradient.
@@ -12919,14 +12669,14 @@ extension Shape {
 
 /// A shape acts as view by filling itself with the foreground color and
 /// default fill style.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Shape {
 
     /// The content and behavior of the view.
     public var body: _ShapeView<Self, ForegroundStyle> { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Shape {
 
     /// Returns a new shape that is a stroked copy of `self`, using the
@@ -12942,11 +12692,11 @@ extension Shape {
 }
 
 /// A way to turn a shape into a view.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ShapeStyle {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ShapeStyle {
 
     /// Return a new paint value matching `self` except using `rect` to
@@ -12956,33 +12706,14 @@ extension ShapeStyle {
 }
 
 /// Default View.body implementation to fill a Rectangle with `self`.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ShapeStyle where Self : View, Self.Body == _ShapeView<Rectangle, Self> {
 
     public var body: _ShapeView<Rectangle, Self> { get }
 }
 
-/// A built-in set of commands for manipulating window sidebars.
-///
-/// These commands are optional and can be explicitly requested by passing a
-/// value of this type to the `Scene.commands(_:)` modifier.
-@available(iOS 14.0, OSX 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-public struct SidebarCommands : Commands {
-
-    /// The composition of commands that comprise the command group.
-    public var body: some Commands { get }
-
-    /// A new value describing the built-in sidebar-related commands.
-    public init()
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = some Commands
-}
-
 /// The behavior and appearance of a sidebar or source list.
-@available(iOS 14.0, OSX 10.15, *)
+@available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct SidebarListStyle : ListStyle {
@@ -13019,7 +12750,7 @@ public struct SidebarListStyle : ListStyle {
 /// To style a `SignInWithAppleButton` instance, use the
 /// ``View/signInWithAppleButtonStyle(_:)`` modifier, passing in one of the
 /// styles defined in ``SignInWithAppleButton/Style``.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
 @available(watchOS, unavailable)
 public struct SignInWithAppleButton : View {
 
@@ -13047,7 +12778,7 @@ public struct SignInWithAppleButton : View {
     public typealias Body = some View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
 @available(watchOS, unavailable)
 extension SignInWithAppleButton {
 
@@ -13085,7 +12816,7 @@ extension SignInWithAppleButton {
 /// A simultaneous gesture is a container-event handler that evaluates its two
 /// child gestures at the same time. Its value is a struct with two optional
 /// values, each representing the phases of one of the two gestures.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct SimultaneousGesture<First, Second> : Gesture where First : Gesture, Second : Gesture {
 
     /// The value of a simultaneous gesture that indicates which of its two
@@ -13117,7 +12848,7 @@ extension SignInWithAppleButton {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension SimultaneousGesture.Value : Equatable where First.Value : Equatable, Second.Value : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -13131,7 +12862,7 @@ extension SimultaneousGesture.Value : Equatable where First.Value : Equatable, S
     public static func == (a: SimultaneousGesture<First, Second>.Value, b: SimultaneousGesture<First, Second>.Value) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension SimultaneousGesture.Value : Hashable where First.Value : Hashable, Second.Value : Hashable {
 
     /// The hash value.
@@ -13160,7 +12891,7 @@ extension SimultaneousGesture.Value : Hashable where First.Value : Hashable, Sec
 }
 
 /// A control for selecting a value from a bounded linear range of values.
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 public struct Slider<Label, ValueLabel> : View where Label : View, ValueLabel : View {
 
@@ -13174,7 +12905,7 @@ public struct Slider<Label, ValueLabel> : View where Label : View, ValueLabel : 
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 extension Slider {
 
@@ -13217,7 +12948,7 @@ extension Slider {
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, minimumValueLabel: ValueLabel, maximumValueLabel: ValueLabel, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 }
 
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 extension Slider where ValueLabel == EmptyView {
 
@@ -13257,7 +12988,7 @@ extension Slider where ValueLabel == EmptyView {
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 }
 
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 extension Slider where Label == EmptyView, ValueLabel == EmptyView {
 
@@ -13297,7 +13028,7 @@ extension Slider where Label == EmptyView, ValueLabel == EmptyView {
 
 /// A flexible space that expands along the major axis of its containing stack
 /// layout, or on both axes if not contained in a stack.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Spacer {
 
     /// The minimum length this spacer can be shrunk to, along the axis or axes
@@ -13315,14 +13046,14 @@ extension Slider where Label == EmptyView, ValueLabel == EmptyView {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Spacer : View {
 }
 
 /// A navigation view style represented by a view stack that only shows a
 /// single top view at a time.
 @available(iOS 13.0, tvOS 13.0, watchOS 7.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 public struct StackNavigationViewStyle : NavigationViewStyle {
 
     public init()
@@ -13361,7 +13092,7 @@ public struct StackNavigationViewStyle : NavigationViewStyle {
 ///             }
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen @propertyWrapper public struct State<Value> : DynamicProperty {
 
     /// Creates the state with an initial wrapped value.
@@ -13425,7 +13156,7 @@ public struct StackNavigationViewStyle : NavigationViewStyle {
     public var projectedValue: Binding<Value> { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension State where Value : ExpressibleByNilLiteral {
 
     /// Creates a state without an initial value.
@@ -13470,7 +13201,7 @@ extension State where Value : ExpressibleByNilLiteral {
 /// model:
 ///
 ///     Toggle("Enabled", isOn: $model.isEnabled)
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen @propertyWrapper public struct StateObject<ObjectType> : DynamicProperty where ObjectType : ObservableObject {
 
     /// Creates a new state object with an initial wrapped value.
@@ -13530,7 +13261,7 @@ extension State where Value : ExpressibleByNilLiteral {
 }
 
 /// A control used to perform semantic increment and decrement actions.
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct Stepper<Label> : View where Label : View {
@@ -13549,7 +13280,7 @@ public struct Stepper<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Stepper {
@@ -13571,7 +13302,7 @@ extension Stepper {
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label) where V : Strideable
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Stepper where Label == Text {
@@ -13621,7 +13352,7 @@ extension Stepper where Label == Text {
     public init<S, V>(_ title: S, value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where S : StringProtocol, V : Strideable
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct StrokeStyle : Equatable {
 
     public var lineWidth: CGFloat
@@ -13649,7 +13380,7 @@ extension Stepper where Label == Text {
     public static func == (a: StrokeStyle, b: StrokeStyle) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension StrokeStyle : Animatable {
 
     /// The type defining the data to animate.
@@ -13660,7 +13391,7 @@ extension StrokeStyle : Animatable {
 }
 
 /// A view that subscribes to a publisher with an action.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct SubscriptionView<PublisherType, Content> : View where PublisherType : Publisher, Content : View, PublisherType.Failure == Never {
 
     /// The content view.
@@ -13685,7 +13416,7 @@ extension StrokeStyle : Animatable {
 ///
 /// To apply this style to a toggle, or to a view that contains toggles, use the
 /// ``View/toggleStyle(_:)`` modifier.
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 public struct SwitchToggleStyle : ToggleStyle {
 
@@ -13693,7 +13424,7 @@ public struct SwitchToggleStyle : ToggleStyle {
     public init()
 
     /// Creates a switch style with a tint color.
-    @available(iOS 14.0, OSX 11.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, watchOS 7.0, *)
     @available(tvOS, unavailable)
     public init(tint: Color)
 
@@ -13740,7 +13471,7 @@ public struct SwitchToggleStyle : ToggleStyle {
 /// Tab views only support tab items of type ``Text``, ``Image``, or an image
 /// followed by text. Passing any other type of view results in a visible but
 /// empty tab item.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 public struct TabView<SelectionValue, Content> : View where SelectionValue : Hashable, Content : View {
 
     /// Creates an instance that selects from content associated with
@@ -13757,14 +13488,14 @@ public struct TabView<SelectionValue, Content> : View where SelectionValue : Has
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 extension TabView where SelectionValue == Int {
 
     public init(@ViewBuilder content: () -> Content)
 }
 
 /// A specification for the appearance and interaction of a `TabView`.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol TabViewStyle {
 }
 
@@ -13790,7 +13521,7 @@ public protocol TabViewStyle {
 ///                 .gesture(tap)
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 public struct TapGesture : Gesture {
 
@@ -13899,7 +13630,7 @@ public struct TapGesture : Gesture {
 /// When localizing a string variable, you can use the default table by omitting
 /// the optional initialization parameters — as in the above example — just like
 /// you might for a string literal.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Text : Equatable {
 
     /// Creates a text view that displays a string literal without localization.
@@ -13953,7 +13684,7 @@ extension Text {
 
     /// Creates an instance that wraps an `Image`, suitable for concatenating
     /// with other `Text`
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public init(_ image: Image)
 }
 
@@ -13972,7 +13703,7 @@ extension Text {
     public init<Subject>(_ subject: Subject, formatter: Formatter) where Subject : NSObject
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Text {
 
     /// A predefined style used to display a `Date`.
@@ -14047,7 +13778,7 @@ extension Text {
     public init(_ interval: DateInterval)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text {
 
     /// Creates a text view that displays localized content identified by a key.
@@ -14090,7 +13821,7 @@ extension Text {
     public init(_ key: LocalizedStringKey, tableName: String? = nil, bundle: Bundle? = nil, comment: StaticString? = nil)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text {
 
     /// Concatenates the text in two text views in a new text view.
@@ -14104,7 +13835,7 @@ extension Text {
     public static func + (lhs: Text, rhs: Text) -> Text
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text {
 
     /// The type of truncation to apply to a line of text when it's too long to
@@ -14174,7 +13905,7 @@ extension Text {
     }
 
     /// A scheme for transforming the capitalization of characters within text.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public enum Case {
 
         /// Displays text in all uppercase characters.
@@ -14227,7 +13958,7 @@ extension Text {
     }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text : View {
 
     /// The type of view representing the body of this view.
@@ -14237,7 +13968,7 @@ extension Text : View {
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text {
 
     /// Sets the color of the text displayed by this view.
@@ -14484,19 +14215,19 @@ extension Text.DateStyle : Codable {
     public init(from decoder: Decoder) throws
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text.TruncationMode : Equatable {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Text.TruncationMode : Hashable {
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Text.Case : Equatable {
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Text.Case : Hashable {
 }
 
@@ -14506,7 +14237,7 @@ extension Text.Case : Hashable {
 ///
 /// Preferred size: Child's preferred size
 /// An alignment position for text along the horizontal axis.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public enum TextAlignment : Hashable, CaseIterable {
 
     case leading
@@ -14554,26 +14285,6 @@ extension Text.Case : Hashable {
 
     /// A collection of all values of this type.
     public static var allCases: [TextAlignment] { get }
-}
-
-/// A built-in group of commands for searching, editing, and transforming
-/// selections of text.
-///
-/// These commands are optional and can be explicitly requested by passing a
-/// value of this type to the `Scene.commands(_:)` modifier.
-@available(iOS 14.0, OSX 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-public struct TextEditingCommands : Commands {
-
-    /// The composition of commands that comprise the command group.
-    public var body: some Commands { get }
-
-    /// A new value describing the built-in text-editing commands.
-    public init()
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = some Commands
 }
 
 /// A view that can display and edit long-form text.
@@ -14629,7 +14340,7 @@ public struct TextEditingCommands : Commands {
 ///                 .lineSpacing(5)
 ///         }
 ///     }
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct TextEditor : View {
@@ -14682,7 +14393,7 @@ public struct TextEditor : View {
 /// runtime. Each platform provides a default style that reflects the platform
 /// style, but you can provide a new style that redefines all text field
 /// instances within a particular environment.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct TextField<Label> : View where Label : View {
 
     /// The content and behavior of the view.
@@ -14695,7 +14406,7 @@ public struct TextField<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension TextField where Label == Text {
 
     /// Creates a text field with a text label generated from a localized title
@@ -14767,32 +14478,12 @@ extension TextField where Label == Text {
 }
 
 /// A specification for the appearance and interaction of a text field.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol TextFieldStyle {
 }
 
-/// A built-in set of commands for transforming the styles applied to selections
-/// of text.
-///
-/// These commands are optional and can be explicitly requested by passing a
-/// value of this type to the `Scene.commands(_:)` modifier.
-@available(iOS 14.0, OSX 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-public struct TextFormattingCommands : Commands {
-
-    /// The composition of commands that comprise the command group.
-    public var body: some Commands { get }
-
-    /// A new value describing the built-in text-formatting commands.
-    public init()
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = some Commands
-}
-
 /// A label style that only displays the title of the label.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct TitleOnlyLabelStyle : LabelStyle {
 
     /// Creates a title-only label style.
@@ -14848,7 +14539,7 @@ public struct TitleOnlyLabelStyle : LabelStyle {
 ///         Toggle("Vibrate on Silent", isOn: $vibrateOnSilent)
 ///     }
 ///     .toggleStyle(SwitchToggleStyle())
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Toggle<Label> : View where Label : View {
 
     /// Creates a toggle that displays a custom label.
@@ -14869,7 +14560,7 @@ public struct Toggle<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Toggle where Label == ToggleStyleConfiguration.Label {
 
     /// Creates a toggle based on a toggle style configuration.
@@ -14893,11 +14584,11 @@ extension Toggle where Label == ToggleStyleConfiguration.Label {
     ///     }
     ///
     /// - Parameter configuration: A toggle style configuration.
-    @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
     public init(_ configuration: ToggleStyleConfiguration)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Toggle where Label == Text {
 
     /// Creates a toggle that generates its label from a localized string key.
@@ -14937,7 +14628,7 @@ extension Toggle where Label == Text {
 ///
 /// To configure the current toggle style for a view hiearchy, use the
 /// ``View/toggleStyle(_:)`` modifier.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ToggleStyle {
 
     /// A view that represents the appearance and interaction of a toggle.
@@ -14957,7 +14648,7 @@ public protocol ToggleStyle {
 }
 
 /// The properties of a toggle instance.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ToggleStyleConfiguration {
 
     /// A type-erased label of a toggle.
@@ -14981,81 +14672,62 @@ public struct ToggleStyleConfiguration {
     public var $isOn: Binding<Bool> { get }
 }
 
-/// A built-in set of commands for manipulating window toolbars.
-///
-/// These commands are optional and can be explicitly requested by passing a
-/// value of this type to the `Scene.commands(_:)` modifier.
-@available(iOS 14.0, OSX 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-public struct ToolbarCommands : Commands {
-
-    /// The composition of commands that comprise the command group.
-    public var body: some Commands { get }
-
-    /// A new value describing the built-in toolbar-related commands.
-    public init()
-
-    /// The type of command group representing the body of this command group.
-    public typealias Body = some Commands
-}
-
 /// Constructs a toolbar item set from multi-expression closures.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @_functionBuilder public struct ToolbarContentBuilder<ID> {
 
     public static func buildBlock<V>(_ content: ToolbarItem<ID, V>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, V>)> where V : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>)> where C0 : View, C1 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>)> where C0 : View, C1 : View, C2 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>)> where C0 : View, C1 : View, C2 : View, C3 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>, _ c7: ToolbarItem<ID, C7>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>, ToolbarItem<ID, C7>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>, _ c7: ToolbarItem<ID, C7>, _ c8: ToolbarItem<ID, C8>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>, ToolbarItem<ID, C7>, ToolbarItem<ID, C8>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>, _ c7: ToolbarItem<ID, C7>, _ c8: ToolbarItem<ID, C8>, _ c9: ToolbarItem<ID, C9>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>, ToolbarItem<ID, C7>, ToolbarItem<ID, C8>, ToolbarItem<ID, C9>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View, C9 : View
@@ -15063,7 +14735,7 @@ extension ToolbarContentBuilder {
 
 /// A model that represents an item which can be placed in the toolbar
 /// or navigation bar.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ToolbarItem<ID, Content> where Content : View {
 
     /// Creates a toolbar item with the specified placement and content,
@@ -15079,7 +14751,7 @@ public struct ToolbarItem<ID, Content> where Content : View {
     public init(id: ID, placement: ToolbarItemPlacement = .automatic, showsByDefault: Bool = true, @ViewBuilder content: () -> Content)
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarItem where ID == Void {
 
     /// Creates a toolbar item with the specified placement and content.
@@ -15091,7 +14763,7 @@ extension ToolbarItem where ID == Void {
     public init(placement: ToolbarItemPlacement = .automatic, @ViewBuilder content: () -> Content)
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarItem : Identifiable where ID : Hashable {
 
     /// The stable identity of the entity associated with this instance.
@@ -15099,7 +14771,7 @@ extension ToolbarItem : Identifiable where ID : Hashable {
 }
 
 /// A set of toolbar items which can be added to a toolbar or navigation bar.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ToolbarItemGroup<ID, Items> {
 
     public init(_ items: Items)
@@ -15115,7 +14787,7 @@ public struct ToolbarItemGroup<ID, Items> {
 /// - Positional placements, such as `.navigationBarLeading`,
 ///   which denote a precise placement for the item,
 ///   usually for a particular platform.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ToolbarItemPlacement {
 
     /// The item is placed in the default section.
@@ -15177,17 +14849,17 @@ public struct ToolbarItemPlacement {
     public static let destructiveAction: ToolbarItemPlacement
 
     /// The item is placed in the leading area of the navigation bar.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public static let navigationBarLeading: ToolbarItemPlacement
 
     /// The item is placed in the trailing area of the navigation bar.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public static let navigationBarTrailing: ToolbarItemPlacement
 
     /// The item is placed in the bottom toolbar.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public static let bottomBar: ToolbarItemPlacement
@@ -15200,14 +14872,14 @@ public struct ToolbarItemPlacement {
 /// The root transaction for a state change comes from the binding that changed,
 /// plus any global values set by calling ``withTransaction(_:_:)`` or
 /// ``withAnimation(_:_:)``.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Transaction {
 
     /// Creates a transaction.
     @inlinable public init()
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Transaction {
 
     /// Creates a transaction and assigns its animation property.
@@ -15227,7 +14899,7 @@ extension Transaction {
     public var disablesAnimations: Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Transaction {
 
     /// A Boolean value that indicates whether the transaction originated from
@@ -15241,7 +14913,7 @@ extension Transaction {
 }
 
 /// A shape with an affine transform applied to it.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct TransformedShape<Content> : Shape where Content : Shape {
 
     public var shape: Content
@@ -15271,7 +14943,7 @@ extension Transaction {
 }
 
 /// A View created from a swift tuple of View values.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct TupleView<T> : View {
 
     public var value: T
@@ -15287,7 +14959,7 @@ extension Transaction {
 
 /// A property wrapper that is used in `App` to provide a delegate from UIKit.
 @available(iOS 14.0, tvOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 @propertyWrapper public struct UIApplicationDelegateAdaptor<DelegateType> : DynamicProperty where DelegateType : NSObject, DelegateType : UIApplicationDelegate {
 
@@ -15306,7 +14978,7 @@ extension Transaction {
 }
 
 @available(iOS 14.0, tvOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 extension UIApplicationDelegateAdaptor where DelegateType : ObservableObject {
 
@@ -15342,7 +15014,7 @@ extension UIApplicationDelegateAdaptor where DelegateType : ObservableObject {
 /// controller, by presenting it or embedding it as a child view controller
 /// in your interface.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 open class UIHostingController<Content> : UIViewController where Content : View {
 
@@ -15480,7 +15152,7 @@ open class UIHostingController<Content> : UIViewController where Content : View 
 /// interactions. For example, you use a coordinator to forward target-action
 /// and delegate messages from your view controller to any SwiftUI views.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public protocol UIViewControllerRepresentable : View where Self.Body == Never {
 
@@ -15558,7 +15230,7 @@ public protocol UIViewControllerRepresentable : View where Self.Body == Never {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension UIViewControllerRepresentable where Self.Coordinator == Void {
 
     /// Creates the custom instance that you use to communicate changes from
@@ -15581,7 +15253,7 @@ extension UIViewControllerRepresentable where Self.Coordinator == Void {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension UIViewControllerRepresentable {
 
     /// Cleans up the presented view controller (and coordinator) in
@@ -15614,7 +15286,7 @@ extension UIViewControllerRepresentable {
 /// the appearance of your view controller and views. Don't create this
 /// structure yourself.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public struct UIViewControllerRepresentableContext<Representable> where Representable : UIViewControllerRepresentable {
 
@@ -15666,7 +15338,7 @@ public struct UIViewControllerRepresentableContext<Representable> where Represen
 /// interactions. For example, you use a coordinator to forward target-action
 /// and delegate messages from your view to any SwiftUI views.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public protocol UIViewRepresentable : View where Self.Body == Never {
 
@@ -15741,7 +15413,7 @@ public protocol UIViewRepresentable : View where Self.Body == Never {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension UIViewRepresentable where Self.Coordinator == Void {
 
     /// Creates the custom instance that you use to communicate changes from
@@ -15763,7 +15435,7 @@ extension UIViewRepresentable where Self.Coordinator == Void {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension UIViewRepresentable {
 
     /// Cleans up the presented UIKit view (and coordinator) in anticipation of
@@ -15795,7 +15467,7 @@ extension UIViewRepresentable {
 /// environment values to configure the appearance of your view. Don't create
 /// this structure yourself.
 @available(iOS 13.0, tvOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 public struct UIViewRepresentableContext<Representable> where Representable : UIViewRepresentable {
 
@@ -15812,7 +15484,7 @@ public struct UIViewRepresentableContext<Representable> where Representable : UI
     public var environment: EnvironmentValues { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct UnitPoint : Hashable {
 
     public var x: CGFloat
@@ -15878,7 +15550,7 @@ public struct UIViewRepresentableContext<Representable> where Representable : UI
     public static func == (a: UnitPoint, b: UnitPoint) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension UnitPoint : Animatable {
 
     /// The type defining the data to animate.
@@ -15890,7 +15562,7 @@ extension UnitPoint : Animatable {
 
 /// A set of values that indicate the visual size available to the view.
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public enum UserInterfaceSizeClass {
@@ -15940,28 +15612,28 @@ extension UserInterfaceSizeClass {
 
     /// Create a size class from its UIUserInterfaceSizeClass equivalent.
     @available(iOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init?(_ uiUserInterfaceSizeClass: UIUserInterfaceSizeClass)
 }
 
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension UserInterfaceSizeClass : Equatable {
 }
 
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension UserInterfaceSizeClass : Hashable {
 }
 
 /// A view that arranges its children in a vertical line.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct VStack<Content> : View where Content : View {
 
     /// Creates an instance with the given spacing and horizontal alignment.
@@ -15988,7 +15660,7 @@ extension UserInterfaceSizeClass : Hashable {
 /// multiplication and a way to query the vector magnitude of the value. Use
 /// this type as the `animatableData` associated type of a type that conforms to
 /// the ``Animatable`` protocol.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol VectorArithmetic : AdditiveArithmetic {
 
     /// Multiplies each component of this value by the given value.
@@ -15999,7 +15671,7 @@ public protocol VectorArithmetic : AdditiveArithmetic {
 }
 
 /// An alignment position along the horizontal axis.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct VerticalAlignment : Equatable {
 
     /// Creates an instance with the given identifier.
@@ -16021,7 +15693,7 @@ public protocol VectorArithmetic : AdditiveArithmetic {
     public static func == (a: VerticalAlignment, b: VerticalAlignment) -> Bool
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension VerticalAlignment {
 
     /// A guide marking the top edge of the view.
@@ -16115,7 +15787,7 @@ extension VerticalAlignment {
 /// ![A screenshot of a text view displaying the string "Title", outlined by a
 /// gray rectangle that hugs the text. A caption reads, "Apply the border
 /// first."](SwiftUI-View-2.png)
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol View {
 
     /// The type of view representing the body of this view.
@@ -16128,7 +15800,7 @@ public protocol View {
     @ViewBuilder var body: Self.Body { get }
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -16140,7 +15812,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Presents a sheet using the given item as a data source
@@ -16168,7 +15840,7 @@ extension View {
 }
 
 @available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension View {
 
     /// Presents a modal view that covers as much of the screen as
@@ -16196,7 +15868,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, tvOS 14.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 14.0, *)
 extension View {
 
     /// Adds an action to perform when this view recognizes a long press
@@ -16226,14 +15898,14 @@ extension View {
     ///
     /// - Parameter enabled: A Boolean value that indicates whether
     ///   autocorrection is disabled for this view.
-    @available(iOS 13.0, OSX 10.15, tvOS 13.0, *)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, *)
     @available(watchOS, unavailable)
     public func disableAutocorrection(_ disable: Bool?) -> some View
 
 }
 
 @available(iOS 14.0, tvOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
 
@@ -16244,7 +15916,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Provides a closure that vends the drag representation to be used for a
@@ -16253,7 +15925,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a condition for whether the view's view hierarchy is deletable.
@@ -16261,7 +15933,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a condition for whether the view's view hierarchy is movable.
@@ -16269,7 +15941,7 @@ extension View {
 
 }
 
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -16301,7 +15973,7 @@ extension View {
     public func accessibilityAction(named name: Text, _ handler: @escaping () -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Sets the style for the tab view within the the current environment.
@@ -16311,7 +15983,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for buttons within this view to a button style with a
@@ -16329,7 +16001,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds an action to perform when this view detects data emitted by the
@@ -16347,14 +16019,14 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies a modifier to a view.
     @inlinable public func modifier<T>(_ modifier: T) -> ModifiedContent<Self, T>
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Sets whether this view should ignore the system Smart Invert setting.
@@ -16369,7 +16041,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Configures whether this view participates in hit test operations.
@@ -16377,7 +16049,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds an action to perform when this view appears.
@@ -16399,7 +16071,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View where Self : Equatable {
 
     /// Prevents the view from updating its child view when its new value is the
@@ -16407,7 +16079,7 @@ extension View where Self : Equatable {
     @inlinable public func equatable() -> EquatableView<Self>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 14.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 14.0, *)
 @available(watchOS, introduced: 6.0, deprecated: 7.0)
 extension View {
 
@@ -16443,6 +16115,13 @@ extension View {
     /// - Returns: A view that adds a contextual menu to this view.
     public func contextMenu<MenuItems>(@ViewBuilder menuItems: () -> MenuItems) -> some View where MenuItems : View
 
+}
+
+@available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use `contextMenu(menuItems:)` instead.")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Use `contextMenu(menuItems:)` instead.")
+@available(tvOS, unavailable)
+@available(watchOS, introduced: 6.0, deprecated: 7.0)
+extension View {
 
     /// Attaches a context menu and its children to the view.
     ///
@@ -16492,7 +16171,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -16512,7 +16191,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Attaches a gesture to the view with a lower precedence than gestures
@@ -16531,7 +16210,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for buttons within this view to a button style with a
@@ -16549,14 +16228,14 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     @inlinable public func transformAnchorPreference<A, K>(key _: K.Type = K.self, value: Anchor<A>.Source, transform: @escaping (inout K.Value, Anchor<A>) -> Void) -> some View where K : PreferenceKey
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Adds a reason to apply a redaction to this view hierarchy.
@@ -16571,15 +16250,7 @@ extension View {
 
 }
 
-@available(*, deprecated, message: "Use redaction(reason: .placeholder) instead.")
-extension View {
-
-    /// Sets whether this view hierarchy should show placeholder data.
-    public func isPlaceholder(_ isPlaceholder: Bool) -> some View
-
-}
-
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Layers the given view behind this view.
@@ -16625,7 +16296,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Layers a secondary view in front of this view.
@@ -16683,7 +16354,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Constrains this view's dimensions to the specified aspect ratio.
@@ -16795,7 +16466,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Fixes this view at its ideal size in the specified dimensions.
@@ -16872,7 +16543,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the color of the foreground elements displayed by this view.
@@ -16885,7 +16556,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for pickers within this view.
@@ -16893,7 +16564,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Pads this view using the edges and padding amount you specify.
@@ -16982,7 +16653,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Offset this view by the horizontal and vertical amount specified in the
@@ -17035,7 +16706,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the view's horizontal alignment.
@@ -17123,7 +16794,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Positions the center of this view at the specified point in its parent's
@@ -17164,7 +16835,10 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use ignoresSafeArea(_:edges:) instead.")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Use ignoresSafeArea(_:edges:) instead.")
+@available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Use ignoresSafeArea(_:edges:) instead.")
+@available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Use ignoresSafeArea(_:edges:) instead.")
 extension View {
 
     /// Changes the view's proposed area to extend outside the screen's safe
@@ -17205,7 +16879,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Expands the view out of its safe area.
@@ -17224,33 +16898,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, *)
-@available(macCatalyst, unavailable)
-@available(OSX, unavailable)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension View {
-
-    /// Presents a StoreKit overlay when a given condition is true.
-    ///
-    /// You use `appStoreOverlay` to display an overlay that recommends another
-    /// app. The overlay enables users to instantly view the other app’s page on
-    /// the App Store.
-    ///
-    /// When `isPresented` is true, the system will run `configuration` to
-    /// determine how to configure the overlay. The overlay will automatically
-    /// be presented over the current scene.
-    ///
-    /// - Parameters:
-    ///   - isPresented: A Binding to a boolean value indicating whether the
-    ///     overlay should be presented.
-    ///   - configuration: A closure providing the configuration of the overlay.
-    /// - SeeAlso: SKOverlay.Configuration.
-    public func appStoreOverlay(isPresented: Binding<Bool>, configuration: @escaping () -> SKOverlay.Configuration) -> some View
-
-}
-
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the environment value of the specified key path to the given value.
@@ -17258,7 +16906,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Controls the display order of overlapping views.
@@ -17292,7 +16940,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies an affine transformation to this view's rendered output.
@@ -17306,7 +16954,8 @@ extension View {
     ///     let transform = CGAffineTransform(rotationAngle: -30 * (.pi / 180))
     ///
     ///     Text("Projection effect using transforms")
-    ///         .projectionEffect(.init(transform))
+    ///         .transformEffect(transform)
+    ///         .border(Color.gray)
     ///
     /// ![A screenshot of a view showing text that is rotated at -30 degrees on
     /// the y axis.](SwiftUI-View-transformEffect.png)
@@ -17331,7 +16980,7 @@ extension View {
     ///     action sheet and replace it with a new one.
     ///   - content: A closure returning the action sheet to present.
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     public func actionSheet<T>(item: Binding<T?>, content: (T) -> ActionSheet) -> some View where T : Identifiable
 
 
@@ -17342,12 +16991,12 @@ extension View {
     ///     shown.
     ///   - content: A closure returning the `ActionSheet` to present.
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     public func actionSheet(isPresented: Binding<Bool>, content: () -> ActionSheet) -> some View
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the accent color for this view and the views it contains.
@@ -17390,12 +17039,12 @@ extension View {
     ///
     /// - Parameter accentColor: The color to use as an accent color. If `nil`,
     ///   the accent color continues to be inherited
-    @available(iOS 13.0, OSX 11.0, tvOS 13.0, watchOS 6.0, *)
+    @available(iOS 13.0, macOS 11.0, tvOS 13.0, watchOS 6.0, *)
     @inlinable public func accentColor(_ accentColor: Color?) -> some View
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a condition that controls whether users can interact with this
@@ -17420,7 +17069,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Rotates this view's rendered output around the specified point.
@@ -17444,7 +17093,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Scales this view's rendered output by the given vertical and horizontal
@@ -17523,7 +17172,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies a Gaussian blur to this view.
@@ -17560,7 +17209,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Brightens this view by the specified amount.
@@ -17594,7 +17243,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Inverts the colors in this view.
@@ -17648,7 +17297,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a color multiplication effect to this view.
@@ -17699,7 +17348,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the contrast and separation between similar colors in this view.
@@ -17752,7 +17401,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a grayscale effect to this view.
@@ -17790,7 +17439,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies a hue rotation effect to this view.
@@ -17828,7 +17477,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 11.0, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 11.0, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the preferred color scheme for this presentation.
@@ -17857,7 +17506,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a luminance to alpha effect to this view.
@@ -17906,7 +17555,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adjusts the color saturation of this view.
@@ -17943,7 +17592,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Associates a transition with the view.
@@ -17951,7 +17600,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the transparency of this view.
@@ -17992,7 +17641,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies the given animation to this view when the specified value
@@ -18009,7 +17658,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the unique tag value of this view.
@@ -18051,7 +17700,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the blend mode for compositing this view with overlapping views.
@@ -18083,7 +17732,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Places a custom background view behind a list row item.
@@ -18121,7 +17770,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Composites this view's contents into an offscreen image before final
@@ -18170,7 +17819,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Wraps this view in a compositing group.
@@ -18211,7 +17860,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Overrides the device for a preview.
@@ -18247,19 +17896,19 @@ extension View {
     /// Declares a context for the preview.
     ///
     /// - Parameter value: The context for the preview; the default is `nil`.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     @inlinable public func previewContext<C>(_ value: C) -> some View where C : PreviewContext
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     @inlinable public func anchorPreference<A, K>(key _: K.Type = K.self, value: Anchor<A>.Source, transform: @escaping (Anchor<A>) -> K.Value) -> some View where K : PreferenceKey
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets a clipping shape for this view.
@@ -18347,7 +17996,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds a shadow to this view.
@@ -18388,7 +18037,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for toggles within this view.
@@ -18407,7 +18056,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets this view's color scheme.
@@ -18421,7 +18070,7 @@ extension View {
     ///
     /// - Returns: A view that sets this view's color scheme.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
-    @available(OSX, introduced: 10.15, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
     @inlinable public func colorScheme(_ colorScheme: ColorScheme) -> some View
@@ -18458,7 +18107,7 @@ extension View {
     ///
     /// - Parameter scale: One of the relative sizes provided by the image scale
     ///   enumeration.
-    @available(OSX 11.0, *)
+    @available(macOS 11.0, *)
     @inlinable public func imageScale(_ scale: Image.Scale) -> some View
 
 
@@ -18499,7 +18148,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Positions this view within an invisible frame with the specified size.
@@ -18567,7 +18216,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Positions this view within an invisible frame having the specified size
@@ -18614,7 +18263,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -18626,7 +18275,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 extension View {
 
     /// Sets the tab bar item associated with this view.
@@ -18672,7 +18321,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -18711,7 +18360,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Sets the style for labels within this view.
@@ -18728,7 +18377,7 @@ extension View {
 
 }
 
-@available(iOS 13.4, OSX 10.15, *)
+@available(iOS 13.4, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -18750,7 +18399,7 @@ extension View {
 }
 
 @available(iOS 13.4, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -18759,14 +18408,14 @@ extension View {
     ///
     /// > Note: The system may fall back to a more appropriate effect.
     @available(iOS 13.4, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func hoverEffect(_ effect: HoverEffect = .automatic) -> some View
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
 @available(watchOS, unavailable)
 extension View {
 
@@ -18777,7 +18426,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Hides this view.
@@ -18816,7 +18465,7 @@ extension View {
     /// - Parameter type: One of the keyboard types defined in the
     /// <doc://com.apple.documentation/documentation/UIKit/UIKeyboardType> enumeration.
     @available(iOS 13.0, tvOS 13.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func keyboardType(_ type: UIKeyboardType) -> some View
 
@@ -18843,13 +18492,13 @@ extension View {
     /// <doc://com.apple.documentation/documentation/UIKit/UITextAutocapitalizationType>
     /// enumeration.
     @available(iOS 13.0, tvOS 13.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func autocapitalization(_ style: UITextAutocapitalizationType) -> some View
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Defines a group of views with synchronized geometry using an
@@ -18893,7 +18542,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds an action to perform when the specified preference key's value
@@ -18910,7 +18559,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 7.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 extension View {
 
     /// Sets the style for navigation views within this view.
@@ -18919,7 +18568,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for lists within this view.
@@ -18927,7 +18576,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies a transformation to a preference value.
@@ -18935,7 +18584,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets whether this view flips its contents horizontally when the layout
@@ -18981,13 +18630,13 @@ extension View {
     ///     addresses, location names, URLs, and telephone numbers to name
     ///     just a few.
     @available(iOS 13.0, tvOS 13.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     @inlinable public func textContentType(_ textContentType: UITextContentType?) -> some View
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Hides the labels of any controls contained within this view.
@@ -19024,49 +18673,8 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension View {
-
-    /// Defines a keyboard shortcut and assigns it to the modified control.
-    ///
-    /// Pressing the control's shortcut while the control is anywhere in the
-    /// frontmost window or scene, or anywhere in the macOS main menu, is
-    /// equivalent to direct interaction with the control to perform its primary
-    /// action.
-    ///
-    /// The target of a keyboard shortcut is resolved in a leading-to-trailing,
-    /// depth-first traversal of one or more view hierarchies. On macOS, the
-    /// system looks in the key window first, then the main window, and then the
-    /// command groups; on other platforms, the system looks in the active
-    /// scene, and then the command groups.
-    ///
-    /// If multiple controls are associated with the same shortcut, the first
-    /// one found is used.
-    public func keyboardShortcut(_ key: KeyEquivalent, modifiers: EventModifiers = .command) -> some View
-
-
-    /// Assigns a keyboard shortcut to the modified control.
-    ///
-    /// Pressing the control's shortcut while the control is anywhere in the
-    /// frontmost window or scene, or anywhere in the macOS main menu, is
-    /// equivalent to direct interaction with the control to perform its primary
-    /// action.
-    ///
-    /// The target of a keyboard shortcut is resolved in a leading-to-trailing
-    /// traversal of one or more view hierarchies. On macOS, the system looks in
-    /// the key window first, then the main window, and then the command groups;
-    /// on other platforms, the system looks in the active scene, and then the
-    /// command groups.
-    ///
-    /// If multiple controls are associated with the same shortcut, the first
-    /// one found is used.
-    public func keyboardShortcut(_ shortcut: KeyboardShortcut) -> some View
-
-}
-
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension View {
 
     /// Hides the navigation bar for this view.
@@ -19077,7 +18685,7 @@ extension View {
     ///
     /// - Parameter hidden: A Boolean value that indicates whether to hide the
     ///   navigation bar.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     public func navigationBarHidden(_ hidden: Bool) -> some View
 
 
@@ -19109,7 +18717,7 @@ extension View {
     /// - Parameter title: A description of this view to display in the
     ///   navigation bar.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
     public func navigationBarTitle(_ title: Text) -> some View
@@ -19146,7 +18754,7 @@ extension View {
     /// - Parameter titleKey: A key to a localized description of this view to
     ///   display in the navigation bar.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
     public func navigationBarTitle(_ titleKey: LocalizedStringKey) -> some View
@@ -19178,7 +18786,7 @@ extension View {
     /// - Parameter title: A title for this view to display in the navigation
     ///   bar.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, renamed: "navigationTitle(_:)")
     public func navigationBarTitle<S>(_ title: S) -> some View where S : StringProtocol
@@ -19214,7 +18822,7 @@ extension View {
     ///   - title: A title for this view to display in the navigation bar.
     ///   - displayMode: The style to use for displaying the navigation bar title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use navigationTitle(_:) with navigationBarTitleDisplayMode(_:)")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarTitle(_ title: Text, displayMode: NavigationBarItem.TitleDisplayMode) -> some View
@@ -19255,7 +18863,7 @@ extension View {
     ///   - displayMode: The style to use for displaying the navigation bar
     ///     title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use navigationTitle(_:) with navigationBarTitleDisplayMode(_:)")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarTitle(_ titleKey: LocalizedStringKey, displayMode: NavigationBarItem.TitleDisplayMode) -> some View
@@ -19301,7 +18909,7 @@ extension View {
     ///   - title: A title for this view to display in the navigation bar.
     ///   - displayMode: The way to display the title.
     @available(iOS, introduced: 14.0, deprecated: 100000.0, message: "Use navigationTitle(_:) with navigationBarTitleDisplayMode(_:)")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarTitle<S>(_ title: S, displayMode: NavigationBarItem.TitleDisplayMode) -> some View where S : StringProtocol
@@ -19317,7 +18925,7 @@ extension View {
     ///
     /// - Parameter hidesBackButton: A Boolean value that indicates whether to
     ///   hide the back button.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     public func navigationBarBackButtonHidden(_ hidesBackButton: Bool) -> some View
 
 }
@@ -19332,12 +18940,12 @@ extension View {
     ///     it to the existing table of exported focus values.
     ///   - value: The focus value to export.
     /// - Returns: A modified representation of this view.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public func focusedValue<Value>(_ keyPath: WritableKeyPath<FocusedValues, Value?>, _ value: Value) -> some View
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the alignment of multiline text in this view.
@@ -19518,12 +19126,12 @@ extension View {
     /// - Parameter textCase: One of the ``Text/Case`` enumerations; the
     ///   default is `nil`.
     /// - Returns: A view that transforms the case of the text.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     @inlinable public func textCase(_ textCase: Text.Case?) -> some View
 
 }
 
-@available(iOS 13.0, OSX 10.15, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 extension View {
 
@@ -19532,7 +19140,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies an inset to the rows in a list.
@@ -19569,7 +19177,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Populates the toolbar or navigation bar with items
@@ -19595,7 +19203,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Binds a view's identity to the given proxy value.
@@ -19606,7 +19214,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Uses the specified preference value from the view to produce another
@@ -19620,7 +19228,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Adds a modifier for this view that fires an action when a specific
@@ -19665,7 +19273,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Sets the style for progress views in this view.
@@ -19681,7 +19289,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Specifies whether to hide this view from system accessibility features.
@@ -19752,7 +19360,7 @@ extension View {
     public func accessibility(activationPoint: UnitPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Sets the tint effect associated with specific content in a list.
@@ -19783,7 +19391,52 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension View {
+
+    /// Links multiple accessibility elements so that the user can quickly
+    /// navigate from one element to another, even when the elements are not near
+    /// each other in the accessibility hierarchy.
+    ///
+    /// This can be useful to allow quickly jumping between content in a list and
+    /// the same content shown in a detail view, for example. All elements marked
+    /// with `accessibilityLinkedGroup` with the same namespace and identifier will be
+    /// linked together.
+    ///
+    /// - Parameters:
+    ///   - id: A hashable identifier used to separate sets of linked elements
+    ///     within the same namespace. Elements with matching `namespace` and `id`
+    ///     will be linked together.
+    ///   - namespace: The namespace to use to organize linked accessibility
+    ///     elements. All elements marked with `accessibilityLink` in this
+    ///     namespace and with the specified `id` will be linked together.
+    public func accessibilityLinkedGroup<ID>(id: ID, in namespace: Namespace.ID) -> some View where ID : Hashable
+
+
+    /// Pairs an accessibility element representing a label with the element
+    /// for the matching content.
+    ///
+    /// Use `accessibilityLabeledPair` with a role of `AccessibilityLabeledPairRole.label`
+    /// to identify the label, and a role of `AccessibilityLabeledPairRole.content`
+    /// to identify the content.
+    /// This improves the behavior of accessibility features such as VoiceOver
+    /// when navigating such elements, allowing users to better understand the
+    /// relationship between them.
+    ///
+    /// - Parameters:
+    ///   - role: Determines whether this element should be used as the label
+    ///     in the pair, or the content in the pair.
+    ///   - id: The identifier for the label / content pair. Elements with
+    ///     matching identifiers within the same namespace will be paired
+    ///     together.
+    ///   - namespace: The namespace used to organize label and content. Label
+    ///     and content under the same namespace with matching identifiers will
+    ///     be paired together.
+    public func accessibilityLabeledPair<ID>(role: AccessibilityLabeledPairRole, id: ID, in namespace: Namespace.ID) -> some View where ID : Hashable
+
+}
+
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Rotates this view's rendered output in three dimensions around the given
@@ -19817,7 +19470,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Transforms the environment value of the specified key path with the
@@ -19826,14 +19479,14 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds an accessibility scroll action to the view.
     public func accessibilityScrollAction(_ handler: @escaping (Edge) -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Assigns a name to the view's coordinate space, so other code can operate
@@ -19888,7 +19541,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Defines the content shape for hit testing.
@@ -19903,7 +19556,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets a value for the given preference.
@@ -19911,7 +19564,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies the given transaction mutation function to all transactions used
@@ -19944,7 +19597,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Wraps this view as a new accessibility element.
@@ -19952,7 +19605,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Advertises a user activity type.
@@ -20017,7 +19670,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the priority by which a parent layout should apportion space to
@@ -20059,7 +19712,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Sets the style for text fields within this view.
@@ -20067,7 +19720,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Masks this view using the alpha channel of the given view.
@@ -20091,7 +19744,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Configures the view's title for purposes of navigation.
@@ -20145,7 +19798,7 @@ extension View {
 }
 
 @available(iOS 14.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -20157,14 +19810,14 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds an accessibility adjustable action to the view.
     public func accessibilityAdjustableAction(_ handler: @escaping (AccessibilityAdjustmentDirection) -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// The default store used by `AppStorage` contained within the view.
@@ -20180,7 +19833,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -20257,7 +19910,7 @@ extension View {
 }
 
 @available(iOS, introduced: 13.4, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
-@available(OSX, introduced: 10.15, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Provide `UTType`s as the `supportedContentTypes` instead.")
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension View {
@@ -20335,7 +19988,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Applies a projection transformation to this view's rendered output.
@@ -20361,7 +20014,7 @@ extension View {
 
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
     /// Adds help text to a view using a localized string that you provide.
@@ -20417,7 +20070,7 @@ extension View {
 }
 
 @available(iOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 extension View {
 
@@ -20427,14 +20080,14 @@ extension View {
     ///
     /// - Parameter hidden: A Boolean value that indicates whether to hide the
     ///   status bar.
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func statusBar(hidden: Bool) -> some View
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Supplies an `ObservableObject` to a view subhierachy.
@@ -20447,7 +20100,7 @@ extension View {
 
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Presents an alert to the user.
@@ -20472,7 +20125,7 @@ extension View {
 }
 
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 extension View {
 
     /// Sets the navigation bar items for this view.
@@ -20523,7 +20176,7 @@ extension View {
     ///   - leading: A view that appears on the leading edge of the title.
     ///   - trailing: A view that appears on the trailing edge of the title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<L, T>(leading: L, trailing: T) -> some View where L : View, T : View
 
@@ -20570,7 +20223,7 @@ extension View {
     /// - Parameter leading: A view that appears on the leading edge of the
     ///   title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<L>(leading: L) -> some View where L : View
 
@@ -20611,7 +20264,7 @@ extension View {
     ///
     /// - Parameter trailing: A view shown on the trailing edge of the title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<T>(trailing: T) -> some View where T : View
 
@@ -20639,7 +20292,7 @@ extension View {
 ///             Text("Jump to Definition")
 ///         }
 ///     }
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @_functionBuilder public struct ViewBuilder {
 
     /// Builds an empty view from a block containing no statements.
@@ -20652,7 +20305,7 @@ extension View {
     public static func buildBlock<Content>(_ content: Content) -> Content where Content : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     /// Provides support for “if” statements in multi-statement closures,
@@ -20669,62 +20322,62 @@ extension ViewBuilder {
     public static func buildEither<TrueContent, FalseContent>(second: FalseContent) -> _ConditionalContent<TrueContent, FalseContent> where TrueContent : View, FalseContent : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> TupleView<(C0, C1)> where C0 : View, C1 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> TupleView<(C0, C1, C2)> where C0 : View, C1 : View, C2 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3) -> TupleView<(C0, C1, C2, C3)> where C0 : View, C1 : View, C2 : View, C3 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4) -> TupleView<(C0, C1, C2, C3, C4)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5) -> TupleView<(C0, C1, C2, C3, C4, C5)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6) -> TupleView<(C0, C1, C2, C3, C4, C5, C6)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7) -> TupleView<(C0, C1, C2, C3, C4, C5, C6, C7)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8) -> TupleView<(C0, C1, C2, C3, C4, C5, C6, C7, C8)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewBuilder {
 
     public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8, _ c9: C9) -> TupleView<(C0, C1, C2, C3, C4, C5, C6, C7, C8, C9)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View, C9 : View
 }
 
 /// A view's size and its alignment guides in its own coordinate space.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ViewDimensions {
 
     /// The view's width.
@@ -20748,7 +20401,7 @@ public struct ViewDimensions {
     public subscript(explicit guide: VerticalAlignment) -> CGFloat? { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewDimensions : Equatable {
 
     /// Returns a Boolean value indicating whether two values are equal.
@@ -20764,7 +20417,7 @@ extension ViewDimensions : Equatable {
 
 /// A modifier that you apply to a view or another view modifier, producing a
 /// different version of the original value.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ViewModifier {
 
     /// The type of view representing the body.
@@ -20780,7 +20433,7 @@ public protocol ViewModifier {
     typealias Content
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewModifier where Self.Body == Never {
 
     /// Gets the current body of the caller.
@@ -20790,7 +20443,7 @@ extension ViewModifier where Self.Body == Never {
     public func body(content: Self.Content) -> Self.Body
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewModifier {
 
     /// Returns a new modifier that is the result of concatenating
@@ -20798,7 +20451,7 @@ extension ViewModifier {
     @inlinable public func concat<T>(_ modifier: T) -> ModifiedContent<Self, T>
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ViewModifier {
 
     /// Returns a new version of the modifier that will apply the
@@ -20816,7 +20469,7 @@ extension ViewModifier {
 /// A system style of date picker that displays each component as columns
 /// in a scrollable wheel.
 @available(iOS 13.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct WheelDatePickerStyle : DatePickerStyle {
@@ -20833,7 +20486,7 @@ public struct WheelDatePickerStyle : DatePickerStyle {
 /// To apply this style to a picker, or to a view that contains pickers, use the
 /// ``View/pickerStyle(_:)`` modifier.
 @available(iOS 13.0, watchOS 6.0, *)
-@available(OSX, unavailable)
+@available(macOS, unavailable)
 @available(tvOS, unavailable)
 public struct WheelPickerStyle : PickerStyle {
 
@@ -20874,7 +20527,7 @@ public struct WheelPickerStyle : PickerStyle {
 /// you've already added support for Siri or Shortcuts, you're well on your way
 /// to supporting customizable widgets. For more information, see
 /// <doc://com.apple.documentation/documentation/WidgetKit/Making-a-Configurable-Widget>.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol Widget {
@@ -20913,7 +20566,7 @@ public protocol Widget {
 ///        }
 ///     }
 ///
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol WidgetBundle {
@@ -20961,7 +20614,7 @@ public protocol WidgetBundle {
 ///            CharacterDetailWidget()
 ///        }
 ///     }
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 @_functionBuilder public struct WidgetBundleBuilder {
@@ -20976,7 +20629,7 @@ public protocol WidgetBundle {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension WidgetBundleBuilder {
@@ -20985,7 +20638,7 @@ extension WidgetBundleBuilder {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension WidgetBundleBuilder {
@@ -20994,7 +20647,7 @@ extension WidgetBundleBuilder {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension WidgetBundleBuilder {
@@ -21003,7 +20656,7 @@ extension WidgetBundleBuilder {
 
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension WidgetBundleBuilder {
@@ -21013,7 +20666,7 @@ extension WidgetBundleBuilder {
 }
 
 /// A type that describes a widget's content.
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public protocol WidgetConfiguration {
@@ -21058,7 +20711,7 @@ public protocol WidgetConfiguration {
 ///
 /// You typically use a window group for the main interface of an app that isn't
 /// document-based. For document-based apps, use a ``DocumentGroup`` instead.
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct WindowGroup<Content> : Scene where Content : View {
 
     /// Creates a window group with an identifier.
@@ -21189,7 +20842,7 @@ public struct WindowGroup<Content> : Scene where Content : View {
 }
 
 /// A view that overlays its children, aligning them in both axes.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ZStack<Content> : View where Content : View {
 
     /// Creates an instance with the given alignment.
@@ -21212,7 +20865,7 @@ public struct WindowGroup<Content> : Scene where Content : View {
 ///
 /// This function sets the given ``Animation`` as the ``Transaction/animation``
 /// property of the thread's current ``Transaction``.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public func withAnimation<Result>(_ animation: Animation? = .default, _ body: () throws -> Result) rethrows -> Result
 
 /// Executes a closure with the specified transaction and returns the result.
@@ -21224,18 +20877,18 @@ public func withAnimation<Result>(_ animation: Animation? = .default, _ body: ()
 ///
 /// - Returns: The result of executing the closure with the specified
 ///   transaction.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public func withTransaction<Result>(_ transaction: Transaction, _ body: () throws -> Result) rethrows -> Result
 
 extension NSDirectionalEdgeInsets {
 
     /// Create edge insets from the equivalent EdgeInsets.
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
     @available(watchOS, unavailable)
     public init(_ edgeInsets: EdgeInsets)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Never {
 
     /// The type of view representing the body of this view.
@@ -21248,13 +20901,13 @@ extension Never {
     public var body: Never { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CGPoint {
 
     public func applying(_ m: ProjectionTransform) -> CGPoint
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Never {
@@ -21266,7 +20919,7 @@ extension Never {
     public typealias WidgetBody = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Never : Gesture {
 
     /// The type representing the gesture's value.
@@ -21276,18 +20929,18 @@ extension Never : Gesture {
 /// Extends `T?` to conform to `Gesture` type if `T` also conforms to
 /// `Gesture`. A nil value is mapped to an empty (i.e. failing)
 /// gesture.
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Optional : Gesture where Wrapped : Gesture {
 
     /// The type representing the gesture's value.
     public typealias Value = Wrapped.Value
 }
 
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension NSUserActivity {
 
     /// Error types when getting/setting typed payload
-    @available(iOS 14.0, OSX 11.0, tvOS 14.0, watchOS 7.0, *)
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public enum TypedPayloadError : Error {
 
         /// UserInfo is empty or invalid
@@ -21348,20 +21001,20 @@ extension NSUserActivity {
 extension Never : Scene {
 }
 
-@available(iOS 14.0, OSX 11.0, *)
+@available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Never : WidgetConfiguration {
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Optional : View where Wrapped : View {
 
     /// The type of gesture representing the body of `Self`.
     public typealias Body = Never
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Never : View {
 }
 
@@ -21385,7 +21038,7 @@ extension MutableCollection {
 extension UIColor {
 
     @available(iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     public convenience init(_ color: Color)
 }
 
@@ -21393,7 +21046,7 @@ extension UIUserInterfaceStyle {
 
     /// Creates a user interface style from its ColorScheme equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ colorScheme: ColorScheme?)
 }
@@ -21402,7 +21055,7 @@ extension UIAccessibilityContrast {
 
     /// Create a contrast from its ColorSchemeContrast equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ colorSchemeContrast: ColorSchemeContrast?)
 }
@@ -21411,7 +21064,7 @@ extension UIContentSizeCategory {
 
     /// Create a size category from its ContentSizeCategory equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ sizeCategory: ContentSizeCategory?)
 }
@@ -21420,7 +21073,7 @@ extension UITraitEnvironmentLayoutDirection {
 
     /// Create a direction from its LayoutDirection equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ layoutDirection: LayoutDirection)
 }
@@ -21429,7 +21082,7 @@ extension UILegibilityWeight {
 
     /// Creates a legibility weight from its LegibilityWeight equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ legibilityWeight: LegibilityWeight?)
 }
@@ -21438,13 +21091,13 @@ extension UIUserInterfaceSizeClass {
 
     /// Create a size class from its UserInterfaceSizeClass equivalent.
     @available(iOS 14.0, *)
-    @available(OSX, unavailable)
+    @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ sizeClass: UserInterfaceSizeClass?)
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CGPoint : Animatable {
 
     /// The type defining the data to animate.
@@ -21454,7 +21107,7 @@ extension CGPoint : Animatable {
     public var animatableData: CGPoint.AnimatableData
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CGSize : Animatable {
 
     /// The type defining the data to animate.
@@ -21464,7 +21117,7 @@ extension CGSize : Animatable {
     public var animatableData: CGSize.AnimatableData
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CGRect : Animatable {
 
     /// The type defining the data to animate.
@@ -21474,7 +21127,7 @@ extension CGRect : Animatable {
     public var animatableData: CGRect.AnimatableData
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Float : VectorArithmetic {
 
     /// Multiplies each component of this value by the given value.
@@ -21484,7 +21137,7 @@ extension Float : VectorArithmetic {
     public var magnitudeSquared: Double { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Double : VectorArithmetic {
 
     /// Multiplies each component of this value by the given value.
@@ -21494,7 +21147,7 @@ extension Double : VectorArithmetic {
     public var magnitudeSquared: Double { get }
 }
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension CGFloat : VectorArithmetic {
 
     /// Multiplies each component of this value by the given value.
@@ -21502,9 +21155,4 @@ extension CGFloat : VectorArithmetic {
 
     /// Returns the dot-product of this vector arithmetic instance with itself.
     public var magnitudeSquared: Double { get }
-}
-
-@available(iOS 14.0, OSX 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension Never : Commands {
 }
