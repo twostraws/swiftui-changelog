@@ -1,4 +1,4 @@
-// Xcode 12.0b4
+// Xcode 12.0b5
 
 import AuthenticationServices
 import Combine
@@ -2350,6 +2350,10 @@ public struct CircularProgressViewStyle : ProgressViewStyle {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Color : Hashable, CustomStringConvertible {
 
+    /// Returns a `CGColor` that represents this color if one can be constructed
+    /// that accurately represents this color.
+    public var cgColor: CGColor? { get }
+
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -2418,6 +2422,13 @@ extension Color : View {
     /// When you create a custom view, Swift infers this type from your
     /// implementation of the required `body` property.
     public typealias Body = Never
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension Color {
+
+    /// Creates a color from an instance of `CGColor`.
+    public init(_ cgColor: CGColor)
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -2600,6 +2611,20 @@ public struct ColorPicker<Label> : View where Label : View {
     ///
     public init(selection: Binding<Color>, supportsOpacity: Bool = true, @ViewBuilder label: () -> Label)
 
+    /// Creates an instance that selects a color.
+    ///
+    /// - Parameters:
+    ///     - selection: A ``Binding`` to the variable that displays the
+    ///       selected ``CGColor``.
+    ///     - supportsOpacity: A Boolean value that indicates whether the color
+    ///       picker allows adjusting the selected color's opacity; the default
+    ///       is `true`.
+    ///     - label: A view that describes the use of the selected color.
+    ///        The system color picker UI sets it's title using the text from
+    ///        this view.
+    ///
+    public init(selection: Binding<CGColor>, supportsOpacity: Bool = true, @ViewBuilder label: () -> Label)
+
     /// The content and behavior of the view.
     public var body: some View { get }
 
@@ -2666,6 +2691,27 @@ extension ColorPicker where Label == Text {
     ///     picker allows adjustments to the selected color's opacity; the
     ///     default is `true`.
     public init<S>(_ title: S, selection: Binding<Color>, supportsOpacity: Bool = true) where S : StringProtocol
+
+    /// Creates a color picker with a text label generated from a title string key.
+    ///
+    /// - Parameters:
+    ///   - titleKey: The key for the localized title of the picker.
+    ///   - selection: A ``Binding`` to the variable that displays the
+    ///     selected ``CGColor``.
+    ///   - supportsOpacity: A Boolean value that indicates whether the color
+    ///     picker allows adjustments to the selected color's opacity; the
+    ///     default is `true`.
+    public init(_ titleKey: LocalizedStringKey, selection: Binding<CGColor>, supportsOpacity: Bool = true)
+
+    /// Creates a color picker with a text label generated from a title string.
+    ///
+    /// - Parameters:
+    ///   - title: The title displayed by the color picker.
+    ///   - selection: A ``Binding`` to the variable containing a ``CGColor``.
+    ///   - supportsOpacity: A Boolean value that indicates whether the color
+    ///     picker allows adjustments to the selected color's opacity; the
+    ///     default is `true`.
+    public init<S>(_ title: S, selection: Binding<CGColor>, supportsOpacity: Bool = true) where S : StringProtocol
 }
 
 /// The working color space for color-compositing operations.
@@ -2879,9 +2925,40 @@ extension ColorSchemeContrast : Equatable {
 extension ColorSchemeContrast : Hashable {
 }
 
+/// Command groups describe additional groupings of controls to add to existing
+/// command menus.
+///
+/// On macOS, command groups are realized as collections of menu items in a menu
+/// bar menu. On iOS, iPadOS, and tvOS, SwiftUI creates key commands for each of
+/// a group's commands that has a keyboard shortcut.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct CommandGroup<Content> : Commands where Content : View {
+
+    /// The composition of commands that comprise the command group.
+    public var body: some Commands { get }
+
+    /// A value describing the addition of the given views to the beginning of
+    /// the indicated group.
+    public init(before group: CommandGroupPlacement, @ViewBuilder addition: () -> Content)
+
+    /// A value describing the addition of the given views to the end of the
+    /// indicated group.
+    public init(after group: CommandGroupPlacement, @ViewBuilder addition: () -> Content)
+
+    /// A value describing the complete replacement of the contents of the
+    /// indicated group with the given views.
+    public init(replacing group: CommandGroupPlacement, @ViewBuilder addition: () -> Content)
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = some Commands
+}
+
 /// Identifier types for standard locations that new command groups can be
 /// placed relative to.
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct CommandGroupPlacement {
 
@@ -3014,12 +3091,6 @@ public struct CommandGroupPlacement {
     /// * Zoom
     public static let windowSize: CommandGroupPlacement
 
-    /// Standard placement for commands that describe and reveal the app's open
-    /// windows.
-    ///
-    /// Managed automatically on macOS.
-    public static let windowList: CommandGroupPlacement
-
     /// Standard placement for commands that arrange all of an app's windows.
     ///
     /// Includes the following by default on macOS:
@@ -3032,6 +3103,151 @@ public struct CommandGroupPlacement {
     /// Includes the following by default on macOS:
     /// * App Help
     public static let help: CommandGroupPlacement
+}
+
+/// Command menus are stand-alone, top-level containers for controls that
+/// perform related, app-specific commands.
+///
+/// Command menus are realized as menu bar menus on macOS, inserted between the
+/// built-in View and Window menus in order of declaration. On iOS, iPadOS, and
+/// tvOS, SwiftUI creates key commands for each of a menu's commands that has a
+/// keyboard shortcut.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct CommandMenu<Content> : Commands where Content : View {
+
+    /// The composition of commands that comprise the command group.
+    public var body: some Commands { get }
+
+    /// Creates a new menu with a localized name for a collection of app-
+    /// specific commands, inserted in the standard location for app menus
+    /// (after the View menu, in order with other menus declared without an
+    /// explicit location).
+    public init(_ nameKey: LocalizedStringKey, @ViewBuilder content: () -> Content)
+
+    /// Creates a new menu for a collection of app-specific commands, inserted
+    /// in the standard location for app menus (after the View menu, in order
+    /// with other menus declared without an explicit location).
+    public init(_ name: Text, @ViewBuilder content: () -> Content)
+
+    /// Creates a new menu for a collection of app-specific commands, inserted
+    /// in the standard location for app menus (after the View menu, in order
+    /// with other menus declared without an explicit location).
+    public init<S>(_ name: S, @ViewBuilder content: () -> Content) where S : StringProtocol
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = some Commands
+}
+
+/// Conforming types represent a group of related commands that can be exposed
+/// to the user via the main menu on macOS and key commands on iOS.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public protocol Commands {
+
+    /// The type of command group representing the body of this command group.
+    associatedtype Body : Commands
+
+    /// The composition of commands that comprise the command group.
+    @CommandsBuilder var body: Self.Body { get }
+}
+
+/// Constructs command sets from multi-expression closures. Like `ViewBuilder`,
+/// it supports up to ten expressions in the closure body.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+@_functionBuilder public struct CommandsBuilder {
+
+    /// Builds an empty command set from an block containing no statements.
+    public static func buildBlock() -> EmptyCommands
+
+    /// Passes a single command group written as a child group through
+    /// modified.
+    public static func buildBlock<Content>(_ content: Content) -> Content where Content : Commands
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some Commands where C0 : Commands, C1 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands, C7 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands, C7 : Commands, C8 : Commands
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension CommandsBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8, _ c9: C9) -> some Commands where C0 : Commands, C1 : Commands, C2 : Commands, C3 : Commands, C4 : Commands, C5 : Commands, C6 : Commands, C7 : Commands, C8 : Commands, C9 : Commands
+
 }
 
 /// A system style that displays the components in a compact, textual format.
@@ -3298,6 +3514,12 @@ extension CoordinateSpace : Equatable, Hashable {
     /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
     ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
     public var hashValue: Int { get }
+}
+
+/// Conforming types represent items that can be placed in various locations
+/// in a customizable toolbar.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+public protocol CustomizableToolbarContent : ToolbarContent where Self.Body : CustomizableToolbarContent {
 }
 
 /// A control for selecting an absolute date.
@@ -3709,22 +3931,6 @@ public struct DefaultPickerStyle : PickerStyle {
 
     /// Creates a default picker style.
     public init()
-}
-
-/// A view representing a synthesized default label for a progress view.
-///
-/// Don't use this type directly. Instead, use `ProgressView`.
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-public struct DefaultProgressViewLabel : View {
-
-    /// The content and behavior of the view.
-    public var body: some View { get }
-
-    /// The type of view representing the body of this view.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias Body = some View
 }
 
 /// The default progress view style in the current context of the view being
@@ -4830,6 +5036,19 @@ extension Ellipse : InsettableShape {
     public static func == (a: EmptyAnimatableData, b: EmptyAnimatableData) -> Bool
 }
 
+/// An empty group of commands.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct EmptyCommands : Commands {
+
+    /// Creates an empty group of commands.
+    public init()
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = Never
+}
+
 /// The empty, or identity, modifier.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyModifier : ViewModifier {
@@ -5667,7 +5886,28 @@ public protocol FileDocument {
     /// Defaults to `readableContentTypes`.
     static var writableContentTypes: [UTType] { get }
 
+    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
+    init(configuration: Self.ReadConfiguration) throws
+
+    /// The configuration for reading document contents.
+    typealias ReadConfiguration = FileDocumentReadConfiguration
+
+    /// Serialize the document to file contents for a specified `configuration`.
+    /// - Parameter configuration: the configuration for the current document
+    ///   contents.
+    ///
+    /// - Returns: The destination to serialize the document contents to. The
+    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
+    ///   of the one provided in `configuration`.
+    func fileWrapper(configuration: Self.WriteConfiguration) throws -> FileWrapper
+
+    /// The configuration for serializing document contents.
+    typealias WriteConfiguration = FileDocumentWriteConfiguration
+
     /// Initialize self from the contents of `fileWrapper` of a given `type`.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    @available(*, deprecated, message: "Implement init(configuration:) instead")
     init(fileWrapper: FileWrapper, contentType: UTType) throws
 
     /// Serialize the document to file contents for a specified `type`.
@@ -5677,6 +5917,9 @@ public protocol FileDocument {
     ///     can be overridden with a newly created `FileWrapper` or
     ///     incrementally updated if needed.
     ///   - contentType: The expected uniform type of the file contents.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    @available(*, deprecated, message: "Implement fileWrapper(configuration:) instead")
     func write(to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
@@ -5689,6 +5932,42 @@ extension FileDocument {
     ///
     /// Defaults to `readableContentTypes`.
     public static var writableContentTypes: [UTType] { get }
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension FileDocument {
+
+    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
+    @available(*, deprecated, message: "Implement init(configuration:) instead")
+    public init(configuration: Self.ReadConfiguration) throws
+
+    /// Serialize the document to file contents for a specified `configuration`.
+    /// - Parameter configuration: the configuration for the current document
+    ///   contents.
+    ///
+    /// - Returns: The destination to serialize the document contents to. The
+    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
+    ///   of the one provided in `configuration`.
+    @available(*, deprecated, message: "Implement fileWrapper(configuration:) instead")
+    public func fileWrapper(configuration: Self.WriteConfiguration) throws -> FileWrapper
+
+    /// Initialize self from the contents of `fileWrapper` of a given `type`.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    public init(fileWrapper: FileWrapper, contentType: UTType) throws
+
+    /// Serialize the document to file contents for a specified `type`.
+    ///
+    /// - Parameters:
+    ///   - fileWrapper: The destination to serialize the document to. The value
+    ///     can be overridden with a newly created `FileWrapper` or
+    ///     incrementally updated if needed.
+    ///   - contentType: The expected uniform type of the file contents.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    public func write(to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
 /// The properties of an open file document.
@@ -5716,6 +5995,33 @@ public struct FileDocumentConfiguration<Document> where Document : FileDocument 
     /// This can return `false` if the document is in viewing mode or if the
     /// file is unable to be written to.
     public var isEditable: Bool
+}
+
+/// The configuration for reading file contents.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct FileDocumentReadConfiguration {
+
+    /// The expected uniform type of the file contents.
+    public let contentType: UTType
+
+    /// The file wrapper containing the document content.
+    public let file: FileWrapper
+}
+
+/// The configuration for serializing file contents.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct FileDocumentWriteConfiguration {
+
+    /// The expected uniform type of the file contents.
+    public let contentType: UTType
+
+    /// The file wrapper containing the current document content.
+    /// `nil` if the document is unsaved.
+    public let existingFile: FileWrapper?
 }
 
 /// A style for rasterizing vector shapes.
@@ -6898,12 +7204,20 @@ public struct GridItem {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Group<Content> {
 
-    /// The type of scene that represents the body of this scene.
-    ///
-    /// When you create a custom scene, Swift infers this type from your
-    /// implementation of the required ``SwiftUI/Scene/body-swift.property``
-    /// property.
+    /// The type of content representing the body of this toolbar content.
     public typealias Body = Never
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension Group : ToolbarContent where Content : ToolbarContent {
+
+    public init(@ToolbarContentBuilder content: () -> Content)
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension Group : CustomizableToolbarContent where Content : CustomizableToolbarContent {
+
+    public init(@ToolbarContentBuilder content: () -> Content)
 }
 
 @available(iOS 14.0, macOS 11.0, *)
@@ -6930,6 +7244,14 @@ extension Group : Scene where Content : Scene {
 extension Group : View where Content : View {
 
     @inlinable public init(@ViewBuilder content: () -> Content)
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension Group : Commands where Content : Commands {
+
+    @inlinable public init(@CommandsBuilder content: () -> Content)
 }
 
 /// A stylized view with an optional label that is associated with a logical
@@ -7701,6 +8023,137 @@ extension InsettableShape {
 
 }
 
+/// Key equivalents consist of a letter, punctuation, or function key that can
+/// be combined with an optional set of modifier keys to specify a keyboard
+/// shortcut.
+///
+/// Key equivalents are used to establish keyboard shortcuts to app
+/// functionality. Any key can be used as a key equivalent as long as pressing
+/// it produces a single character value. Key equivalents are typically
+/// initialized using a single-character string literal, with constants for
+/// unprintable or hard-to-type values.
+///
+/// The modifier keys necessary to type a key equivalent are factored in to the
+/// resulting keyboard shortcut. That is, a key equivalent whose raw value is
+/// the capitalized string "A" corresponds with the keyboard shortcut
+/// Command-Shift-A. The exact mapping may depend on the keyboard layout—for
+/// example, a key equivalent whith the character value "}" produces a shortcut
+/// equivalent to Command-Shift-] on ANSI keyboards, but would produce a
+/// different shortcut for keyboard layouts where punctuation characters are in
+/// different locations.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct KeyEquivalent {
+
+    /// Up Arrow (U+F700)
+    public static let upArrow: KeyEquivalent
+
+    /// Down Arrow (U+F701)
+    public static let downArrow: KeyEquivalent
+
+    /// Left Arrow (U+F702)
+    public static let leftArrow: KeyEquivalent
+
+    /// Right Arrow (U+F703)
+    public static let rightArrow: KeyEquivalent
+
+    /// Escape (U+001B)
+    public static let escape: KeyEquivalent
+
+    /// Delete (U+0008)
+    public static let delete: KeyEquivalent
+
+    /// Delete Forward (U+F728)
+    public static let deleteForward: KeyEquivalent
+
+    /// Home (U+F729)
+    public static let home: KeyEquivalent
+
+    /// End (U+F72B)
+    public static let end: KeyEquivalent
+
+    /// Page Up (U+F72C)
+    public static let pageUp: KeyEquivalent
+
+    /// Page Down (U+F72D)
+    public static let pageDown: KeyEquivalent
+
+    /// Clear (U+F739)
+    public static let clear: KeyEquivalent
+
+    /// Tab (U+0009)
+    public static let tab: KeyEquivalent
+
+    /// Space (U+0020)
+    public static let space: KeyEquivalent
+
+    /// Return (U+000D)
+    public static let `return`: KeyEquivalent
+
+    /// The character value that the key equivalent represents.
+    public var character: Character
+
+    /// Creates a new key equivalent from the given character value.
+    public init(_ character: Character)
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension KeyEquivalent : ExpressibleByExtendedGraphemeClusterLiteral {
+
+    /// Creates an instance initialized to the given value.
+    ///
+    /// - Parameter value: The value of the new instance.
+    public init(extendedGraphemeClusterLiteral: Character)
+
+    /// A type that represents an extended grapheme cluster literal.
+    ///
+    /// Valid types for `ExtendedGraphemeClusterLiteralType` are `Character`,
+    /// `String`, and `StaticString`.
+    public typealias ExtendedGraphemeClusterLiteralType = Character
+
+    /// A type that represents a Unicode scalar literal.
+    ///
+    /// Valid types for `UnicodeScalarLiteralType` are `Unicode.Scalar`,
+    /// `Character`, `String`, and `StaticString`.
+    public typealias UnicodeScalarLiteralType = Character
+}
+
+/// Keyboard shortcuts describe combinations of keys on a keyboard that the user
+/// can press in order to activate a button or toggle.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct KeyboardShortcut {
+
+    /// The standard keyboard shortcut for the default button, consisting of
+    /// the Return (↩) key and no modifiers.
+    ///
+    /// On macOS, the default button is designated with special coloration. If
+    /// more than one control is assigned this shortcut, only the first one is
+    /// emphasized.
+    public static let defaultAction: KeyboardShortcut
+
+    /// The standard keyboard shortcut for cancelling the in-progress action
+    /// or dismissing a prompt, consisting of the Escape (⎋) key and no
+    /// modifiers.
+    public static let cancelAction: KeyboardShortcut
+
+    /// The key equivalent that the user presses in conjunction with any
+    /// specified modifier keys to activate the shortcut.
+    public var key: KeyEquivalent
+
+    /// The modifier keys that the user presses in conjunction with a key
+    /// equivalent to activate the shortcut.
+    public var modifiers: EventModifiers
+
+    /// Creates a new keyboard shortcut with the given key equivalent and set of
+    /// modifier keys.
+    public init(_ key: KeyEquivalent, modifiers: EventModifiers = .command)
+}
+
 /// A standard label for user interface items, consisting of an icon with a
 /// title.
 ///
@@ -8025,7 +8478,7 @@ public struct LazyHGrid<Content> : View where Content : View {
 /// consists of a horizontal row of text views. The stack aligns to the top
 /// of the scroll view and uses 10-point spacing between each text view.
 ///
-///     ScrollView {
+///     ScrollView(.horizontal) {
 ///         LazyHStack(alignment: .top, spacing: 10) {
 ///             ForEach(1...100, id: \.self) {
 ///                 Text("Column \($0)")
@@ -9174,6 +9627,16 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     public func accessibilityAction(named name: Text, _ handler: @escaping () -> Void) -> ModifiedContent<Content, Modifier>
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
+
+    /// Adds a custom accessibility action to the view and all subviews.
+    public func accessibilityAction(named nameKey: LocalizedStringKey, _ handler: @escaping () -> Void) -> ModifiedContent<Content, Modifier>
+
+    /// Adds a custom accessibility action to the view and all subviews.
+    public func accessibilityAction<S>(named name: S, _ handler: @escaping () -> Void) -> ModifiedContent<Content, Modifier> where S : StringProtocol
+}
+
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ModifiedContent : Equatable where Content : Equatable, Modifier : Equatable {
 
@@ -9224,10 +9687,140 @@ extension ModifiedContent : Scene where Content : Scene, Modifier : _SceneModifi
     public var body: ModifiedContent<Content, Modifier>.Body { get }
 }
 
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
 
     /// Specifies whether to hide this view from system accessibility features.
+    public func accessibilityHidden(_ hidden: Bool) -> ModifiedContent<Content, Modifier>
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    public func accessibilityLabel(_ label: Text) -> ModifiedContent<Content, Modifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ value: Text) -> ModifiedContent<Content, Modifier>
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    public func accessibilityHint(_ hint: Text) -> ModifiedContent<Content, Modifier>
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// If you don't specify any input labels, the user can still refer to the view using the accessibility
+    /// label that you add with the accessibilityLabel() modifier. Provide labels in descending order
+    /// of importance. Voice Control and Full Keyboard Access use the input labels.
+    public func accessibilityInputLabels(_ inputLabels: [Text]) -> ModifiedContent<Content, Modifier>
+
+    /// Adds the given traits to the view.
+    public func accessibilityAddTraits(_ traits: AccessibilityTraits) -> ModifiedContent<Content, Modifier>
+
+    /// Removes the given traits from this view.
+    public func accessibilityRemoveTraits(_ traits: AccessibilityTraits) -> ModifiedContent<Content, Modifier>
+
+    /// Uses the specified string to identify the view.
+    ///
+    /// Use this value for testing. It isn't visible to the user.
+    public func accessibilityIdentifier(_ identifier: String) -> ModifiedContent<Content, Modifier>
+
+    /// Sets the sort priority order for this view's accessibility
+    /// element, relative to other elements at the same level.
+    ///
+    /// Higher numbers are sorted first. The default sort priority is zero.
+    public func accessibilitySortPriority(_ sortPriority: Double) -> ModifiedContent<Content, Modifier>
+
+    /// Specifies the point where activations occur in the view.
+    public func accessibilityActivationPoint(_ activationPoint: CGPoint) -> ModifiedContent<Content, Modifier>
+
+    /// Specifies the unit point where activations occur in the view.
+    public func accessibilityActivationPoint(_ activationPoint: UnitPoint) -> ModifiedContent<Content, Modifier>
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    public func accessibilityLabel(_ labelKey: LocalizedStringKey) -> ModifiedContent<Content, Modifier>
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    public func accessibilityLabel<S>(_ label: S) -> ModifiedContent<Content, Modifier> where S : StringProtocol
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ valueKey: LocalizedStringKey) -> ModifiedContent<Content, Modifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue<S>(_ value: S) -> ModifiedContent<Content, Modifier> where S : StringProtocol
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    public func accessibilityHint(_ hintKey: LocalizedStringKey) -> ModifiedContent<Content, Modifier>
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    public func accessibilityHint<S>(_ hint: S) -> ModifiedContent<Content, Modifier> where S : StringProtocol
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// Provide labels in descending order of importance. Voice Control
+    /// and Full Keyboard Access use the input labels.
+    ///
+    /// > Note: If you don't specify any input labels, the user can still
+    ///   refer to the view using the accessibility label that you add with the
+    ///   `accessibilityLabel()` modifier.
+    public func accessibilityInputLabels(_ inputLabelKeys: [LocalizedStringKey]) -> ModifiedContent<Content, Modifier>
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// Provide labels in descending order of importance. Voice Control
+    /// and Full Keyboard Access use the input labels.
+    ///
+    /// > Note: If you don't specify any input labels, the user can still
+    ///   refer to the view using the accessibility label that you add with the
+    ///   `accessibilityLabel()` modifier.
+    public func accessibilityInputLabels<S>(_ inputLabels: [S]) -> ModifiedContent<Content, Modifier> where S : StringProtocol
+}
+
+extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
+
+    /// Specifies whether to hide this view from system accessibility features.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
     public func accessibility(hidden: Bool) -> ModifiedContent<Content, Modifier>
 
     /// Adds a label to the view that describes its contents.
@@ -9236,6 +9829,10 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     /// For example, you could use this method to label a button that plays music with the text "Play".
     /// Don't include text in the label that repeats information that users already have. For example,
     /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
     public func accessibility(label: Text) -> ModifiedContent<Content, Modifier>
 
     /// Adds a textual description of the value that the view contains.
@@ -9243,6 +9840,10 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     /// Use this method to describe the value represented by a view, but only if that's different than the
     /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
     /// you can provide the current volume setting, like "60%", using accessibility(value:).
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
     public func accessibility(value: Text) -> ModifiedContent<Content, Modifier>
 
     /// Communicates to the user what happens after performing the view's
@@ -9250,39 +9851,74 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     ///
     /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
     /// "Downloads the attachment".
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
     public func accessibility(hint: Text) -> ModifiedContent<Content, Modifier>
 
     /// Sets alternate input labels with which users identify a view.
     ///
     /// If you don't specify any input labels, the user can still refer to the view using the accessibility
-    /// label that you add with the accessibility(label:) modifier. Provide labels in descending order
+    /// label that you add with the accessibilityLabel() modifier. Provide labels in descending order
     /// of importance. Voice Control and Full Keyboard Access use the input labels.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
     public func accessibility(inputLabels: [Text]) -> ModifiedContent<Content, Modifier>
 
     /// Adds the given traits to the view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
     public func accessibility(addTraits traits: AccessibilityTraits) -> ModifiedContent<Content, Modifier>
 
     /// Removes the given traits from this view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
     public func accessibility(removeTraits traits: AccessibilityTraits) -> ModifiedContent<Content, Modifier>
 
     /// Uses the specified string to identify the view.
     ///
     /// Use this value for testing. It isn't visible to the user.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
     public func accessibility(identifier: String) -> ModifiedContent<Content, Modifier>
 
-    @available(*, deprecated)
+    @available(iOS, deprecated, introduced: 13.0)
+    @available(macOS, deprecated, introduced: 10.15)
+    @available(tvOS, deprecated, introduced: 13.0)
+    @available(watchOS, deprecated, introduced: 6)
     public func accessibility(selectionIdentifier: AnyHashable) -> ModifiedContent<Content, Modifier>
 
     /// Sets the sort priority order for this view's accessibility
     /// element, relative to other elements at the same level.
     ///
     /// Higher numbers are sorted first. The default sort priority is zero.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
     public func accessibility(sortPriority: Double) -> ModifiedContent<Content, Modifier>
 
     /// Specifies the point where activations occur in the view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
     public func accessibility(activationPoint: CGPoint) -> ModifiedContent<Content, Modifier>
 
     /// Specifies the unit point where activations occur in the view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
     public func accessibility(activationPoint: UnitPoint) -> ModifiedContent<Content, Modifier>
 }
 
@@ -9658,11 +10294,11 @@ public struct OpenURLAction {
 ///         var name: String
 ///         var children: [FileItem]? = nil
 ///         var description: String {
-///             switch (children) {
+///             switch children {
 ///             case nil:
 ///                 return "📄 \(name)"
 ///             case .some(let children):
-///                 return children.count > 0 ? "📂 \(name)" : "📁 \(name)"
+///                 return children.isEmpty ? "📂 \(name)" : "📁 \(name)"
 ///             }
 ///         }
 ///     }
@@ -9670,20 +10306,20 @@ public struct OpenURLAction {
 ///     let data =
 ///       FileItem(name: "users", children:
 ///         [FileItem(name: "user1234", children:
-///           [FileItem(name:"Photos", children:
+///           [FileItem(name: "Photos", children:
 ///             [FileItem(name: "photo001.jpg"),
 ///              FileItem(name: "photo002.jpg")]),
-///            FileItem(name:"Movies", children:
+///            FileItem(name: "Movies", children:
 ///              [FileItem(name: "movie001.mp4")]),
-///               FileItem(name:"Documents", children: [])
+///               FileItem(name: "Documents", children: [])
 ///           ]),
 ///          FileItem(name: "newuser", children:
-///            [FileItem (name: "Documents", children: [])
+///            [FileItem(name: "Documents", children: [])
 ///            ])
 ///         ])
 ///
 ///     OutlineGroup(data, children: \.children) { item in
-///         Text ("\(item.description)")
+///         Text("\(item.description)")
 ///     }
 ///
 /// ### Type Parameters
@@ -10756,9 +11392,7 @@ public struct PrimitiveButtonStyleConfiguration {
 /// take a progress value:
 ///
 ///     var body: some View {
-///         VStack {
-///             ProgressView()
-///         }
+///         ProgressView()
 ///     }
 ///
 /// ### Styling Progress Views
@@ -10787,8 +11421,9 @@ public struct PrimitiveButtonStyleConfiguration {
 ///                         radius: 4.0, x: 1.0, y: 2.0)
 ///         }
 ///     }
+///
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-public struct ProgressView<Label> : View where Label : View {
+public struct ProgressView<Label, CurrentValueLabel> : View where Label : View, CurrentValueLabel : View {
 
     /// The content and behavior of the view.
     public var body: some View { get }
@@ -10800,7 +11435,7 @@ public struct ProgressView<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-extension ProgressView {
+extension ProgressView where CurrentValueLabel == EmptyView {
 
     /// Creates a progress view for showing indeterminate progress, without a
     /// label.
@@ -10809,33 +11444,27 @@ extension ProgressView {
     /// Creates a progress view for showing indeterminate progress that displays
     /// a custom label.
     ///
-    /// To hide the label, apply the ``View/labelsHidden()`` modifier to the
-    /// progress view or its container.
-    ///
     /// - Parameters:
     ///     - label: A view builder that creates a view that describes the task
-    ///      in progress.
+    ///       in progress.
     public init(@ViewBuilder label: () -> Label)
 
-    /// Creates a progress view for showing indeterminate progress that generates
-    /// its label from a localized string.
+    /// Creates a progress view for showing indeterminate progress that
+    /// generates its label from a localized string.
     ///
     /// This initializer creates a ``Text`` view on your behalf, and treats the
     /// localized key similar to ``Text/init(_:tableName:bundle:comment:)``. See
     /// ``Text`` for more information about localizing strings. To initialize a
-    ///  indeterminate progress view with a string variable, use
-    ///  the corresponding initializer that takes a `StringProtocol` instance.
-    ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
-    /// progress view or its container.
+    /// indeterminate progress view with a string variable, use
+    /// the corresponding initializer that takes a `StringProtocol` instance.
     ///
     /// - Parameters:
     ///     - titleKey: The key for the progress view's localized title that
-    ///         describes the task in progress.
+    ///       describes the task in progress.
     public init(_ titleKey: LocalizedStringKey) where Label == Text
 
-    /// Creates a progress view for showing indeterminate progress that generates
-    /// its label from a string.
+    /// Creates a progress view for showing indeterminate progress that
+    /// generates its label from a string.
     ///
     /// - Parameters:
     ///     - title: A string that describes the task in progress.
@@ -10844,10 +11473,7 @@ extension ProgressView {
     /// title similar to ``Text/init(verbatim:)``. See ``Text`` for more
     /// information about localizing strings. To initialize a progress view with
     /// a localized string key, use the corresponding initializer that takes a
-    ///  `LocalizedStringKey` instance.
-    ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
-    /// progress view or its container.
+    /// `LocalizedStringKey` instance.
     public init<S>(_ title: S) where Label == Text, S : StringProtocol
 }
 
@@ -10861,13 +11487,12 @@ extension ProgressView {
     /// progress, in which case the progress view ignores `total`.
     ///
     /// - Parameters:
-    ///     - value: The completed amount of the task to this point, in a
-    ///         range of `0.0` to `total`, or `nil` if the progress is
-    ///         indeterminate.
-    ///     - total: The full amount representing the complete scope of the task,
-    ///         meaning the task is complete if `value` equals `total`. The
-    ///         default value is `1.0`.
-    public init<V>(value: V?, total: V = 1.0) where Label == EmptyView, V : BinaryFloatingPoint
+    ///     - value: The completed amount of the task to this point, in a range
+    ///       of `0.0` to `total`, or `nil` if the progress is indeterminate.
+    ///     - total: The full amount representing the complete scope of the
+    ///       task, meaning the task is complete if `value` equals `total`. The
+    ///       default value is `1.0`.
+    public init<V>(value: V?, total: V = 1.0) where Label == EmptyView, CurrentValueLabel == EmptyView, V : BinaryFloatingPoint
 
     /// Creates a progress view for showing determinate progress, with a
     /// custom label.
@@ -10877,19 +11502,35 @@ extension ProgressView {
     /// the nearest possible bound. A value of `nil` represents indeterminate
     /// progress, in which case the progress view ignores `total`.
     ///
-    /// To hide the label, apply the ``View/labelsHidden()`` modifier to the
-    /// progress view or its container.
+    /// - Parameters:
+    ///     - value: The completed amount of the task to this point, in a range
+    ///       of `0.0` to `total`, or `nil` if the progress is indeterminate.
+    ///     - total: The full amount representing the complete scope of the
+    ///       task, meaning the task is complete if `value` equals `total`. The
+    ///       default value is `1.0`.
+    ///     - label: A view builder that creates a view that describes the task
+    ///       in progress.
+    public init<V>(value: V?, total: V = 1.0, @ViewBuilder label: () -> Label) where CurrentValueLabel == EmptyView, V : BinaryFloatingPoint
+
+    /// Creates a progress view for showing determinate progress, with a
+    /// custom label.
+    ///
+    /// If the value is non-`nil`, but outside the range of `0.0` through
+    /// `total`, the progress view pins the value to those limits, rounding to
+    /// the nearest possible bound. A value of `nil` represents indeterminate
+    /// progress, in which case the progress view ignores `total`.
     ///
     /// - Parameters:
-    ///     - value: The completed amount of the task to this point, in a
-    ///         range of `0.0` to `total`, or `nil` if the progress is
-    ///         indeterminate.
-    ///     - total: The full amount representing the complete scope of the task,
-    ///         meaning the task is complete if `value` equals `total`. The
-    ///         default value is `1.0`.
+    ///     - value: The completed amount of the task to this point, in a range
+    ///       of `0.0` to `total`, or `nil` if the progress is indeterminate.
+    ///     - total: The full amount representing the complete scope of the
+    ///       task, meaning the task is complete if `value` equals `total`. The
+    ///       default value is `1.0`.
     ///     - label: A view builder that creates a view that describes the task
-    ///         in progress.
-    public init<V>(value: V?, total: V = 1.0, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint
+    ///       in progress.
+    ///     - currentValueLabel: A view builder that creates a view that
+    ///       describes the level of completed progress of the task.
+    public init<V>(value: V?, total: V = 1.0, @ViewBuilder label: () -> Label, @ViewBuilder currentValueLabel: () -> CurrentValueLabel) where V : BinaryFloatingPoint
 
     /// Creates a progress view for showing determinate progress that generates
     /// its label from a localized string.
@@ -10905,19 +11546,16 @@ extension ProgressView {
     ///  determinate progress view with a string variable, use
     ///  the corresponding initializer that takes a `StringProtocol` instance.
     ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
-    /// progress view or its container.
-    ///
     /// - Parameters:
     ///     - titleKey: The key for the progress view's localized title that
-    ///         describes the task in progress.
-    ///     - value: The completed amount of the task to this point, in a
-    ///         range of `0.0` to `total`, or `nil` if the progress is
-    ///         indeterminate.
-    ///     - total: The full amount representing the complete scope of the task,
-    ///         meaning the task is complete if `value` equals `total`. The
-    ///         default value is `1.0`.
-    public init<V>(_ titleKey: LocalizedStringKey, value: V?, total: V = 1.0) where Label == Text, V : BinaryFloatingPoint
+    ///       describes the task in progress.
+    ///     - value: The completed amount of the task to this point, in a range
+    ///       of `0.0` to `total`, or `nil` if the progress is
+    ///       indeterminate.
+    ///     - total: The full amount representing the complete scope of the
+    ///       task, meaning the task is complete if `value` equals `total`. The
+    ///       default value is `1.0`.
+    public init<V>(_ titleKey: LocalizedStringKey, value: V?, total: V = 1.0) where Label == Text, CurrentValueLabel == EmptyView, V : BinaryFloatingPoint
 
     /// Creates a progress view for showing determinate progress that generates
     /// its label from a string.
@@ -10930,21 +11568,18 @@ extension ProgressView {
     /// This initializer creates a ``Text`` view on your behalf, and treats the
     /// title similar to ``Text/init(verbatim:)``. See ``Text`` for more
     /// information about localizing strings. To initialize a determinate
-    /// progress view with a localized string key, use
-    /// the corresponding initializer that takes a `LocalizedStringKey` instance.
-    ///
-    /// To hide the title, apply the ``View/labelsHidden()`` modifier to the
-    /// progress view or its container.
+    /// progress view with a localized string key, use the corresponding
+    /// initializer that takes a `LocalizedStringKey` instance.
     ///
     /// - Parameters:
     ///     - title: The string that describes the task in progress.
-    ///     - value: The completed amount of the task to this point, in a
-    ///         range of `0.0` to `total`, or `nil` if the progress is
-    ///         indeterminate.
-    ///     - total: The full amount representing the complete scope of the task,
-    ///         meaning the task is complete if `value` equals `total`. The
-    ///         default value is `1.0`.
-    public init<S, V>(_ title: S, value: V?, total: V = 1.0) where Label == Text, S : StringProtocol, V : BinaryFloatingPoint
+    ///     - value: The completed amount of the task to this point, in a range
+    ///       of `0.0` to `total`, or `nil` if the progress is
+    ///       indeterminate.
+    ///     - total: The full amount representing the complete scope of the
+    ///       task, meaning the task is complete if `value` equals `total`. The
+    ///       default value is `1.0`.
+    public init<S, V>(_ title: S, value: V?, total: V = 1.0) where Label == Text, CurrentValueLabel == EmptyView, S : StringProtocol, V : BinaryFloatingPoint
 }
 
 extension ProgressView {
@@ -10952,10 +11587,8 @@ extension ProgressView {
     /// Creates a progress view for visualizing the given progress instance.
     ///
     /// The progress view synthesizes a default label using the
-    /// `localizedDescription` of the given progress instance. To hide the
-    /// label, apply the ``View/labelsHidden()`` modifier to the progress view
-    /// or its container.
-    public init(_ progress: Progress) where Label == DefaultProgressViewLabel
+    /// `localizedDescription` of the given progress instance.
+    public init(_ progress: Progress) where Label == EmptyView, CurrentValueLabel == EmptyView
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -10980,7 +11613,8 @@ extension ProgressView {
     ///                         radius: 4.0, x: 1.0, y: 2.0)
     ///         }
     ///     }
-    public init(_ configuration: ProgressViewStyleConfiguration) where Label == ProgressViewStyleConfiguration.Label
+    ///
+    public init(_ configuration: ProgressViewStyleConfiguration) where Label == ProgressViewStyleConfiguration.Label, CurrentValueLabel == ProgressViewStyleConfiguration.CurrentValueLabel
 }
 
 /// A type that applies standard interaction behavior to all progress views
@@ -11026,7 +11660,7 @@ public struct ProgressViewStyleConfiguration {
     }
 
     /// A type-erased label that describes the current value of a progress view.
-    public struct ValueLabel : View {
+    public struct CurrentValueLabel : View {
 
         /// The type of view representing the body of this view.
         ///
@@ -11035,15 +11669,15 @@ public struct ProgressViewStyleConfiguration {
         public typealias Body = Never
     }
 
-    /// The completed fraction of the task represented by the progress view, from
-    /// `0.0` (not yet started) to `1.0` (fully complete), or `nil` if the
+    /// The completed fraction of the task represented by the progress view,
+    /// from `0.0` (not yet started) to `1.0` (fully complete), or `nil` if the
     /// progress is indeterminate.
     public let fractionCompleted: Double?
 
     /// A view that describes the task represented by the progress view.
     ///
-    /// If `nil`, then the task is self-evident from the surrounding context, and
-    /// the style does not need to provide any additional description.
+    /// If `nil`, then the task is self-evident from the surrounding context,
+    /// and the style does not need to provide any additional description.
     ///
     /// If the progress view is defined using a `Progress` instance, then this
     /// label is equivalent to its `localizedDescription`.
@@ -11051,13 +11685,13 @@ public struct ProgressViewStyleConfiguration {
 
     /// A view that describes the current value of a progress view.
     ///
-    /// If `nil`, then the value of the progress view is either self-evident from
-    /// the surrounding context or unknown, and the style does not need to
+    /// If `nil`, then the value of the progress view is either self-evident
+    /// from the surrounding context or unknown, and the style does not need to
     /// provide any additional description.
     ///
     /// If the progress view is defined using a `Progress` instance, then this
     /// label is equivalent to its `localizedAdditionalDescription`.
-    public var valueLabel: ProgressViewStyleConfiguration.ValueLabel?
+    public var currentValueLabel: ProgressViewStyleConfiguration.CurrentValueLabel?
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -11231,8 +11865,11 @@ public protocol ReferenceFileDocument : ObservableObject {
     /// Defaults to `readableContentTypes`.
     static var writableContentTypes: [UTType] { get }
 
-    /// Initialize a document from the contents of `fileWrapper`.
-    init(fileWrapper: FileWrapper, contentType: UTType) throws
+    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
+    init(configuration: Self.ReadConfiguration) throws
+
+    /// The configuration for reading document contents.
+    typealias ReadConfiguration = FileDocumentReadConfiguration
 
     /// Create a snapshot of the current state of the document, which will be
     /// used for serialization while `self` becomes editable by the user.
@@ -11251,10 +11888,34 @@ public protocol ReferenceFileDocument : ObservableObject {
     /// - Parameters:
     ///   - snapshot: The snapshot of the document containing the state required
     ///     to be saved.
+    ///   - configuration: The configuration for the current document contents.
+    ///
+    /// - Returns: The destination to serialize the document contents to. The
+    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
+    ///   of the one provided in `configuration`.
+    func fileWrapper(snapshot: Self.Snapshot, configuration: Self.WriteConfiguration) throws -> FileWrapper
+
+    /// The configurations for serializing document contents.
+    typealias WriteConfiguration = FileDocumentWriteConfiguration
+
+    /// Initialize a document from the contents of `fileWrapper`.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    @available(*, deprecated, message: "Implement init(configuration:) instead")
+    init(fileWrapper: FileWrapper, contentType: UTType) throws
+
+    /// Serialize the snapshot to file contents for a specified `type`.
+    ///
+    /// - Parameters:
+    ///   - snapshot: The snapshot of the document containing the state required
+    ///     to be saved.
     ///   - fileWrapper: The destination to serialize the snapshot to. The value
     ///     can be overridden with a newly created `FileWrapper` or
     ///     incrementally updated if needed.
     ///   - contentType: The expected uniform type of the file contents.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    @available(*, deprecated, message: "Implement fileWrapper(snapshot:configuration:) instead")
     func write(snapshot: Self.Snapshot, to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
@@ -11267,6 +11928,47 @@ extension ReferenceFileDocument {
     ///
     /// Defaults to `readableContentTypes`.
     public static var writableContentTypes: [UTType] { get }
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension ReferenceFileDocument {
+
+    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
+    @available(*, deprecated, message: "Implement init(configuration:) instead")
+    public init(configuration: Self.ReadConfiguration) throws
+
+    /// Serialize the snapshot to file contents for a specified `type`.
+    ///
+    /// - Parameters:
+    ///   - snapshot: The snapshot of the document containing the state required
+    ///     to be saved.
+    ///   - configuration: The configuration for the current document contents.
+    ///
+    /// - Returns: The destination to serialize the document contents to. The
+    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
+    ///   of the one provided in `configuration`.
+    @available(*, deprecated, message: "Implement fileWrapper(snapshot:configuration:) instead")
+    public func fileWrapper(snapshot: Self.Snapshot, configuration: Self.WriteConfiguration) throws -> FileWrapper
+
+    /// Initialize a document from the contents of `fileWrapper`.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    public init(fileWrapper: FileWrapper, contentType: UTType) throws
+
+    /// Serialize the snapshot to file contents for a specified `type`.
+    ///
+    /// - Parameters:
+    ///   - snapshot: The snapshot of the document containing the state required
+    ///     to be saved.
+    ///   - fileWrapper: The destination to serialize the snapshot to. The value
+    ///     can be overridden with a newly created `FileWrapper` or
+    ///     incrementally updated if needed.
+    ///   - contentType: The expected uniform type of the file contents.
+    ///
+    /// - Warning: This is deprecated and will be removed in a future seed.
+    public func write(snapshot: Self.Snapshot, to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
 /// The properties of an open reference file document.
@@ -11745,6 +12447,26 @@ extension Scene {
 
 }
 
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension Scene {
+
+    /// Adds commands to the scene.
+    ///
+    /// Commands are realized in different ways on different platforms. On
+    /// macOS, the main menu uses the available command menus and groups to
+    /// organize its main menu items. Each menu is represented as a top-level
+    /// menu bar menu, and each command group has a corresponding set of menu
+    /// items in one of the top-level menus, delimited by separator menu items.
+    ///
+    /// On iPadOS, commands with keyboard shortcuts are exposed in the shortcut
+    /// discoverability HUD that users see when they hold down the Command (⌘)
+    /// key.
+    public func commands<Content>(@CommandsBuilder content: () -> Content) -> some Scene where Content : Commands
+
+}
+
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Scene {
 
@@ -12019,7 +12741,7 @@ extension ScenePhase : Hashable {
 /// destroyed on iPadOS or the window is closed on macOS), the data is also
 /// destroyed. Do not use `SceneStorage` with sensitive data.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-@propertyWrapper public struct SceneStorage<Value> : DynamicProperty {
+@frozen @propertyWrapper public struct SceneStorage<Value> : DynamicProperty {
 
     /// The underlying value referenced by the state variable.
     ///
@@ -12712,6 +13434,25 @@ extension ShapeStyle where Self : View, Self.Body == _ShapeView<Rectangle, Self>
     public var body: _ShapeView<Rectangle, Self> { get }
 }
 
+/// A built-in set of commands for manipulating window sidebars.
+///
+/// These commands are optional and can be explicitly requested by passing a
+/// value of this type to the `Scene.commands(_:)` modifier.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct SidebarCommands : Commands {
+
+    /// A new value describing the built-in sidebar-related commands.
+    public init()
+
+    /// The composition of commands that comprise the command group.
+    public var body: some Commands { get }
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = some Commands
+}
+
 /// The behavior and appearance of a sidebar or source list.
 @available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
@@ -12739,9 +13480,9 @@ public struct SidebarListStyle : ListStyle {
 ///         },
 ///         onCompletion: { result in
 ///             switch result {
-///             case .success (let authResults):
+///             case .success(let authResults):
 ///                 print("Authorization successful.")
-///             case .failure (let error):
+///             case .failure(let error):
 ///                 print("Authorization failed: " + error.localizedDescription)
 ///             }
 ///         }
@@ -13123,7 +13864,7 @@ public struct StackNavigationViewStyle : NavigationViewStyle {
     ///         Button(action: { self.showingProfile.toggle() }) {
     ///             Image(systemName: "person.crop.circle")
     ///                 .imageScale(.large)
-    ///                 .accessibility(label: Text("User Profile"))
+    ///                 .accessibilityLabel(Text("User Profile"))
     ///                 .padding()
     ///         }
     ///     }
@@ -14287,6 +15028,26 @@ extension Text.Case : Hashable {
     public static var allCases: [TextAlignment] { get }
 }
 
+/// A built-in group of commands for searching, editing, and transforming
+/// selections of text.
+///
+/// These commands are optional and can be explicitly requested by passing a
+/// value of this type to the `Scene.commands(_:)` modifier.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct TextEditingCommands : Commands {
+
+    /// A new value describing the built-in text-editing commands.
+    public init()
+
+    /// The composition of commands that comprise the command group.
+    public var body: some Commands { get }
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = some Commands
+}
+
 /// A view that can display and edit long-form text.
 ///
 /// A text editor view allows you to display and edit multiline, scrollable
@@ -14482,6 +15243,26 @@ extension TextField where Label == Text {
 public protocol TextFieldStyle {
 }
 
+/// A built-in set of commands for transforming the styles applied to selections
+/// of text.
+///
+/// These commands are optional and can be explicitly requested by passing a
+/// value of this type to the `Scene.commands(_:)` modifier.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct TextFormattingCommands : Commands {
+
+    /// A new value describing the built-in text-formatting commands.
+    public init()
+
+    /// The composition of commands that comprise the command group.
+    public var body: some Commands { get }
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = some Commands
+}
+
 /// A label style that only displays the title of the label.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct TitleOnlyLabelStyle : LabelStyle {
@@ -14672,83 +15453,181 @@ public struct ToggleStyleConfiguration {
     public var $isOn: Binding<Bool> { get }
 }
 
+/// A built-in set of commands for manipulating window toolbars.
+///
+/// These commands are optional and can be explicitly requested by passing a
+/// value of this type to the `Scene.commands(_:)` modifier.
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct ToolbarCommands : Commands {
+
+    /// A new value describing the built-in toolbar-related commands.
+    public init()
+
+    /// The composition of commands that comprise the command group.
+    public var body: some Commands { get }
+
+    /// The type of command group representing the body of this command group.
+    public typealias Body = some Commands
+}
+
+/// Conforming types represent items that can be placed in various locations
+/// in a toolbar.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+public protocol ToolbarContent {
+
+    /// The type of content representing the body of this toolbar content.
+    associatedtype Body : ToolbarContent
+
+    /// The composition of content that comprise the toolbar content.
+    @ToolbarContentBuilder var body: Self.Body { get }
+}
+
 /// Constructs a toolbar item set from multi-expression closures.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-@_functionBuilder public struct ToolbarContentBuilder<ID> {
+@_functionBuilder public struct ToolbarContentBuilder {
 
-    public static func buildBlock<V>(_ content: ToolbarItem<ID, V>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, V>)> where V : View
+    public static func buildBlock<Content>(_ content: Content) -> some ToolbarContent where Content : ToolbarContent
+
+
+    public static func buildBlock<Content>(_ content: Content) -> some CustomizableToolbarContent where Content : CustomizableToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>)> where C0 : View, C1 : View
+    public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>)> where C0 : View, C1 : View, C2 : View
+    public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>)> where C0 : View, C1 : View, C2 : View, C3 : View
+    public static func buildBlock<C0, C1, C2, C3>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View
+    public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent, C4 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View
+    public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent, C4 : ToolbarContent, C5 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent, C4 : ToolbarContent, C5 : ToolbarContent, C6 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>, _ c7: ToolbarItem<ID, C7>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>, ToolbarItem<ID, C7>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent, C4 : ToolbarContent, C5 : ToolbarContent, C6 : ToolbarContent, C7 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>, _ c7: ToolbarItem<ID, C7>, _ c8: ToolbarItem<ID, C8>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>, ToolbarItem<ID, C7>, ToolbarItem<ID, C8>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent, C4 : ToolbarContent, C5 : ToolbarContent, C6 : ToolbarContent, C7 : ToolbarContent, C8 : ToolbarContent
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarContentBuilder {
 
-    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: ToolbarItem<ID, C0>, _ c1: ToolbarItem<ID, C1>, _ c2: ToolbarItem<ID, C2>, _ c3: ToolbarItem<ID, C3>, _ c4: ToolbarItem<ID, C4>, _ c5: ToolbarItem<ID, C5>, _ c6: ToolbarItem<ID, C6>, _ c7: ToolbarItem<ID, C7>, _ c8: ToolbarItem<ID, C8>, _ c9: ToolbarItem<ID, C9>) -> ToolbarItemGroup<ID, (ToolbarItem<ID, C0>, ToolbarItem<ID, C1>, ToolbarItem<ID, C2>, ToolbarItem<ID, C3>, ToolbarItem<ID, C4>, ToolbarItem<ID, C5>, ToolbarItem<ID, C6>, ToolbarItem<ID, C7>, ToolbarItem<ID, C8>, ToolbarItem<ID, C9>)> where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View, C9 : View
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8, _ c9: C9) -> some ToolbarContent where C0 : ToolbarContent, C1 : ToolbarContent, C2 : ToolbarContent, C3 : ToolbarContent, C4 : ToolbarContent, C5 : ToolbarContent, C6 : ToolbarContent, C7 : ToolbarContent, C8 : ToolbarContent, C9 : ToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent, C4 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent, C4 : CustomizableToolbarContent, C5 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent, C4 : CustomizableToolbarContent, C5 : CustomizableToolbarContent, C6 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent, C4 : CustomizableToolbarContent, C5 : CustomizableToolbarContent, C6 : CustomizableToolbarContent, C7 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent, C4 : CustomizableToolbarContent, C5 : CustomizableToolbarContent, C6 : CustomizableToolbarContent, C7 : CustomizableToolbarContent, C8 : CustomizableToolbarContent
+
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarContentBuilder {
+
+    public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(_ c0: C0, _ c1: C1, _ c2: C2, _ c3: C3, _ c4: C4, _ c5: C5, _ c6: C6, _ c7: C7, _ c8: C8, _ c9: C9) -> some CustomizableToolbarContent where C0 : CustomizableToolbarContent, C1 : CustomizableToolbarContent, C2 : CustomizableToolbarContent, C3 : CustomizableToolbarContent, C4 : CustomizableToolbarContent, C5 : CustomizableToolbarContent, C6 : CustomizableToolbarContent, C7 : CustomizableToolbarContent, C8 : CustomizableToolbarContent, C9 : CustomizableToolbarContent
+
 }
 
 /// A model that represents an item which can be placed in the toolbar
 /// or navigation bar.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-public struct ToolbarItem<ID, Content> where Content : View {
+public struct ToolbarItem<ID, Content> : ToolbarContent where Content : View {
 
-    /// Creates a toolbar item with the specified placement and content,
-    /// which allows for user customization.
-    ///
-    /// - Parameters:
-    ///   - id: A unique identifier for this item.
-    ///   - placement: Which section of the toolbar
-    ///     the item should be placed in.
-    ///   - showsByDefault: Whether the item appears by default in the toolbar,
-    ///     or only shows if the user explicitly adds it via customization.
-    ///   - content: The content of the item.
-    public init(id: ID, placement: ToolbarItemPlacement = .automatic, showsByDefault: Bool = true, @ViewBuilder content: () -> Content)
+    /// The type of content representing the body of this toolbar content.
+    public typealias Body = Never
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -14764,17 +15643,44 @@ extension ToolbarItem where ID == Void {
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ToolbarItem : CustomizableToolbarContent where ID == String {
+
+    /// Creates a toolbar item with the specified placement and content,
+    /// which allows for user customization.
+    ///
+    /// - Parameters:
+    ///   - id: A unique identifier for this item.
+    ///   - placement: Which section of the toolbar
+    ///     the item should be placed in.
+    ///   - showsByDefault: Whether the item appears by default in the toolbar,
+    ///     or only shows if the user explicitly adds it via customization.
+    ///   - content: The content of the item.
+    public init(id: String, placement: ToolbarItemPlacement = .automatic, showsByDefault: Bool = true, @ViewBuilder content: () -> Content)
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToolbarItem : Identifiable where ID : Hashable {
 
     /// The stable identity of the entity associated with this instance.
     public var id: ID { get }
 }
 
-/// A set of toolbar items which can be added to a toolbar or navigation bar.
+/// A model that represents a group of `ToolbarItem`s which can be placed in
+/// the toolbar or navigation bar.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-public struct ToolbarItemGroup<ID, Items> {
+public struct ToolbarItemGroup<Content> : ToolbarContent where Content : View {
 
-    public init(_ items: Items)
+    /// Creates a toolbar item group with a specified placement and content.
+    ///
+    /// - Parameters:
+    ///  - placement: Which section of the toolbar all of its vended
+    ///    `ToolbarItem`s should be placed in.
+    ///  - content: The content of the group. Each view specified in the
+    ///    `ViewBuilder` will be given its own `ToolbarItem` in the toolbar.
+    public init(placement: ToolbarItemPlacement = .automatic, @ViewBuilder content: () -> Content)
+
+    /// The type of content representing the body of this toolbar content.
+    public typealias Body = Never
 }
 
 /// A structure which defines the placement of a toolbar item.
@@ -14790,9 +15696,34 @@ public struct ToolbarItemGroup<ID, Items> {
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ToolbarItemPlacement {
 
-    /// The item is placed in the default section.
+    /// The item is placed automatically, depending on many factors including
+    /// the platform, size class, or presence of other items.
     ///
-    /// The default section varies depending on the current platform.
+    /// On macOS and Mac Catalyst, items are placed in the current toolbar
+    /// section in order of leading to trailing. On watchOS, only the first
+    /// item will appear, pinned beneath the navigation bar.
+    ///
+    /// On iOS, iPadOS and tvOS, items are placed in the trailing position of
+    /// the navigation bar by default, and additional items overflow into the
+    /// leading position of the navigation bar if it is not already occupied
+    /// by some system-provided item (like a back button).
+    ///
+    /// In compact horizontal size classes, both the leading and the trailing
+    /// positions of the navigation bar are limited to a single item each,
+    /// whereas in regular horizontal size classes this limit increases to six
+    /// items each.
+    ///
+    /// Items placed in the navigation bar are ordered inward from the outer edge.
+    /// For example, the first item in a regular, horizontal size class will
+    /// be placed in the most-trailing position, the next item will be placed
+    /// in the second-most trailing position, and so on. The same applies to
+    /// the leading side of the bar, where the first item is placed in the
+    /// most-leading position, the next item in the second-most leading
+    /// position, etc.
+    ///
+    /// On iOS and iPadOS, if the navigation bar cannot accommodate all of the
+    /// items, then the remaining items will appear in a bottom toolbar in
+    /// order of leading to trailing.
     public static let automatic: ToolbarItemPlacement
 
     /// The item is placed in the principal item section.
@@ -14800,14 +15731,29 @@ public struct ToolbarItemPlacement {
     /// Principal actions receive prominent placement.
     /// As an example, the location field for a web browser would be
     /// considered a principal item.
+    ///
+    /// On macOS and Mac Catalyst, the principal item will be placed in the
+    /// center of the toolbar.
+    ///
+    /// On iOS, iPadOS, and tvOS, the principal item will be placed in
+    /// the center of the navigation bar. This item will take precendent over
+    /// a title specified through `.navigationTitle()`.
     @available(watchOS, unavailable)
     public static let principal: ToolbarItemPlacement
 
-    /// The item represents a navigational action.
+    /// The item represents a navigation action.
     ///
-    /// Navigational actions allow the user to move between contexts.
+    /// Navigation actions allow the user to move between contexts.
     /// For example, the forward and back buttons of a web browser
-    /// are considered navigational actions.
+    /// are considered navigation actions.
+    ///
+    /// On macOS and Mac Catalyst, navigation items will be placed in the
+    /// leading edge of the toolbar ahead of the inline title if that is
+    /// present in the toolbar.
+    ///
+    /// On iOS, iPadOS, and tvOS, navigation items will appear in the leading
+    /// edge of the navigation bar. If a system navigation item like a back
+    /// button is present, they will instead appear in the .primaryAction placement.
     @available(watchOS, unavailable)
     public static let navigation: ToolbarItemPlacement
 
@@ -14816,6 +15762,15 @@ public struct ToolbarItemPlacement {
     /// A primary action is considered to be a more frequently used action
     /// for the current context. For example, a button which allows the user
     /// to compose a new message in a chat application.
+    ///
+    /// On macOS and Mac Catalyst, the primary action is considered to be the
+    /// leading edge of the toolbar.
+    ///
+    /// On iOS, iPadOS and tvOS, the primary action is considered to be
+    /// the trailing edge of the navigation bar.
+    ///
+    /// On watchOS, the primary action is placed beneath the navigation
+    /// bar and revealed by scrolling.
     public static let primaryAction: ToolbarItemPlacement
 
     /// The item represents a change in status for the current context.
@@ -14824,6 +15779,12 @@ public struct ToolbarItemPlacement {
     /// and do not represent an action that can be taken by the user.
     /// For example, a message indicating the last time the server has been
     /// checked for new messages.
+    ///
+    /// On macOS and Mac Catalyst, status items will be placed in the center
+    /// of the toolbar.
+    ///
+    /// On iOS and iPadOS, status items will be placed in the center of the
+    /// bottom toolbar.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public static let status: ToolbarItemPlacement
@@ -14833,12 +15794,29 @@ public struct ToolbarItemPlacement {
     /// Confirmation actions are used to receive user confirmation of a
     /// particular action. An example of a confirmation action would be
     /// an action with the label "Add" to add a new event to the calendar.
+    ///
+    /// On macOS and Mac Catalyst, confirmationAction items will be placed
+    /// on the trailing edge in the trailing-most position of the sheet
+    /// and gain the apps accent color as a background color.
+    ///
+    /// On iOS, iPadOS, and tvOS, confirmationAction items will be placed in
+    /// the same location as a `.primaryAction` placement.
+    ///
+    /// On watchOS, confirmationAction items will be placed in the trailing
+    /// edge of the navigation bar.
     public static let confirmationAction: ToolbarItemPlacement
 
     /// The item represents a cancellation action for a modal interface.
     ///
     /// Cancellation actions can be used to dismiss the modal interface
     /// without taking any action, usually via a 'Cancel' button.
+    ///
+    /// On macOS and Mac Catalyst, cancellationAction items will be placed
+    /// on the trailing edge of the sheet but be placed before any
+    /// confirmationAction items.
+    ///
+    /// On iOS, iPadOS, tvOS and watchOS, cancellationAction items will
+    /// be placed on the leading edge of the navigation bar.
     public static let cancellationAction: ToolbarItemPlacement
 
     /// The item represents a destructive action for a modal interface.
@@ -14846,19 +15824,29 @@ public struct ToolbarItemPlacement {
     /// Destructive actions are used represent the opposite of a
     /// confirmational action. For example, a button labeled 'Don't Save',
     /// which declines to save the current document before quitting.
+    ///
+    /// On macOS and Mac Catalyst, destructiveAction items will be placed in
+    /// the leading edge of the sheet and will be given a special appearance
+    /// to caution against accidental use.
+    ///
+    /// On iOS, tvOS and watchOS, destructiveAction items will be placed in the
+    /// trailing edge of the navigation bar.
     public static let destructiveAction: ToolbarItemPlacement
 
-    /// The item is placed in the leading area of the navigation bar.
+    /// The item is placed in the leading edge of the navigation bar. Applies
+    /// to iOS, iPadOS, tvOS, and Mac Catalyst.
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public static let navigationBarLeading: ToolbarItemPlacement
 
-    /// The item is placed in the trailing area of the navigation bar.
+    /// The item is placed in the trailing edge of the navigation bar. Applies
+    /// to iOS, iPadOS, tvOS, and Mac Catalyst.
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public static let navigationBarTrailing: ToolbarItemPlacement
 
-    /// The item is placed in the bottom toolbar.
+    /// The item is placed in the bottom toolbar. Applies to iOS, iPadOS, and
+    /// Mac Catalyst.
     @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -15018,6 +16006,8 @@ extension UIApplicationDelegateAdaptor where DelegateType : ObservableObject {
 @available(watchOS, unavailable)
 open class UIHostingController<Content> : UIViewController where Content : View {
 
+    @objc override dynamic open var keyCommands: [UIKeyCommand]? { get }
+
     /// Creates a hosting controller object that wraps the specified SwiftUI
     /// view.
     ///
@@ -15123,6 +16113,8 @@ open class UIHostingController<Content> : UIViewController where Content : View 
     @objc override dynamic open func willMove(toParent parent: UIViewController?)
 
     @objc override dynamic open func didMove(toParent parent: UIViewController?)
+
+    @objc override dynamic open func target(forAction action: Selector, withSender sender: Any?) -> Any?
 
     @objc override dynamic public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
 }
@@ -15964,6 +16956,7 @@ extension View {
 
 }
 
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Adds an accessibility action to this view.
@@ -15971,6 +16964,16 @@ extension View {
 
     /// Adds a custom accessibility action to the view and all subviews.
     public func accessibilityAction(named name: Text, _ handler: @escaping () -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension View {
+
+    /// Adds a custom accessibility action to the view and all subviews.
+    public func accessibilityAction(named nameKey: LocalizedStringKey, _ handler: @escaping () -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a custom accessibility action to the view and all subviews.
+    public func accessibilityAction<S>(named name: S, _ handler: @escaping () -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -18636,7 +19639,6 @@ extension View {
 
 }
 
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
     /// Hides the labels of any controls contained within this view.
@@ -18670,6 +19672,48 @@ extension View {
     ///   interface like `Toggle`, but not to controls like a bordered button
     ///   where the label is inside the button's border.
     public func labelsHidden() -> some View
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension View {
+
+    /// Defines a keyboard shortcut and assigns it to the modified control.
+    ///
+    /// Pressing the control's shortcut while the control is anywhere in the
+    /// frontmost window or scene, or anywhere in the macOS main menu, is
+    /// equivalent to direct interaction with the control to perform its primary
+    /// action.
+    ///
+    /// The target of a keyboard shortcut is resolved in a leading-to-trailing,
+    /// depth-first traversal of one or more view hierarchies. On macOS, the
+    /// system looks in the key window first, then the main window, and then the
+    /// command groups; on other platforms, the system looks in the active
+    /// scene, and then the command groups.
+    ///
+    /// If multiple controls are associated with the same shortcut, the first
+    /// one found is used.
+    public func keyboardShortcut(_ key: KeyEquivalent, modifiers: EventModifiers = .command) -> some View
+
+
+    /// Assigns a keyboard shortcut to the modified control.
+    ///
+    /// Pressing the control's shortcut while the control is anywhere in the
+    /// frontmost window or scene, or anywhere in the macOS main menu, is
+    /// equivalent to direct interaction with the control to perform its primary
+    /// action.
+    ///
+    /// The target of a keyboard shortcut is resolved in a leading-to-trailing
+    /// traversal of one or more view hierarchies. On macOS, the system looks in
+    /// the key window first, then the main window, and then the command groups;
+    /// on other platforms, the system looks in the active scene, and then the
+    /// command groups.
+    ///
+    /// If multiple controls are associated with the same shortcut, the first
+    /// one found is used.
+    public func keyboardShortcut(_ shortcut: KeyboardShortcut) -> some View
 
 }
 
@@ -19190,7 +20234,7 @@ extension View {
     /// Populates the toolbar or navigation bar with the specified items.
     ///
     /// - Parameter items: The items representing the content of the toolbar.
-    public func toolbar<Items>(@ToolbarContentBuilder<Void> items: () -> ToolbarItemGroup<Void, Items>) -> some View
+    public func toolbar<Content>(@ToolbarContentBuilder content: () -> Content) -> some View where Content : ToolbarContent
 
 
     /// Populates the toolbar or navigation bar with the specified items,
@@ -19198,9 +20242,258 @@ extension View {
     ///
     /// - Parameters:
     ///   - id: A unique identifier for this toolbar.
-    ///   - items: The items representing the content of the toolbar.
-    public func toolbar<Items>(id: String, @ToolbarContentBuilder<String> items: () -> ToolbarItemGroup<String, Items>) -> some View
+    ///   - content: The content representing the content of the toolbar.
+    public func toolbar<Content>(id: String, @ToolbarContentBuilder content: () -> Content) -> some View where Content : CustomizableToolbarContent
 
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension View {
+
+    /// Specifies whether to hide this view from system accessibility features.
+    public func accessibilityHidden(_ hidden: Bool) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    public func accessibilityLabel(_ label: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ value: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    public func accessibilityHint(_ hint: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// Provide labels in descending order of importance. Voice Control
+    /// and Full Keyboard Access use the input labels.
+    ///
+    /// > Note: If you don't specify any input labels, the user can still
+    ///   refer to the view using the accessibility label that you add with the
+    ///   `accessibilityLabel()` modifier.
+    ///
+    /// - Parameter inputLabels: An array of Text elements to use as input labels.
+    public func accessibilityInputLabels(_ inputLabels: [Text]) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds the given traits to the view.
+    public func accessibilityAddTraits(_ traits: AccessibilityTraits) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Removes the given traits from this view.
+    public func accessibilityRemoveTraits(_ traits: AccessibilityTraits) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Uses the specified string to identify the view.
+    ///
+    /// Use this value for testing. It isn't visible to the user.
+    public func accessibilityIdentifier(_ identifier: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Sets the sort priority order for this view's accessibility element,
+    /// relative to other elements at the same level.
+    ///
+    /// Higher numbers are sorted first. The default sort priority is zero.
+    public func accessibilitySortPriority(_ sortPriority: Double) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Specifies the point where activations occur in the view.
+    public func accessibilityActivationPoint(_ activationPoint: CGPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Specifies the unit point where activations occur in the view.
+    public func accessibilityActivationPoint(_ activationPoint: UnitPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension View {
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    public func accessibilityLabel(_ labelKey: LocalizedStringKey) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    public func accessibilityLabel<S>(_ label: S) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ valueKey: LocalizedStringKey) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue<S>(_ value: S) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    public func accessibilityHint(_ hintKey: LocalizedStringKey) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    public func accessibilityHint<S>(_ hint: S) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// Provide labels in descending order of importance. Voice Control
+    /// and Full Keyboard Access use the input labels.
+    ///
+    /// > Note: If you don't specify any input labels, the user can still
+    ///   refer to the view using the accessibility label that you add with the
+    ///   `accessibilityLabel()` modifier.
+    public func accessibilityInputLabels(_ inputLabelKeys: [LocalizedStringKey]) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// Provide labels in descending order of importance. Voice Control
+    /// and Full Keyboard Access use the input labels.
+    ///
+    /// > Note: If you don't specify any input labels, the user can still
+    ///   refer to the view using the accessibility label that you add with the
+    ///   `accessibilityLabel()` modifier.
+    public func accessibilityInputLabels<S>(_ inputLabels: [S]) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
+}
+
+extension View {
+
+    /// Specifies whether to hide this view from system accessibility features.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityHidden(_:)")
+    public func accessibility(hidden: Bool) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a label to the view that describes its contents.
+    ///
+    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
+    /// For example, you could use this method to label a button that plays music with the text "Play".
+    /// Don't include text in the label that repeats information that users already have. For example,
+    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
+    public func accessibility(label: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
+    /// you can provide the current volume setting, like "60%", using accessibility(value:).
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    public func accessibility(value: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Communicates to the user what happens after performing the view's
+    /// action.
+    ///
+    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
+    /// "Downloads the attachment".
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityHint(_:)")
+    public func accessibility(hint: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Sets alternate input labels with which users identify a view.
+    ///
+    /// Provide labels in descending order of importance. Voice Control
+    /// and Full Keyboard Access use the input labels.
+    ///
+    /// > Note: If you don't specify any input labels, the user can still
+    ///   refer to the view using the accessibility label that you add with the
+    ///   ``accessibility(label:)`` modifier.
+    ///
+    /// - Parameter inputLabels: An array of Text elements to use as input labels.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityInputLabels(_:)")
+    public func accessibility(inputLabels: [Text]) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds the given traits to the view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityAddTraits(_:)")
+    public func accessibility(addTraits traits: AccessibilityTraits) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Removes the given traits from this view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityRemoveTraits(_:)")
+    public func accessibility(removeTraits traits: AccessibilityTraits) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Uses the specified string to identify the view.
+    ///
+    /// Use this value for testing. It isn't visible to the user.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityIdentifier(_:)")
+    public func accessibility(identifier: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Sets a selection identifier for this view's accessibility element.
+    ///
+    /// Picker uses the value to determine what node to use for the
+    /// accessibility value.
+    @available(iOS, deprecated, introduced: 13.0)
+    @available(macOS, deprecated, introduced: 10.15)
+    @available(tvOS, deprecated, introduced: 13.0)
+    @available(watchOS, deprecated, introduced: 6)
+    public func accessibility(selectionIdentifier: AnyHashable) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Sets the sort priority order for this view's accessibility element,
+    /// relative to other elements at the same level.
+    ///
+    /// Higher numbers are sorted first. The default sort priority is zero.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilitySortPriority(_:)")
+    public func accessibility(sortPriority: Double) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Specifies the point where activations occur in the view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    public func accessibility(activationPoint: CGPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Specifies the unit point where activations occur in the view.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityActivationPoint(_:)")
+    public func accessibility(activationPoint: UnitPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -19287,77 +20580,6 @@ extension View {
     /// - Parameter style: The progress view style to use for this view.
     public func progressViewStyle<S>(_ style: S) -> some View where S : ProgressViewStyle
 
-}
-
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension View {
-
-    /// Specifies whether to hide this view from system accessibility features.
-    public func accessibility(hidden: Bool) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Adds a label to the view that describes its contents.
-    ///
-    /// Use this method to provide an accessibility label for a view that doesn't display text, like an icon.
-    /// For example, you could use this method to label a button that plays music with the text "Play".
-    /// Don't include text in the label that repeats information that users already have. For example,
-    /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
-    public func accessibility(label: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
-    /// you can provide the current volume setting, like "60%", using accessibility(value:).
-    public func accessibility(value: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Communicates to the user what happens after performing the view's
-    /// action.
-    ///
-    /// Provide a hint in the form of a brief phrase, like "Purchases the item" or
-    /// "Downloads the attachment".
-    public func accessibility(hint: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Sets alternate input labels with which users identify a view.
-    ///
-    /// Provide labels in descending order of importance. Voice Control 
-    /// and Full Keyboard Access use the input labels.
-    /// 
-    /// > Note: If you don't specify any input labels, the user can still 
-    ///   refer to the view using the accessibility label that you add with the 
-    ///   ``accessibility(label:)`` modifier. 
-    ///
-    /// - Parameter inputLabels: An array of Text elements to use as input labels.
-    public func accessibility(inputLabels: [Text]) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Adds the given traits to the view.
-    public func accessibility(addTraits traits: AccessibilityTraits) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Removes the given traits from this view.
-    public func accessibility(removeTraits traits: AccessibilityTraits) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Uses the specified string to identify the view.
-    ///
-    /// Use this value for testing. It isn't visible to the user.
-    public func accessibility(identifier: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Sets a selection identifier for this view's accessibility element.
-    ///
-    /// Picker uses the value to determine what node to use for the
-    /// accessibility value.
-    @available(*, deprecated)
-    public func accessibility(selectionIdentifier: AnyHashable) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Sets the sort priority order for this view's accessibility element,
-    /// relative to other elements at the same level.
-    ///
-    /// Higher numbers are sorted first. The default sort priority is zero.
-    public func accessibility(sortPriority: Double) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Specifies the point where activations occur in the view.
-    public func accessibility(activationPoint: CGPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Specifies the unit point where activations occur in the view.
-    public func accessibility(activationPoint: UnitPoint) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -20124,8 +21346,6 @@ extension View {
 
 }
 
-@available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@available(macOS, unavailable)
 extension View {
 
     /// Sets the navigation bar items for this view.
@@ -20176,6 +21396,7 @@ extension View {
     ///   - leading: A view that appears on the leading edge of the title.
     ///   - trailing: A view that appears on the trailing edge of the title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<L, T>(leading: L, trailing: T) -> some View where L : View, T : View
@@ -20223,6 +21444,7 @@ extension View {
     /// - Parameter leading: A view that appears on the leading edge of the
     ///   title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<L>(leading: L) -> some View where L : View
@@ -20264,6 +21486,7 @@ extension View {
     ///
     /// - Parameter trailing: A view shown on the trailing edge of the title.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Use toolbar(_:) with navigationBarLeading or navigationBarTrailing placement")
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public func navigationBarItems<T>(trailing: T) -> some View where T : View
@@ -20292,6 +21515,7 @@ extension View {
 ///             Text("Jump to Definition")
 ///         }
 ///     }
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @_functionBuilder public struct ViewBuilder {
 
@@ -20313,13 +21537,22 @@ extension ViewBuilder {
     /// evaluates to `true`.
     public static func buildIf<Content>(_ content: Content?) -> Content? where Content : View
 
-    /// Provides support for "if" statements in multi-statement closures, producing
-    /// ConditionalContent for the "then" branch.
+    /// Provides support for "if" statements in multi-statement closures,
+    /// producing conditional content for the "then" branch.
     public static func buildEither<TrueContent, FalseContent>(first: TrueContent) -> _ConditionalContent<TrueContent, FalseContent> where TrueContent : View, FalseContent : View
 
-    /// Provides support for "if-else" statements in multi-statement closures, producing
-    /// ConditionalContent for the "else" branch.
+    /// Provides support for "if-else" statements in multi-statement closures,
+    /// producing conditional content for the "else" branch.
     public static func buildEither<TrueContent, FalseContent>(second: FalseContent) -> _ConditionalContent<TrueContent, FalseContent> where TrueContent : View, FalseContent : View
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ViewBuilder {
+
+    /// Provides support for "if" statements with `#available()` clauses in
+    /// multi-statement closures, producing conditional content for the "then"
+    /// branch, i.e. the conditionally-available branch.
+    public static func buildLimitedAvailability<Content>(_ content: Content) -> AnyView where Content : View
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -21007,6 +22240,9 @@ extension Never : Scene {
 extension Never : WidgetConfiguration {
 }
 
+extension Never : ToolbarContent, CustomizableToolbarContent {
+}
+
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Optional : View where Wrapped : View {
 
@@ -21155,4 +22391,10 @@ extension CGFloat : VectorArithmetic {
 
     /// Returns the dot-product of this vector arithmetic instance with itself.
     public var magnitudeSquared: Double { get }
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension Never : Commands {
 }
