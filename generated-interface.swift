@@ -1,6 +1,5 @@
-// Xcode 12.0b5
+// Xcode 12.0b6
 
-import AuthenticationServices
 import Combine
 import CoreData
 import CoreFoundation
@@ -5105,33 +5104,142 @@ extension EmptyModifier {
     public typealias Body = Never
 }
 
-/// A property wrapper type that reads a value from the view's environment.
+/// A property wrapper that reads a value from a view's environment.
+///
+/// Use the `Environment` property wrapper to read a value
+/// stored in a view's environment. Indicate the value to read using an
+/// ``EnvironmentValues`` key path in the property declaration. For example, you
+/// can create a property that reads the color scheme of the current
+/// view using the key path of the ``EnvironmentValues/colorScheme``
+/// property:
+///
+///     @Environment(\.colorScheme) var colorScheme: ColorScheme
+///
+/// You can condition a view's content on the associated value, which
+/// you read from the declared property's ``wrappedValue``. As with any property
+/// wrapper, you access the wrapped value by directly referring to the property:
+///
+///     if colorScheme == .dark { // Checks the wrapped value.
+///         DarkContent()
+///     } else {
+///         LightContent()
+///     }
+///
+/// If the value changes, SwiftUI updates any parts of your view that depend on
+/// the value. For example, that might happen in the above example if the user
+/// changes the Appearance settings.
+///
+/// You can use this property wrapper to read --- but not set --- an environment
+/// value. SwiftUI updates some environment values automatically based on system
+/// settings and provides reasonable defaults for others. You can override some
+/// of these, as well as set custom environment values that you define,
+/// using the ``View/environment(_:_:)`` view modifier.
+///
+/// For the complete list of environment values provided by SwiftUI, see the
+/// properties of the ``EnvironmentValues`` structure. For information about
+/// creating custom environment values, see the ``EnvironmentKey`` protocol.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen @propertyWrapper public struct Environment<Value> : DynamicProperty {
 
     /// Creates an environment property to read the specified key path.
     ///
+    /// Don’t call this initializer directly. Instead, declare a property
+    /// with the ``Environment`` property wrapper, and provide the key path of
+    /// the environment value that the property should reflect:
+    ///
+    ///     struct MyView: View {
+    ///         @Environment(\.colorScheme) var colorScheme: ColorScheme
+    ///
+    ///         // ...
+    ///     }
+    ///
+    /// SwiftUI automatically updates any parts of `MyView` that depend on
+    /// the property when the associated environment value changes.
+    /// You can't modify the environment value using a property like this.
+    /// Instead, use the ``View/environment(_:_:)`` view modifier on a view to
+    /// set a value for a view hierarchy.
+    ///
     /// - Parameter keyPath: A key path to a specific resulting value.
     @inlinable public init(_ keyPath: KeyPath<EnvironmentValues, Value>)
 
     /// The current value of the environment property.
+    ///
+    /// The wrapped value property provides primary access to the value's data.
+    /// However, you don't access `wrappedValue` directly. Instead, you read the
+    /// property variable created with the ``Environment`` property wrapper:
+    ///
+    ///     @Environment(\.colorScheme) var colorScheme: ColorScheme
+    ///
+    ///     var body: some View {
+    ///         if colorScheme == .dark {
+    ///             DarkContent()
+    ///         } else {
+    ///             LightContent()
+    ///         }
+    ///     }
+    ///
     @inlinable public var wrappedValue: Value { get }
 }
 
-/// A protocol that represents an environment key.
+/// A key for accessing values in the environment.
 ///
-/// To declare a new environment key type, specify the `Value` type and provide
-/// a default value; for example:
+/// You can create custom environment values by extending the
+/// ``EnvironmentValues`` structure with new properties.
+/// First declare a new environment key type and specify a value for the
+/// required ``defaultValue`` property:
 ///
-///     struct MyEnvironmentKey: EnvironmentKey {
-///         typealias Value = String
-///
-///         static var defaultValue: String = "default value"
+///     private struct MyEnvironmentKey: EnvironmentKey {
+///         static let defaultValue: String = "Default value"
 ///     }
+///
+/// The Swift compiler automatically infers the associated ``Value`` type as the
+/// type you specify for the default value. Then use the key to define a new
+/// environment value property:
+///
+///     extension EnvironmentValues {
+///         var myCustomValue: String {
+///             get { self[MyEnvironmentKey.self] }
+///             set { self[MyEnvironmentKey.self] = newValue }
+///         }
+///     }
+///
+/// Clients of your environment value never use the key directly.
+/// Instead, they use the key path of your custom environment value property.
+/// To set the environment value for a view and all its subviews, add the
+/// ``View/environment(_:_:)`` view modifier to that view:
+///
+///     MyView()
+///         .environment(\.myCustomValue, "Another string")
+///
+/// As a convenience, you can also define a dedicated view modifier to
+/// apply this environment value:
+///
+///     extension View {
+///         func myCustomValue(_ myCustomValue: String) -> some View {
+///             environment(\.myCustomValue, myCustomValue)
+///         }
+///     }
+///
+/// This improves clarity at the call site:
+///
+///     MyView()
+///         .myCustomValue("Another string")
+///
+/// To read the value from inside `MyView` or one of its descendants, use the
+/// ``Environment`` property wrapper:
+///
+///     struct MyView: View {
+///         @Environment(\.myCustomValue) var customValue: String
+///
+///         var body: some View {
+///             Text(customValue) // Displays "Another value".
+///         }
+///     }
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol EnvironmentKey {
 
-    /// The associated type representing the data type of the environment key's
+    /// The associated type representing the type of the environment key's
     /// value.
     associatedtype Value
 
@@ -5184,12 +5292,121 @@ public protocol EnvironmentKey {
 }
 
 /// A collection of environment values propagated through a view hierarchy.
+///
+/// SwiftUI exposes a collection of values to your app's views in an
+/// `EnvironmentValues` structure. To read a value from the structure,
+/// declare a property using the ``Environment`` property wrapper and
+/// specify the value's key path. For example, you can read the current locale:
+///
+///     @Environment(\.locale) var locale: Locale
+///
+/// Use the property you declare to dynamically control a view's layout.
+/// SwiftUI automatically sets or updates many environment values, like
+/// ``EnvironmentValues/pixelLength``, ``EnvironmentValues/scenePhase``, or
+/// ``EnvironmentValues/locale``, based on device characteristics, system state,
+/// or user settings. For others, like ``EnvironmentValues/lineLimit``, SwiftUI
+/// provides a reasonable default value.
+///
+/// You can set or override some values using the ``View/environment(_:_:)``
+/// view modifier:
+///
+///     MyView()
+///         .environment(\.lineLimit, 2)
+///
+/// The value that you set affects the environment for the view that you modify
+/// --- including its descendants in the view hierarchy --- but only up to the
+/// point where you apply a different environment modifier.
+///
+/// SwiftUI provides dedicated view modifiers for setting some values, which
+/// typically makes your code easier to read. For example, rather than setting
+/// the ``EnvironmentValues/lineLimit`` value directly, as in the previous
+/// example, you should instead use the ``View/lineLimit(_:)`` modifier:
+///
+///     MyView()
+///         .lineLimit(2)
+///
+/// In some cases, using a dedicated view modifier provides additional
+/// functionality. For example, you must use the
+/// ``View/preferredColorScheme(_:)`` modifier rather than setting
+/// ``EnvironmentValues/colorScheme`` directly to ensure that the new
+/// value propagates up to the presenting container when presenting a view
+/// like a popover:
+///
+///     MyView()
+///         .popover(isPresented: $isPopped) {
+///             PopoverContent()
+///                 .preferredColorScheme(.dark)
+///         }
+///
+/// Create custom environment values by defining a type that
+/// conforms to the ``EnvironmentKey`` protocol, and then extending the
+/// environment values structure with a new property. Use your key to get and
+/// set the value, and provide a dedicated modifier for clients to use when
+/// setting the value:
+///
+///     private struct MyEnvironmentKey: EnvironmentKey {
+///         static let defaultValue: String = "Default value"
+///     }
+///
+///     extension EnvironmentValues {
+///         var myCustomValue: String {
+///             get { self[MyEnvironmentKey.self] }
+///             set { self[MyEnvironmentKey.self] = newValue }
+///         }
+///     }
+///
+///     extension View {
+///         func myCustomValue(_ myCustomValue: String) -> some View {
+///             environment(\.myCustomValue, myCustomValue)
+///         }
+///     }
+///
+/// Clients of your value then access the value in the usual way, reading it
+/// with the ``Environment`` property wrapper, and setting it with the
+/// `myCustomValue` view modifier.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct EnvironmentValues : CustomStringConvertible {
 
     /// Creates an environment values instance.
+    ///
+    /// You don't typically create an instance of ``EnvironmentValues``
+    /// directly. Doing so would provide access only to default values that
+    /// don't update based on system settings or device characteristics.
+    /// Instead, you rely on an environment values' instance
+    /// that SwiftUI manages for you when you use the ``Environment``
+    /// property wrapper and the ``View/environment(_:_:)`` view modifier.
     public init()
 
+    /// Accesses the environment value associated with a custom key.
+    ///
+    /// Create custom environment values by defining a key
+    /// that conforms to the ``EnvironmentKey`` protocol, and then using that
+    /// key with the subscript operator of the ``EnvironmentValues`` structure
+    /// to get and set a value for that key:
+    ///
+    ///     private struct MyEnvironmentKey: EnvironmentKey {
+    ///         static let defaultValue: String = "Default value"
+    ///     }
+    ///
+    ///     extension EnvironmentValues {
+    ///         var myCustomValue: String {
+    ///             get { self[MyEnvironmentKey.self] }
+    ///             set { self[MyEnvironmentKey.self] = newValue }
+    ///         }
+    ///     }
+    ///
+    /// You use custom environment values the same way you use system-provided
+    /// values, setting a value with the ``View/environment(_:_:)`` view
+    /// modifier, and reading values with the ``Environment`` property wrapper.
+    /// You can also provide a dedicated view modifier as a convenience for
+    /// setting the value:
+    ///
+    ///     extension View {
+    ///         func myCustomValue(_ myCustomValue: String) -> some View {
+    ///             environment(\.myCustomValue, myCustomValue)
+    ///         }
+    ///     }
+    ///
     public subscript<K>(key: K.Type) -> K.Value where K : EnvironmentKey
 
     /// A string that represents the contents of the environment values
@@ -5374,16 +5591,6 @@ extension EnvironmentValues {
     public var verticalSizeClass: UserInterfaceSizeClass?
 }
 
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension EnvironmentValues {
-
-    /// Exports files or data from this application by prompting the user
-    /// with an appropriate system dialog.
-    public var exportFiles: ExportFilesAction { get }
-}
-
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension EnvironmentValues {
 
@@ -5518,16 +5725,6 @@ extension EnvironmentValues {
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public var editMode: Binding<EditMode>?
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension EnvironmentValues {
-
-    /// Imports files into this application by prompting the user
-    /// with an appropriate system dialog.
-    public var importFiles: ImportFilesAction { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -5669,63 +5866,6 @@ extension ExclusiveGesture.Value : Equatable where First.Value : Equatable, Seco
     ///   - lhs: A value to compare.
     ///   - rhs: Another value to compare.
     public static func == (a: ExclusiveGesture<First, Second>.Value, b: ExclusiveGesture<First, Second>.Value) -> Bool
-}
-
-/// Provides functionality for exporting files.
-///
-/// An `ExportFilesAction` should be obtained from the environment,
-/// and can be used to export either a single file, or multiple files
-/// via a standard system dialog.
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-public struct ExportFilesAction {
-
-    /// Requests a system prompt for allowing the user to export a single file.
-    ///
-    /// - Parameters:
-    ///   - url: The URL of the file to be exported.
-    ///   - completion: A handler which will be invoked
-    ///     when the export has finished.
-    ///   - result: An optional Result indicating whether the export operation
-    ///     succeeded or failed. The value will be `nil` if the export process
-    ///     was cancelled by the user.
-    public func callAsFunction(moving url: URL, completion: @escaping (Result<URL, Error>?) -> Void)
-
-    /// Requests a system prompt for allowing the user to export multiple files.
-    ///
-    /// - Parameters:
-    ///   - url: The URLs of the files to be exported.
-    ///   - completion: A handler which will be invoked
-    ///     when the export has finished.
-    ///   - result: An optional Result indicating whether the export operation
-    ///     succeeded or failed. The value will be `nil` if the export process
-    ///     was cancelled by the user.
-    public func callAsFunction(moving urls: [URL], completion: @escaping (Result<[URL], Error>?) -> Void)
-
-    /// Requests a system prompt for allowing the user to export
-    /// data represented in memory to a single file.
-    ///
-    /// - Parameters:
-    ///   - file: A `FileWrapper` containing the data to be exported.
-    ///   - completion: A handler which will be invoked
-    ///     when the export has finished.
-    ///   - result: An optional Result indicating whether the export operation
-    ///     succeeded or failed. The value will be `nil` if the export process
-    ///     was cancelled by the user.
-    public func callAsFunction(_ file: FileWrapper, contentType: UTType, completion: @escaping (Result<URL, Error>?) -> Void)
-
-    /// Requests a system prompt for allowing the user to export
-    /// data represented in memory to multiple files.
-    ///
-    /// - Parameters:
-    ///   - files: The `FileWrapper`s containing the data to be exported.
-    ///   - completion: A handler which will be invoked
-    ///     when the export has finished.
-    ///   - result: An optional Result indicating whether the export operation
-    ///     succeeded or failed. The value will be `nil` if the export process
-    ///     was cancelled by the user.
-    public func callAsFunction(_ files: [FileWrapper], contentType: UTType, completion: @escaping (Result<[URL], Error>?) -> Void)
 }
 
 /// A property wrapper type that makes fetch requests and retrieves the results
@@ -5903,24 +6043,6 @@ public protocol FileDocument {
 
     /// The configuration for serializing document contents.
     typealias WriteConfiguration = FileDocumentWriteConfiguration
-
-    /// Initialize self from the contents of `fileWrapper` of a given `type`.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    @available(*, deprecated, message: "Implement init(configuration:) instead")
-    init(fileWrapper: FileWrapper, contentType: UTType) throws
-
-    /// Serialize the document to file contents for a specified `type`.
-    ///
-    /// - Parameters:
-    ///   - fileWrapper: The destination to serialize the document to. The value
-    ///     can be overridden with a newly created `FileWrapper` or
-    ///     incrementally updated if needed.
-    ///   - contentType: The expected uniform type of the file contents.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    @available(*, deprecated, message: "Implement fileWrapper(configuration:) instead")
-    func write(to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
 @available(iOS 14.0, macOS 11.0, *)
@@ -5932,42 +6054,6 @@ extension FileDocument {
     ///
     /// Defaults to `readableContentTypes`.
     public static var writableContentTypes: [UTType] { get }
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension FileDocument {
-
-    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
-    @available(*, deprecated, message: "Implement init(configuration:) instead")
-    public init(configuration: Self.ReadConfiguration) throws
-
-    /// Serialize the document to file contents for a specified `configuration`.
-    /// - Parameter configuration: the configuration for the current document
-    ///   contents.
-    ///
-    /// - Returns: The destination to serialize the document contents to. The
-    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
-    ///   of the one provided in `configuration`.
-    @available(*, deprecated, message: "Implement fileWrapper(configuration:) instead")
-    public func fileWrapper(configuration: Self.WriteConfiguration) throws -> FileWrapper
-
-    /// Initialize self from the contents of `fileWrapper` of a given `type`.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    public init(fileWrapper: FileWrapper, contentType: UTType) throws
-
-    /// Serialize the document to file contents for a specified `type`.
-    ///
-    /// - Parameters:
-    ///   - fileWrapper: The destination to serialize the document to. The value
-    ///     can be overridden with a newly created `FileWrapper` or
-    ///     incrementally updated if needed.
-    ///   - contentType: The expected uniform type of the file contents.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    public func write(to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
 /// The properties of an open file document.
@@ -7904,43 +7990,6 @@ extension Image.ResizingMode : Hashable {
     public init(image: Image, sourceRect: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1), scale: CGFloat = 1)
 }
 
-/// Provides functionality for importing files.
-///
-/// An `ImportFilesAction` should be obtained from the environment,
-/// and can be used to import either a single file, or multiple files
-/// via a standard system dialog.
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-public struct ImportFilesAction {
-
-    /// Requests a system prompt for allowing the user to choose a single file
-    /// for importing.
-    ///
-    /// - Parameters:
-    ///   - supportedContentTypes: The list of supported content types
-    ///     which can be imported.
-    ///   - completion: A handler which will be invoked
-    ///     when the import has finished.
-    ///   - result: An optional Result indicating whether the import operation
-    ///     succeeded or failed. The value will be `nil` if the import process
-    ///     was cancelled by the user.
-    public func callAsFunction(singleOfType supportedContentTypes: [UTType], completion: @escaping (Result<URL, Error>?) -> Void)
-
-    /// Requests a system prompt for allowing the user to choose multiple files
-    /// for importing.
-    ///
-    /// - Parameters:
-    ///   - supportedContentTypes: The list of supported content types
-    ///     which can be imported.
-    ///   - completion: A handler which will be invoked
-    ///     when the import has finished.
-    ///   - result: An optional Result indicating whether the import operation
-    ///     succeeded or failed. The value will be `nil` if the import process
-    ///     was cancelled by the user.
-    public func callAsFunction(multipleOfType supportedContentTypes: [UTType], completion: @escaping (Result<[URL], Error>?) -> Void)
-}
-
 /// Defines the implementation of all `IndexView` instances within a view
 /// hierarchy.
 ///
@@ -9415,7 +9464,7 @@ public struct MagnificationGesture : Gesture {
 ///         Image(systemName: "document")
 ///         Text("PDF")
 ///     }
-///     
+///
 /// ### Styling Menus
 ///
 /// Use the ``View/menuStyle(_:)`` modifier to change the style of all menus
@@ -10759,7 +10808,7 @@ extension Path {
 ///
 ///         var id: String { self.rawValue }
 ///     }
-///     
+///
 /// You can create a picker to select among these values by providing ``Text``
 /// views in the picker initializer's content. You can optionally provide a
 /// string as the first parameter; if you do, the picker creates a ``Text``
@@ -10839,7 +10888,7 @@ extension Path {
 ///
 ///     @State private var selectedFlavor = Flavor.chocolate
 ///     @State private var selectedTopping = Topping.nuts
-///     
+///
 ///     VStack {
 ///         Picker("Flavor", selection: $selectedFlavor) {
 ///             ForEach(Flavor.allCases) { flavor in
@@ -11897,26 +11946,6 @@ public protocol ReferenceFileDocument : ObservableObject {
 
     /// The configurations for serializing document contents.
     typealias WriteConfiguration = FileDocumentWriteConfiguration
-
-    /// Initialize a document from the contents of `fileWrapper`.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    @available(*, deprecated, message: "Implement init(configuration:) instead")
-    init(fileWrapper: FileWrapper, contentType: UTType) throws
-
-    /// Serialize the snapshot to file contents for a specified `type`.
-    ///
-    /// - Parameters:
-    ///   - snapshot: The snapshot of the document containing the state required
-    ///     to be saved.
-    ///   - fileWrapper: The destination to serialize the snapshot to. The value
-    ///     can be overridden with a newly created `FileWrapper` or
-    ///     incrementally updated if needed.
-    ///   - contentType: The expected uniform type of the file contents.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    @available(*, deprecated, message: "Implement fileWrapper(snapshot:configuration:) instead")
-    func write(snapshot: Self.Snapshot, to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
 @available(iOS 14.0, macOS 11.0, *)
@@ -11928,47 +11957,6 @@ extension ReferenceFileDocument {
     ///
     /// Defaults to `readableContentTypes`.
     public static var writableContentTypes: [UTType] { get }
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension ReferenceFileDocument {
-
-    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
-    @available(*, deprecated, message: "Implement init(configuration:) instead")
-    public init(configuration: Self.ReadConfiguration) throws
-
-    /// Serialize the snapshot to file contents for a specified `type`.
-    ///
-    /// - Parameters:
-    ///   - snapshot: The snapshot of the document containing the state required
-    ///     to be saved.
-    ///   - configuration: The configuration for the current document contents.
-    ///
-    /// - Returns: The destination to serialize the document contents to. The
-    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
-    ///   of the one provided in `configuration`.
-    @available(*, deprecated, message: "Implement fileWrapper(snapshot:configuration:) instead")
-    public func fileWrapper(snapshot: Self.Snapshot, configuration: Self.WriteConfiguration) throws -> FileWrapper
-
-    /// Initialize a document from the contents of `fileWrapper`.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    public init(fileWrapper: FileWrapper, contentType: UTType) throws
-
-    /// Serialize the snapshot to file contents for a specified `type`.
-    ///
-    /// - Parameters:
-    ///   - snapshot: The snapshot of the document containing the state required
-    ///     to be saved.
-    ///   - fileWrapper: The destination to serialize the snapshot to. The value
-    ///     can be overridden with a newly created `FileWrapper` or
-    ///     incrementally updated if needed.
-    ///   - contentType: The expected uniform type of the file contents.
-    ///
-    /// - Warning: This is deprecated and will be removed in a future seed.
-    public func write(snapshot: Self.Snapshot, to fileWrapper: inout FileWrapper, contentType: UTType) throws
 }
 
 /// The properties of an open reference file document.
@@ -12481,6 +12469,42 @@ extension Scene {
     /// - Parameter store: The user defaults to use as the default
     ///   store for `AppStorage`.
     public func defaultAppStorage(_ store: UserDefaults) -> some Scene
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension Scene {
+
+    /// Specifies a modifier to indicate if this Scene can be used
+    /// when creating a new Scene for the received External Event.
+    ///
+    /// This modifier is only supported for WindowGroup Scene types.
+    ///
+    /// For DocumentGroups, the received External Event must have a URL
+    /// for the DocumentGroup to be considered. (Either via openURL, or
+    /// the webPageURL property of an NSUserActivity). The UTI for the URL
+    /// is implicitly matched against the DocumentGroup's supported types.
+    ///
+    /// If the modifier evaluates to true, an instance of the
+    /// Scene will be used.
+    ///
+    /// If the modifier evaluates to false, on macOS the Scene
+    /// will not be used even if no other Scenes are available.
+    /// This case is considered an error. On iOS, the first Scene
+    /// specified in the body property for the App will be used.
+    ///
+    /// If no modifier is set, the Scene will be used if all
+    /// other WindowGroups with a modifier evaluate to false.
+    ///
+    /// On platforms that only allow a single Window/Scene, this method is
+    /// ignored.
+    ///
+    /// - Parameter matching: A Set of Strings that are checked to see
+    /// if they are contained in the targetContentIdenfifier. The empty Set
+    /// and empty Strings never match. The String value "*" always matches.
+    public func handlesExternalEvents(matching conditions: Set<String>) -> some Scene
 
 }
 
@@ -13461,94 +13485,6 @@ public struct SidebarListStyle : ListStyle {
 
     /// Creates a sidebar list style.
     public init()
-}
-
-/// A control that you add to your interface to allow users to sign in with
-/// their Apple ID.
-///
-/// You create a `SignInWithAppleButton` instance with a
-/// ``SignInWithAppleButton/Label`` value that indicates the purpose of the
-/// authorization, such as signing up or continuing a setup process. You also
-/// provide closures to configure the authorization and handle the result. The
-/// following sample shows how to create a `SignInWithAppleButton` instance:
-///
-///
-///     SignInWithAppleButton(
-///         .signIn,
-///         onRequest: { request in
-///             request.requestedScopes = [.fullName, .email]
-///         },
-///         onCompletion: { result in
-///             switch result {
-///             case .success(let authResults):
-///                 print("Authorization successful.")
-///             case .failure(let error):
-///                 print("Authorization failed: " + error.localizedDescription)
-///             }
-///         }
-///     )
-///
-/// To style a `SignInWithAppleButton` instance, use the
-/// ``View/signInWithAppleButtonStyle(_:)`` modifier, passing in one of the
-/// styles defined in ``SignInWithAppleButton/Style``.
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-public struct SignInWithAppleButton : View {
-
-    /// Creates an instance that displays a control to Sign in with Apple.
-    ///
-    /// - Parameters:
-    ///   - label: The label to set on the button. Defaults to
-    ///     ``SignInWithAppleButton/Label/signIn``.
-    ///   - onRequest: A closure that configures the authorization request.
-    ///   - onCompletion: A closure that handles the result of the
-    ///     authorization process. The closure receives a
-    ///     <doc://com.apple.documentation/documentation/Swift/Result> instance
-    ///     which contains either an
-    ///     <doc://com.apple.documentation/documentation/AuthenticationServices/ASAuthorization>
-    ///     or an <doc://com.apple.documentation/documentation/Swift/Error>.
-    public init(_ label: SignInWithAppleButton.Label = .signIn, onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void, onCompletion: @escaping ((Result<ASAuthorization, Error>) -> Void))
-
-    /// The content and behavior of the view.
-    public var body: some View { get }
-
-    /// The type of view representing the body of this view.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias Body = some View
-}
-
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension SignInWithAppleButton {
-
-    /// A structure that determines the label on a Sign in with Apple Button.
-    public struct Label {
-
-        /// A button label that displays "Sign in with Apple".
-        public static let signIn: SignInWithAppleButton.Label
-
-        ///  A button label that displays "Continue with Apple".
-        public static let `continue`: SignInWithAppleButton.Label
-
-        ///  A button label that displays "Sign up with Apple".
-        public static let signUp: SignInWithAppleButton.Label
-    }
-
-    /// A structure that determines the color of the Sign in with Apple Button.
-    public struct Style {
-
-        /// A style that sets the background color of the button to black.
-        public static let black: SignInWithAppleButton.Style
-
-        /// A style that sets the background color of the button to white.
-        public static let white: SignInWithAppleButton.Style
-
-        /// A style that sets the background color of the button to white, and
-        /// places a black border around the button.
-        public static let whiteOutline: SignInWithAppleButton.Style
-    }
 }
 
 /// A gesture containing two gestures that can happen at the same time with
@@ -15704,26 +15640,10 @@ public struct ToolbarItemPlacement {
     /// item will appear, pinned beneath the navigation bar.
     ///
     /// On iOS, iPadOS and tvOS, items are placed in the trailing position of
-    /// the navigation bar by default, and additional items overflow into the
-    /// leading position of the navigation bar if it is not already occupied
-    /// by some system-provided item (like a back button).
+    /// the navigation bar.
     ///
     /// In compact horizontal size classes, both the leading and the trailing
-    /// positions of the navigation bar are limited to a single item each,
-    /// whereas in regular horizontal size classes this limit increases to six
-    /// items each.
-    ///
-    /// Items placed in the navigation bar are ordered inward from the outer edge.
-    /// For example, the first item in a regular, horizontal size class will
-    /// be placed in the most-trailing position, the next item will be placed
-    /// in the second-most trailing position, and so on. The same applies to
-    /// the leading side of the bar, where the first item is placed in the
-    /// most-leading position, the next item in the second-most leading
-    /// position, etc.
-    ///
-    /// On iOS and iPadOS, if the navigation bar cannot accommodate all of the
-    /// items, then the remaining items will appear in a bottom toolbar in
-    /// order of leading to trailing.
+    /// positions of the navigation bar are limited to a single item each.
     public static let automatic: ToolbarItemPlacement
 
     /// The item is placed in the principal item section.
@@ -15753,7 +15673,8 @@ public struct ToolbarItemPlacement {
     ///
     /// On iOS, iPadOS, and tvOS, navigation items will appear in the leading
     /// edge of the navigation bar. If a system navigation item like a back
-    /// button is present, they will instead appear in the .primaryAction placement.
+    /// button is present in a compact width, they will instead appear in
+    /// the .primaryAction placement.
     @available(watchOS, unavailable)
     public static let navigation: ToolbarItemPlacement
 
@@ -17213,6 +17134,62 @@ extension View {
 
 }
 
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension View {
+
+    /// Presents a system interface for allowing the user to import an existing
+    /// file.
+    ///
+    /// In order for the interface to appear, `isPresented` must be `true`. When
+    /// the operation is finished, `isPresented` will be set to `false` before
+    /// `onCompletion` is called. If the user cancels the operation,
+    /// `isPresented` will be set to `false` and `onCompletion` will not be
+    /// called.
+    ///
+    /// - Note: Changing `allowedContentTypes` while the file importer is
+    ///   presented will have no immediate effect, however will apply the next
+    ///   time it is presented.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - allowedContentTypes: The list of supported content types which can
+    ///     be imported.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileImporter(isPresented: Binding<Bool>, allowedContentTypes: [UTType], onCompletion: @escaping (Result<URL, Error>) -> Void) -> some View
+
+
+    /// Presents a system interface for allowing the user to import multiple
+    /// files.
+    ///
+    /// In order for the interface to appear, `isPresented` must be `true`. When
+    /// the operation is finished, `isPresented` will be set to `false` before
+    /// `onCompletion` is called. If the user cancels the operation,
+    /// `isPresented` will be set to `false` and `onCompletion` will not be
+    /// called.
+    ///
+    /// - Note: Changing `allowedContentTypes` or `allowsMultipleSelection`
+    ///   while the file importer is presented will have no immediate effect,
+    ///   however will apply the next time it is presented.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - allowedContentTypes: The list of supported content types which can
+    ///     be imported.
+    ///   - allowsMultipleSelection: Whether the importer allows the user to
+    ///     select more than one file to import.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileImporter(isPresented: Binding<Bool>, allowedContentTypes: [UTType], allowsMultipleSelection: Bool, onCompletion: @escaping (Result<[URL], Error>) -> Void) -> some View
+
+}
+
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
@@ -17905,6 +17882,45 @@ extension View {
 extension View {
 
     /// Sets the environment value of the specified key path to the given value.
+    ///
+    /// Use this modifier to set one of the writable properties of the
+    /// ``EnvironmentValues`` structure, including custom values that you
+    /// create. For example, you can set the value associated with the
+    /// ``EnvironmentValues/truncationMode`` key:
+    ///
+    ///     MyView()
+    ///         .environment(\.truncationMode, .head)
+    ///
+    /// You then read the value inside `MyView` or one of its descendants
+    /// using the ``Environment`` property wrapper:
+    ///
+    ///     struct MyView: View {
+    ///         @Environment(\.truncationMode) var truncationMode: Text.TruncationMode
+    ///
+    ///         var body: some View { ... }
+    ///     }
+    ///
+    /// SwiftUI provides dedicated view modifiers for setting most
+    /// environment values, like the ``View/truncationMode(_:)``
+    /// modifier which sets the ``EnvironmentValues/truncationMode`` value:
+    ///
+    ///     MyView()
+    ///         .truncationMode(.head)
+    ///
+    /// Prefer the dedicated modifier when available, and offer your own when
+    /// defining custom environment values, as described in
+    /// ``EnvironmentKey``.
+    ///
+    /// The ``View/environment(_:_:)`` modifier affects the given view,
+    /// as well as that view's descendant views. It has no effect
+    /// outside the view hierarchy on which you call it.
+    ///
+    /// - Parameters:
+    ///   - keyPath: A key path that indicates the property of the
+    ///     ``EnvironmentValues`` structure to update.
+    ///   - value: The new value to set for the item specified by `keyPath`.
+    ///
+    /// - Returns: A view that has the given value set in its environment.
     @inlinable public func environment<V>(_ keyPath: WritableKeyPath<EnvironmentValues, V>, _ value: V) -> some View
 
 }
@@ -19418,17 +19434,6 @@ extension View {
 
 }
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)
-@available(watchOS, unavailable)
-extension View {
-
-    /// Sets the style used for all Sign in with Apple buttons in the view.
-    ///
-    /// - Parameter style: The style to apply to Sign in with Apple buttons.
-    public func signInWithAppleButtonStyle(_ style: SignInWithAppleButton.Style) -> some View
-
-}
-
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
@@ -20582,6 +20587,50 @@ extension View {
 
 }
 
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension View {
+
+    /// Presents a system interface for allowing the user to move an existing
+    /// file to a new location.
+    ///
+    /// In order for the interface to appear, both `isPresented` must be `true`
+    /// and `file` must not be `nil`. When the operation is finished,
+    /// `isPresented` will be set to `false` before `onCompletion` is called. If
+    /// the user cancels the operation, `isPresented` will be set to `false` and
+    /// `onCompletion` will not be called.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - file: The `URL` of the file to be moved.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     has succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileMover(isPresented: Binding<Bool>, file: URL?, onCompletion: @escaping (Result<URL, Error>) -> Void) -> some View
+
+
+    /// Presents a system interface for allowing the user to move a collection
+    /// of existing files to a new location.
+    ///
+    /// In order for the interface to appear, both `isPresented` must be `true`
+    /// and `files` must not be empty. When the operation is finished,
+    /// `isPresented` will be set to `false` before `onCompletion` is called. If
+    /// the user cancels the operation, `isPresented` will be set to `false` and
+    /// `onCompletion` will not be called.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - files: A collection of `URL`s for the files to be moved.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     has succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileMover<C>(isPresented: Binding<Bool>, files: C, onCompletion: @escaping (Result<[URL], Error>) -> Void) -> some View where C : Collection, C.Element == URL
+
+}
+
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
@@ -20889,6 +20938,147 @@ extension View {
     ///  object as its parameter when delivering the URL to the scene or window
     ///  the view is in.
     public func onOpenURL(perform action: @escaping (URL) -> ()) -> some View
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension View {
+
+    /// Specifies a modifier indicating the Scene this View
+    /// is in can handle matching incoming External Events.
+    ///
+    /// If no modifier is set in any Views within a Scene, the behavior
+    /// is platform dependent. On macOS, a new Scene will be created to
+    /// use for the External Event. On iOS, the system will choose an
+    /// existing Scene to use.
+    ///
+    /// On platforms that only allow a single Window/Scene, this method is
+    /// ignored, and incoming External Events are always routed to the
+    /// existing single Scene.
+    ///
+    /// - Parameter preferring: A Set of Strings that are checked to see
+    /// if they are contained in the targetContentIdenfifier to see if
+    /// the Scene this View is in prefers to handle the Exernal Event.
+    /// The empty Set and empty Strings never match. The String value
+    /// "*" always matches. The String comparisons are case/diacritic
+    /// insensitive
+    ///
+    /// - Parameter allowing: A Set of Strings that are checked to see
+    /// if they are contained in the targetContentIdenfifier to see if
+    /// the Scene this View is in allows handling the External Event.
+    /// The empty Set and empty Strings never match. The String value
+    /// "*" always matches.
+    public func handlesExternalEvents(preferring: Set<String>, allowing: Set<String>) -> some View
+
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension View {
+
+    /// Presents a system interface for allowing the user to export an in-memory
+    /// document to a file on disk.
+    ///
+    /// In order for the interface to appear, both `isPresented` must be `true`
+    /// and `document` must not be `nil`. When the operation is finished,
+    /// `isPresented` will be set to `false` before `onCompletion` is called. If
+    /// the user cancels the operation, `isPresented` will be set to `false` and
+    /// `onCompletion` will not be called.
+    ///
+    /// The `contentType` provided must be included within the document type's
+    /// `writableContentTypes`, otherwise the first valid writable content type
+    /// will be used instead.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - document: The in-memory document to export.
+    ///   - contentType: The content type to use for the exported file.
+    ///   - defaultFilename: If provided, the default name to use for the
+    ///     exported file, which will the user will have an opportunity to edit
+    ///     prior to the export.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     has succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileExporter<D>(isPresented: Binding<Bool>, document: D?, contentType: UTType, defaultFilename: String? = nil, onCompletion: @escaping (Result<URL, Error>) -> Void) -> some View where D : FileDocument
+
+
+    /// Presents a system interface for allowing the user to export a collection
+    /// of in-memory documents to files on disk.
+    ///
+    /// In order for the interface to appear, both `isPresented` must be `true`
+    /// and `documents` must not be empty. When the operation is finished,
+    /// `isPresented` will be set to `false` before `onCompletion` is called. If
+    /// the user cancels the operation, `isPresented` will be set to `false` and
+    /// `onCompletion` will not be called.
+    ///
+    /// The `contentType` provided must be included within the document type's
+    /// `writableContentTypes`, otherwise the first valid writable content type
+    /// will be used instead.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - documents: The collection of in-memory documents to export.
+    ///   - contentType: The content type to use for the exported file.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     has succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileExporter<C>(isPresented: Binding<Bool>, documents: C, contentType: UTType, onCompletion: @escaping (Result<[URL], Error>) -> Void) -> some View where C : Collection, C.Element : FileDocument
+
+
+    /// Presents a system interface for allowing the user to export an in-memory
+    /// document to a file on disk.
+    ///
+    /// In order for the interface to appear, both `isPresented` must be `true`
+    /// and `document` must not be `nil`. When the operation is finished,
+    /// `isPresented` will be set to `false` before `onCompletion` is called. If
+    /// the user cancels the operation, `isPresented` will be set to `false` and
+    /// `onCompletion` will not be called.
+    ///
+    /// The `contentType` provided must be included within the document type's
+    /// `writableContentTypes`, otherwise the first valid writable content type
+    /// will be used instead.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - document: The in-memory document to export.
+    ///   - contentType: The content type to use for the exported file.
+    ///   - defaultFilename: If provided, the default name to use for the
+    ///     exported file, which will the user will have an opportunity to edit
+    ///     prior to the export.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     has succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileExporter<D>(isPresented: Binding<Bool>, document: D?, contentType: UTType, defaultFilename: String? = nil, onCompletion: @escaping (Result<URL, Error>) -> Void) -> some View where D : ReferenceFileDocument
+
+
+    /// Presents a system interface for allowing the user to export a collection
+    /// of in-memory documents to files on disk.
+    ///
+    /// In order for the interface to appear, both `isPresented` must be `true`
+    /// and `documents` must not be empty. When the operation is finished,
+    /// `isPresented` will be set to `false` before `onCompletion` is called. If
+    /// the user cancels the operation, `isPresented` will be set to `false` and
+    /// `onCompletion` will not be called.
+    ///
+    /// The `contentType` provided must be included within the document type's
+    /// `writableContentTypes`, otherwise the first valid writable content type
+    /// will be used instead.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding to whether the interface should be shown.
+    ///   - documents: The collection of in-memory documents to export.
+    ///   - contentType: The content type to use for the exported file.
+    ///   - onCompletion: A callback that will be invoked when the operation has
+    ///     has succeeded or failed.
+    ///   - result: A `Result` indicating whether the operation succeeded or
+    ///     failed.
+    public func fileExporter<C>(isPresented: Binding<Bool>, documents: C, contentType: UTType, onCompletion: @escaping (Result<[URL], Error>) -> Void) -> some View where C : Collection, C.Element : ReferenceFileDocument
 
 }
 
@@ -22150,6 +22340,11 @@ extension Never {
     /// When you create a custom view, Swift infers this type from your
     /// implementation of the required `body` property.
     public typealias WidgetBody = Never
+}
+
+extension Encoder {
+
+    public func filteredImage(_ image: CGImage) throws -> CGImage
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
