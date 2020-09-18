@@ -1,4 +1,4 @@
-// Xcode 12.0
+// Xcode 12.2 beta (12B5018i)
 
 import Combine
 import CoreData
@@ -2351,6 +2351,7 @@ public struct CircularProgressViewStyle : ProgressViewStyle {
 
     /// Returns a `CGColor` that represents this color if one can be constructed
     /// that accurately represents this color.
+    @available(iOS 14.0, macOS 11, tvOS 14.0, watchOS 7.0, *)
     public var cgColor: CGColor? { get }
 
     /// Hashes the essential components of this value by feeding them into the
@@ -5048,7 +5049,38 @@ public struct EmptyCommands : Commands {
     public typealias Body = Never
 }
 
-/// The empty, or identity, modifier.
+/// An empty, or identity, modifier, used during development to switch
+/// modifiers at compile time.
+///
+/// Use the empty modifier to switch modifiers at compile time during
+/// development. In the example below, in a debug build the ``Text``
+/// view inside `ContentView` has a yellow background and a red border.
+/// A non-debug build reflects the default system, or container supplied
+/// appearance.
+///
+///     struct EmphasizedLayout: ViewModifier {
+///         func body(content: Content) -> some View {
+///             content
+///                 .background(Color.yellow)
+///                 .border(Color.red)
+///         }
+///     }
+///
+///     struct ContentView: View {
+///         var body: some View {
+///             Text("Hello, World!")
+///                 .modifier(modifier)
+///         }
+///
+///         var modifier: some ViewModifier {
+///             #if DEBUG
+///                 return EmphasizedLayout()
+///             #else
+///                 return EmptyModifier()
+///             #endif
+///         }
+///     }
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyModifier : ViewModifier {
 
@@ -5064,16 +5096,6 @@ public struct EmptyCommands : Commands {
     /// `content` is a proxy for the view that will have the modifier
     /// represented by `Self` applied to it.
     public func body(content: EmptyModifier.Content) -> EmptyModifier.Body
-}
-
-/// The empty, or identity, modifier.
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension EmptyModifier {
-
-    /// The type of widget representing the body of `Self`.
-    public typealias WidgetBody = Never
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -7304,20 +7326,6 @@ extension Group : ToolbarContent where Content : ToolbarContent {
 extension Group : CustomizableToolbarContent where Content : CustomizableToolbarContent {
 
     public init(@ToolbarContentBuilder content: () -> Content)
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension Group where Content : _Widget {
-
-    /// The type of widget representing the body of this widget.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias WidgetBody = Never
-
-    @inlinable public init(@_WidgetBuilder content: () -> Content)
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -9644,26 +9652,24 @@ public struct MenuStyleConfiguration {
     /// implementation of the required `body` property.
     public typealias Body = Never
 
+    /// The content that the modifier transforms into a new view or new
+    /// view modifier.
     public var content: Content
 
+    /// The view modifier.
     public var modifier: Modifier
 
-    @inlinable public init(content: Content, modifier: Modifier)
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension ModifiedContent where Content : _Widget, Modifier : _WidgetModifier {
-
-    /// The type of widget representing the body of this widget.
+    /// A structure that the defines the content and modifier needed to produce
+    /// a new view or view modifier.
     ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias WidgetBody = Never
-
-    /// Declares the content and behavior of this widget.
-    public var body: ModifiedContent<Content, Modifier>.WidgetBody { get }
+    /// If `content` is a ``View`` and `modifier` is a ``ViewModifier``, the
+    /// result is a ``View``. If `content` and `modifier` are both view
+    /// modifiers, then the result is a new ``ViewModifier`` combining them.
+    ///
+    /// - Parameters:
+    ///     - content: The content that the modifier changes.
+    ///     - modifier: The modifier to apply to the content.
+    @inlinable public init(content: Content, modifier: Modifier)
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -10280,10 +10286,13 @@ extension OffsetShape : InsettableShape where Content : InsettableShape {
 
 /// Provides functionality for opening a URL.
 ///
-/// An `OpenURLAction` should be obtained from the environment, and can be used
-/// to open a URL as the result of some user action.
+/// The `OpenURLAction` instance in the app's ``Environment`` offers
+/// a handler that you can use to open a URL in response to some action.
+/// Use the ``EnvironmentValues/openURL`` environment value to get the handler.
+/// Then call the action's handler when you need to open a URL. For example,
+/// you can open a support URL in response to when a user taps a button:
 ///
-///     struct SupportView : View {
+///     struct OpenUrlActionView: View {
 ///         @Environment(\.openURL) var openURL
 ///
 ///         var body: some View {
@@ -10294,33 +10303,41 @@ extension OffsetShape : InsettableShape where Content : InsettableShape {
 ///         }
 ///
 ///         func contactSupport() {
-///             openURL(mailToSupport)
+///             guard let url = URL(string: "https://www.example.com") else {
+///                 return
+///             }
+///             openURL(url)
 ///         }
 ///     }
+///
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct OpenURLAction {
 
-    /// Requests that a URL be opened, following system conventions.
+    /// Opens a URL, following system conventions.
+    ///
+    /// Use this method to attempt to open a URL. This function handles the
+    /// calling of the platform specific URL handler contained in the
+    /// `openURL` property stored the app's ``Environment``, and is used when
+    /// you call the function ``openURL(:_)``.
     ///
     /// - Parameters:
-    ///   - url: A URL to be opened by the system.
+    ///   - url: The URL to open.
     public func callAsFunction(_ url: URL)
 
-    /// Requests that a URL be opened, following system conventions.
+    /// Asynchronously opens a URL, following system conventions.
     ///
-    /// When this method is called the URL will be asynchronously opened, and a
-    /// result returned indicating whether the system could handle the URL. The
-    /// completion runs after the system has decided whether it can handle the
-    /// URL. Actual handling may not yet be complete when the completion
-    /// is called.
+    /// Use this method when attempting to asynchronously open a URL; the
+    /// result indicates whether the system was able open the URL.
+    /// The completion runs after the system decides that it can open the URL,
+    /// but the full opening of the URL may not yet be complete when calling the
+    /// completion handler.
     ///
     /// - Parameters:
-    ///   - url: A URL to be opened by the system.
-    ///   - completion: Invoked with whether the URL could be opened.
-    ///   - accepted: Indicating whether or not the system will process the
-    ///   request. If the value is `false`, then the system has refused the
-    ///   request and the app should respond appropriately. For example, the app
-    ///   could alert the user or attempt to open a fallback URL.
+    ///   - url: The URL to open.
+    ///   - completion: A closure the method calls after determining if
+    ///     it is possible to open the URL, although possibly before fully
+    ///     opening the URL. The closure takes a Boolean that indicates whether
+    ///     the URL can be opened.
     @available(watchOS, unavailable)
     public func callAsFunction(_ url: URL, completion: @escaping (Bool) -> Void)
 }
@@ -11484,6 +11501,7 @@ public struct ProgressView<Label, CurrentValueLabel> : View where Label : View, 
     public typealias Body = some View
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView where CurrentValueLabel == EmptyView {
 
     /// Creates a progress view for showing indeterminate progress, without a
@@ -11526,6 +11544,7 @@ extension ProgressView where CurrentValueLabel == EmptyView {
     public init<S>(_ title: S) where Label == Text, S : StringProtocol
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView {
 
     /// Creates a progress view for showing determinate progress.
@@ -11631,6 +11650,7 @@ extension ProgressView {
     public init<S, V>(_ title: S, value: V?, total: V = 1.0) where Label == Text, CurrentValueLabel == EmptyView, S : StringProtocol, V : BinaryFloatingPoint
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView {
 
     /// Creates a progress view for visualizing the given progress instance.
@@ -14365,6 +14385,7 @@ extension Text {
     public init(_ image: Image)
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Text {
 
     /// Creates a text view that displays the formatted representation of a value.
@@ -16946,7 +16967,48 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Applies a modifier to a view.
+    /// Applies a modifier to a view and returns a new view.
+    ///
+    /// Use this modifier to combine a ``View`` and a ``ViewModifier``, to
+    /// create a new view. For example, if you create a view modifier for
+    /// a new kind of caption with blue text surrounded by a rounded rectangle:
+    ///
+    ///     struct BorderedCaption: ViewModifier {
+    ///         func body(content: Content) -> some View {
+    ///             content
+    ///                 .font(.caption2)
+    ///                 .padding(10)
+    ///                 .overlay(
+    ///                     RoundedRectangle(cornerRadius: 15)
+    ///                         .stroke(lineWidth: 1)
+    ///                 )
+    ///                 .foregroundColor(Color.blue)
+    ///         }
+    ///     }
+    ///
+    /// You can use ``modifier(_:)`` to extend ``View`` to create new modifier
+    /// for applying the `BorderedCaption` defined above:
+    ///
+    ///     extension View {
+    ///         func borderedCaption() -> some View {
+    ///             modifier(BorderedCaption())
+    ///         }
+    ///     }
+    ///
+    /// Then you can apply the bordered caption to any view:
+    ///
+    ///     Image(systemName: "bus")
+    ///         .resizable()
+    ///         .frame(width:50, height:50)
+    ///     Text("Downtown Bus")
+    ///         .borderedCaption()
+    ///
+    /// ![A screenshot showing the image of a bus with a caption reading
+    /// Downtown Bus. A view extension, using custom a modifier, renders the
+    ///  caption in blue text surrounded by a rounded
+    ///  rectangle.](SwiftUI-View-ViewModifier.png)
+    ///
+    /// - Parameter modifier: The modifier to apply to this view.
     @inlinable public func modifier<T>(_ modifier: T) -> ModifiedContent<Self, T>
 }
 
@@ -17233,45 +17295,6 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Layers the given view behind this view.
-    ///
-    /// Use `background(_:alignment:)` when you need to place one view behind
-    /// another, with the background view optionally aligned with a specified
-    /// edge of the frontmost view.
-    ///
-    /// The example below creates two views: the `Frontmost` view, and the
-    /// `DiamondBackground` view. The `Frontmost` view uses the
-    /// `DiamondBackground` view for the background of the image element inside
-    /// the `Frontmost` view's ``VStack``.
-    ///
-    ///     struct DiamondBackground: View {
-    ///         var body: some View {
-    ///             VStack {
-    ///                 Rectangle()
-    ///                     .fill(Color.gray)
-    ///                     .frame(width: 250, height: 250, alignment: .center)
-    ///                     .rotationEffect(.degrees(45.0))
-    ///             }
-    ///         }
-    ///     }
-    ///
-    ///     struct Frontmost: View {
-    ///         var body: some View {
-    ///             VStack {
-    ///                 Image(systemName: "folder")
-    ///                     .font(.system(size: 128, weight: .ultraLight))
-    ///                     .background(DiamondBackground())
-    ///             }
-    ///         }
-    ///     }
-    ///
-    /// ![A view showing a large folder image with a grey diamond placed behind
-    /// it as its background view.](SwiftUI-View-background-1.png)
-    ///
-    /// - Parameters:
-    ///   - background: The view to draw behind this view.
-    ///   - alignment: The alignment with a default value of
-    ///     ``Alignment/center`` that you use to position the background view.
     @inlinable public func background<Background>(_ background: Background, alignment: Alignment = .center) -> some View where Background : View
 
 }
@@ -17279,25 +17302,6 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Layers a secondary view in front of this view.
-    ///
-    /// When you apply an overlay to a view, the original view continues to
-    /// provide the layout characteristics for the resulting view. In the
-    /// following example, the heart image is shown overlaid in front of, and
-    /// aligned to the bottom of the folder image.
-    ///
-    ///     Image(systemName: "folder")
-    ///         .font(.system(size: 55, weight: .thin))
-    ///         .overlay(Text("❤️"), alignment: .bottom)
-    ///
-    /// ![View showing placement of a heart overlaid onto a folder
-    /// icon.](SwiftUI-View-overlay-1.png)
-    ///
-    /// - Parameters:
-    ///   - overlay: The view to layer in front of this view.
-    ///   - alignment: The alignment for `overlay` in relation to this view.
-    ///
-    /// - Returns: A view that layers `overlay` in front of the view.
     @inlinable public func overlay<Overlay>(_ overlay: Overlay, alignment: Alignment = .center) -> some View where Overlay : View
 
 
@@ -17529,7 +17533,10 @@ extension View {
     /// Sets the color of the foreground elements displayed by this view.
     ///
     /// - Parameter color: The foreground color to use when displaying this
-    ///   view.
+    ///   view. Pass `nil` to remove any custom foreground color and to allow
+    ///   the system or the container to provide its own foreground color.
+    ///   If a container-specific override doesn't exist, the system uses
+    ///   the primary color.
     ///
     /// - Returns: A view that uses the foreground color you supply.
     @inlinable public func foregroundColor(_ color: Color?) -> some View
@@ -20638,7 +20645,7 @@ extension View {
     ///
     /// The containing list's style will apply that tint as appropriate. watchOS
     /// uses the tint color for its background platter appearance. Sidebars on
-    /// iOS and macOS apply the tint color to their `ItemLabel` icons, which
+    /// iOS and macOS apply the tint color to their `Label` icons, which
     /// otherwise use the accent color by default.
     ///
     /// - Parameter tint: The tint effect to use, or nil to not override the
@@ -20653,7 +20660,7 @@ extension View {
     ///
     /// The containing list's style will apply that tint as appropriate. watchOS
     /// uses the tint color for its background platter appearance. Sidebars on
-    /// iOS and macOS apply the tint color to their `ItemLabel` icons, which
+    /// iOS and macOS apply the tint color to their `Label` icons, which
     /// otherwise use the accent color by default.
     ///
     /// - Parameter color: The color to use to tint the content, or nil to not
@@ -21506,9 +21513,9 @@ extension View {
     ///
     /// The object can be read by any child by using `EnvironmentObject`.
     ///
-    /// - Parameter bindable: the object to store and make available to
+    /// - Parameter object: the object to store and make available to
     ///     the view's subhiearchy.
-    @inlinable public func environmentObject<B>(_ bindable: B) -> some View where B : ObservableObject
+    @inlinable public func environmentObject<T>(_ object: T) -> some View where T : ObservableObject
 
 }
 
@@ -21840,6 +21847,47 @@ extension ViewDimensions : Equatable {
 
 /// A modifier that you apply to a view or another view modifier, producing a
 /// different version of the original value.
+///
+/// Adopt the ``ViewModifier`` protocol when you want to create a reusable
+/// modifier that you can apply to any view. The example below combines several
+/// modifiers to create a new modifier that you can use to create blue caption
+/// text surrounded by a rounded rectangle:
+///
+///     struct BorderedCaption: ViewModifier {
+///         func body(content: Content) -> some View {
+///             content
+///                 .font(.caption2)
+///                 .padding(10)
+///                 .overlay(
+///                     RoundedRectangle(cornerRadius: 15)
+///                         .stroke(lineWidth: 1)
+///                 )
+///                 .foregroundColor(Color.blue)
+///         }
+///     }
+///
+/// You can apply ``modifier(_:)`` directly to a view, but a more common and
+/// idiomatic approach uses ``modifier(_:)`` to define an extension to
+/// ``View`` itself that incorporates the view modifier:
+///
+///     extension View {
+///         func borderedCaption() -> some View {
+///             modifier(BorderedCaption())
+///         }
+///     }
+///
+/// You can then apply the bordered caption to any view, similar to this:
+///
+///     Image(systemName: "bus")
+///         .resizable()
+///         .frame(width:50, height:50)
+///     Text("Downtown Bus")
+///         .borderedCaption()
+///
+/// ![A screenshot showing the image of a bus with a caption reading
+/// Downtown Bus. A view extension, using custom a modifier, renders the
+///  caption in blue text surrounded by a rounded
+///  rectangle.](SwiftUI-View-ViewModifier.png)
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ViewModifier {
 
@@ -22330,23 +22378,6 @@ extension CGPoint {
     public func applying(_ m: ProjectionTransform) -> CGPoint
 }
 
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension Never {
-
-    /// The type of widget representing the body of this widget.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias WidgetBody = Never
-}
-
-extension Encoder {
-
-    public func filteredImage(_ image: CGImage) throws -> CGImage
-}
-
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Never : Gesture {
 
@@ -22593,3 +22624,4 @@ extension CGFloat : VectorArithmetic {
 @available(watchOS, unavailable)
 extension Never : Commands {
 }
+
