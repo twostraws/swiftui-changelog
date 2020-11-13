@@ -1,4 +1,4 @@
-// Xcode 12.1
+// Xcode 12.2
 
 import Combine
 import CoreData
@@ -2351,6 +2351,7 @@ public struct CircularProgressViewStyle : ProgressViewStyle {
 
     /// Returns a `CGColor` that represents this color if one can be constructed
     /// that accurately represents this color.
+    @available(iOS 14.0, macOS 11, tvOS 14.0, watchOS 7.0, *)
     public var cgColor: CGColor? { get }
 
     /// Hashes the essential components of this value by feeding them into the
@@ -5048,7 +5049,38 @@ public struct EmptyCommands : Commands {
     public typealias Body = Never
 }
 
-/// The empty, or identity, modifier.
+/// An empty, or identity, modifier, used during development to switch
+/// modifiers at compile time.
+///
+/// Use the empty modifier to switch modifiers at compile time during
+/// development. In the example below, in a debug build the ``Text``
+/// view inside `ContentView` has a yellow background and a red border.
+/// A non-debug build reflects the default system, or container supplied
+/// appearance.
+///
+///     struct EmphasizedLayout: ViewModifier {
+///         func body(content: Content) -> some View {
+///             content
+///                 .background(Color.yellow)
+///                 .border(Color.red)
+///         }
+///     }
+///
+///     struct ContentView: View {
+///         var body: some View {
+///             Text("Hello, World!")
+///                 .modifier(modifier)
+///         }
+///
+///         var modifier: some ViewModifier {
+///             #if DEBUG
+///                 return EmphasizedLayout()
+///             #else
+///                 return EmptyModifier()
+///             #endif
+///         }
+///     }
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyModifier : ViewModifier {
 
@@ -5064,16 +5096,6 @@ public struct EmptyCommands : Commands {
     /// `content` is a proxy for the view that will have the modifier
     /// represented by `Self` applied to it.
     public func body(content: EmptyModifier.Content) -> EmptyModifier.Body
-}
-
-/// The empty, or identity, modifier.
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension EmptyModifier {
-
-    /// The type of widget representing the body of `Self`.
-    public typealias WidgetBody = Never
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -5626,6 +5648,10 @@ extension EnvironmentValues {
     /// In these cases it may be needed for UI drawing to be adjusted to in
     /// order to display optimally when inverted.
     public var accessibilityInvertColors: Bool { get }
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension EnvironmentValues {
 
     /// Whether the system preference for Show Button Shapes is enabled.
     ///
@@ -7304,20 +7330,6 @@ extension Group : ToolbarContent where Content : ToolbarContent {
 extension Group : CustomizableToolbarContent where Content : CustomizableToolbarContent {
 
     public init(@ToolbarContentBuilder content: () -> Content)
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension Group where Content : _Widget {
-
-    /// The type of widget representing the body of this widget.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias WidgetBody = Never
-
-    @inlinable public init(@_WidgetBuilder content: () -> Content)
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -9644,26 +9656,24 @@ public struct MenuStyleConfiguration {
     /// implementation of the required `body` property.
     public typealias Body = Never
 
+    /// The content that the modifier transforms into a new view or new
+    /// view modifier.
     public var content: Content
 
+    /// The view modifier.
     public var modifier: Modifier
 
-    @inlinable public init(content: Content, modifier: Modifier)
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension ModifiedContent where Content : _Widget, Modifier : _WidgetModifier {
-
-    /// The type of widget representing the body of this widget.
+    /// A structure that the defines the content and modifier needed to produce
+    /// a new view or view modifier.
     ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias WidgetBody = Never
-
-    /// Declares the content and behavior of this widget.
-    public var body: ModifiedContent<Content, Modifier>.WidgetBody { get }
+    /// If `content` is a ``View`` and `modifier` is a ``ViewModifier``, the
+    /// result is a ``View``. If `content` and `modifier` are both view
+    /// modifiers, then the result is a new ``ViewModifier`` combining them.
+    ///
+    /// - Parameters:
+    ///     - content: The content that the modifier changes.
+    ///     - modifier: The modifier to apply to the content.
+    @inlinable public init(content: Content, modifier: Modifier)
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -10280,10 +10290,13 @@ extension OffsetShape : InsettableShape where Content : InsettableShape {
 
 /// Provides functionality for opening a URL.
 ///
-/// An `OpenURLAction` should be obtained from the environment, and can be used
-/// to open a URL as the result of some user action.
+/// The `OpenURLAction` instance in the app's ``Environment`` offers
+/// a handler that you can use to open a URL in response to some action.
+/// Use the ``EnvironmentValues/openURL`` environment value to get the handler.
+/// Then call the action's handler when you need to open a URL. For example,
+/// you can open a support URL in response to when a user taps a button:
 ///
-///     struct SupportView : View {
+///     struct OpenUrlActionView: View {
 ///         @Environment(\.openURL) var openURL
 ///
 ///         var body: some View {
@@ -10294,33 +10307,41 @@ extension OffsetShape : InsettableShape where Content : InsettableShape {
 ///         }
 ///
 ///         func contactSupport() {
-///             openURL(mailToSupport)
+///             guard let url = URL(string: "https://www.example.com") else {
+///                 return
+///             }
+///             openURL(url)
 ///         }
 ///     }
+///
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct OpenURLAction {
 
-    /// Requests that a URL be opened, following system conventions.
+    /// Opens a URL, following system conventions.
+    ///
+    /// Use this method to attempt to open a URL. This function handles the
+    /// calling of the platform specific URL handler contained in the
+    /// `openURL` property stored the app's ``Environment``, and is used when
+    /// you call the function ``openURL(:_)``.
     ///
     /// - Parameters:
-    ///   - url: A URL to be opened by the system.
+    ///   - url: The URL to open.
     public func callAsFunction(_ url: URL)
 
-    /// Requests that a URL be opened, following system conventions.
+    /// Asynchronously opens a URL, following system conventions.
     ///
-    /// When this method is called the URL will be asynchronously opened, and a
-    /// result returned indicating whether the system could handle the URL. The
-    /// completion runs after the system has decided whether it can handle the
-    /// URL. Actual handling may not yet be complete when the completion
-    /// is called.
+    /// Use this method when attempting to asynchronously open a URL; the
+    /// result indicates whether the system was able open the URL.
+    /// The completion runs after the system decides that it can open the URL,
+    /// but the full opening of the URL may not yet be complete when calling the
+    /// completion handler.
     ///
     /// - Parameters:
-    ///   - url: A URL to be opened by the system.
-    ///   - completion: Invoked with whether the URL could be opened.
-    ///   - accepted: Indicating whether or not the system will process the
-    ///   request. If the value is `false`, then the system has refused the
-    ///   request and the app should respond appropriately. For example, the app
-    ///   could alert the user or attempt to open a fallback URL.
+    ///   - url: The URL to open.
+    ///   - completion: A closure the method calls after determining if
+    ///     it is possible to open the URL, although possibly before fully
+    ///     opening the URL. The closure takes a Boolean that indicates whether
+    ///     the URL can be opened.
     @available(watchOS, unavailable)
     public func callAsFunction(_ url: URL, completion: @escaping (Bool) -> Void)
 }
@@ -11484,6 +11505,7 @@ public struct ProgressView<Label, CurrentValueLabel> : View where Label : View, 
     public typealias Body = some View
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView where CurrentValueLabel == EmptyView {
 
     /// Creates a progress view for showing indeterminate progress, without a
@@ -11526,6 +11548,7 @@ extension ProgressView where CurrentValueLabel == EmptyView {
     public init<S>(_ title: S) where Label == Text, S : StringProtocol
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView {
 
     /// Creates a progress view for showing determinate progress.
@@ -11631,6 +11654,7 @@ extension ProgressView {
     public init<S, V>(_ title: S, value: V?, total: V = 1.0) where Label == Text, CurrentValueLabel == EmptyView, S : StringProtocol, V : BinaryFloatingPoint
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ProgressView {
 
     /// Creates a progress view for visualizing the given progress instance.
@@ -13937,14 +13961,140 @@ extension State where Value : ExpressibleByNilLiteral {
     public var projectedValue: ObservedObject<ObjectType>.Wrapper { get }
 }
 
-/// A control used to perform semantic increment and decrement actions.
+/// A control that performs increment and decrement actions.
+///
+/// Use a stepper control when you want the user to have granular control while
+/// incrementing or decrementing a value. For example, you can use a stepper
+/// to:
+///
+///  * Change a value up or down by `1`.
+///  * Operate strictly over a prescribed range.
+///  * Step by specific amounts over a stepper's range of possible values.
+///
+/// The example below uses an array that holds a number of ``Color`` values,
+/// a local state variable, `value`, to set the control's background
+/// color, and title label. When the user clicks or taps on the stepper's
+/// increment or decrement buttons SwiftUI executes the relevant
+/// closure that updates `value`, wrapping the `value` to prevent overflow.
+/// SwiftUI then re-renders the view, updating the text and background
+/// color to match the current index:
+///
+///     struct StepperView: View {
+///         @State private var value = 0
+///         let colors: [Color] = [.orange, .red, .gray, .blue,
+///                                .green, .purple, .pink]
+///
+///         func incrementStep() {
+///             value += 1
+///             if value >= colors.count { value = 0 }
+///         }
+///
+///         func decrementStep() {
+///             value -= 1
+///             if value < 0 { value = colors.count - 1 }
+///         }
+///
+///         var body: some View {
+///             Stepper(onIncrement: incrementStep,
+///                 onDecrement: decrementStep) {
+///                 Text("Value: \(value) Color: \(colors[value].description)")
+///             }
+///             .padding(5)
+///             .background(colors[value])
+///         }
+///    }
+///
+/// ![A view displaying a stepper that uses a text view for stepper's title
+///   and that changes the background color of its view when incremented or
+///   decremented. The view selects the new background color from a
+///    predefined array of colors using the stepper's value as the
+///   index.](SwiftUI-Stepper-increment-decrement-closures.png)
+///
+/// The following example shows a stepper that displays the effect of
+/// incrementing or decrementing a value with the step size of `step` with
+/// the bounds defined by `range`:
+///
+///     struct StepperView: View {
+///         @State private var value = 0
+///         let step = 5
+///         let range = 1...50
+///
+///         var body: some View {
+///             Stepper(value: $value,
+///                     in: range,
+///                     step: step) {
+///                 Text("Current: \(value) in \(range.description) " +
+///                      "stepping by \(step)")
+///             }
+///                 .padding(10)
+///         }
+///     }
+///
+/// ![A view displaying a stepper with a step size of five, and a
+/// prescribed range of 1 though 50.](SwiftUI-Stepper-value-step-range.png)
+///
 @available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct Stepper<Label> : View where Label : View {
 
-    /// Creates an instance that performs `onIncrement` and `onDecrement` when
-    /// incremented and decremented, respectively.
+    /// Creates a stepper instance that performs the closures you provide when
+    /// the user increments or decrements the stepper.
+    ///
+    /// Use this initializer to create a control with a custom title that
+    /// executes closures you provide when the user clicks or taps the
+    /// stepper's increment or decrement buttons.
+    ///
+    /// The example below uses an array that holds a number of ``Color`` values,
+    /// a local state variable, `value`, to set the control's background
+    /// color, and title label. When the user clicks or taps on the stepper's
+    /// increment or decrement buttons SwiftUI executes the relevant
+    /// closure that updates `value`, wrapping the `value` to prevent overflow.
+    /// SwiftUI then re-renders the view, updating the text and background
+    /// color to match the current index:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 0
+    ///         let colors: [Color] = [.orange, .red, .gray, .blue, .green,
+    ///                                .purple, .pink]
+    ///
+    ///         func incrementStep() {
+    ///             value += 1
+    ///             if value >= colors.count { value = 0 }
+    ///         }
+    ///
+    ///         func decrementStep() {
+    ///             value -= 1
+    ///             if value < 0 { value = colors.count - 1 }
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             Stepper(onIncrement: incrementStep,
+    ///                 onDecrement: decrementStep) {
+    ///                 Text("Value: \(value) Color: \(colors[value].description)")
+    ///             }
+    ///             .padding(5)
+    ///             .background(colors[value])
+    ///         }
+    ///    }
+    ///
+    /// ![A view displaying a stepper that uses a text view for stepper's title
+    ///   and that changes the background color of its view when incremented or
+    ///   decremented. The view selects the new background color from a
+    ///    predefined array of colors using the stepper's value as the
+    ///   index.](SwiftUI-Stepper-increment-decrement-closures.png)
+    ///
+    /// - Parameters:
+    ///     - onIncrement: The closure to execute when the user clicks or taps
+    ///       the control's plus button.
+    ///     - onDecrement: The closure to execute when the user clicks or taps
+    ///       the control's minus button.
+    ///     - onEditingChanged: A closure called when editing begins and ends.
+    ///       For example, on iOS, the user may touch and hold the increment
+    ///       or decrement buttons on a `Stepper` which causes the execution
+    ///       of the `onEditingChanged` closure at the start and end of
+    ///       the gesture.
+    ///     - label: A view describing the purpose of this stepper.
     public init(onIncrement: (() -> Void)?, onDecrement: (() -> Void)?, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
@@ -13962,18 +14112,92 @@ public struct Stepper<Label> : View where Label : View {
 @available(watchOS, unavailable)
 extension Stepper {
 
-    /// Creates an instance configured to increment and decrement `value` by
-    /// units of `step`.
+    /// Creates a stepper configured to increment or decrement a binding to a
+    /// value using a step value you provide.
+    ///
+    /// Use this initializer to create a stepper that increments or decrements
+    /// a bound value by a specific amount each time the user
+    /// clicks or taps the stepper's increment or decrement buttons.
+    ///
+    /// In the example below, a stepper increments or decrements `value` by the
+    /// `step` value of 5 at each click or tap of the control's increment or
+    /// decrement button:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 1
+    ///         let step = 5
+    ///         var body: some View {
+    ///             Stepper(value: $value,
+    ///                     step: step) {
+    ///                 Text("Current value: \(value), step: \(step)")
+    ///             }
+    ///                 .padding(10)
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that increments or decrements a value by
+    ///   a specified amount each time the user clicks or taps the stepper's
+    ///   increment or decrement buttons.](SwiftUI-Stepper-value-step.png)
+    ///
+    /// - Parameters:
+    ///   - value: The ``Binding`` to a value that you provide.
+    ///   - step: The amount to increment or decrement `value` each time the
+    ///     user clicks or taps the stepper's increment or decrement buttons.
+    ///     Defaults to `1`.
+    ///   - onEditingChanged: A closure that's called when editing begins and
+    ///     ends. For example, on iOS, the user may touch and hold the increment
+    ///     or decrement buttons on a stepper which causes the execution
+    ///     of the `onEditingChanged` closure at the start and end of
+    ///     the gesture.
+    ///   - label: A view describing the purpose of this stepper.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<V>(value: Binding<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label) where V : Strideable
 
-    /// Creates an instance configured to increment and decrement `value` by
-    /// units of `step` and clamped to `bounds`.
+    /// Creates a stepper configured to increment or decrement a binding to a
+    /// value using a step value and within a range of values you provide.
     ///
-    /// `onIncrement` will be initialized to `nil` if attempting to increment
-    /// `value` will have no effect. Likewise, `onDecrement` will be initialized
-    /// to `nil` if attempting to decrement `value` will have no effect.
+    /// Use this initializer to create a stepper that increments or decrements
+    /// a binding to value by the step size you provide within the given bounds.
+    /// By setting the bounds, you ensure that the value never goes below or
+    /// above the lowest or highest value, respectively.
+    ///
+    /// The example below shows a stepper that displays the effect of
+    /// incrementing or decrementing a value with the step size of `step`
+    /// with the bounds defined by `range`:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 0
+    ///         let step = 5
+    ///         let range = 1...50
+    ///
+    ///         var body: some View {
+    ///             Stepper(value: $value,
+    ///                     in: range,
+    ///                     step: step) {
+    ///                 Text("Current: \(value) in \(range.description) " +
+    ///                      "stepping by \(step)")
+    ///             }
+    ///                 .padding(10)
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper with a step size of five, and a
+    /// prescribed range of 1 though 50.](SwiftUI-Stepper-value-step-range.png)
+    ///
+    /// - Parameters:
+    ///   - value: A ``Binding`` to a value that you provide.
+    ///   - bounds: A closed range that describes the upper and lower bounds
+    ///     permitted by the stepper.
+    ///   - step: The amount to increment or decrement the stepper when the
+    ///     user clicks or taps the stepper's increment or decrement buttons,
+    ///     respectively.
+    ///   - onEditingChanged: A closure that's called when editing begins and
+    ///     ends. For example, on iOS, the user may touch and hold the increment
+    ///     or decrement buttons on a stepper which causes the execution
+    ///     of the `onEditingChanged` closure at the start and end of
+    ///     the gesture.
+    ///   - label: A view describing the purpose of this stepper.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label) where V : Strideable
@@ -13984,46 +14208,299 @@ extension Stepper {
 @available(watchOS, unavailable)
 extension Stepper where Label == Text {
 
-    /// Creates an instance that performs `onIncrement` and `onDecrement` when
-    /// incremented and decremented, respectively.
+    /// Creates a stepper that uses a title key and executes the closures
+    /// you provide when the user clicks or taps the stepper's increment and
+    /// decrement buttons.
+    ///
+    /// Use this initializer to create a stepper with a custom title that
+    /// executes closures you provide when either of the stepper's increment
+    /// or decrement buttons are pressed. This version of ``Stepper`` doesn't
+    /// take a binding to a value, nor does it allow you to specify a range of
+    /// acceptable values, or a step value -- it simply calls the closures you
+    /// provide when the control's buttons are pressed.
+    ///
+    /// The example below uses an array that holds a number of ``Color`` values,
+    /// a local state variable, `value`, to set the control's background
+    /// color, and title label. When the user clicks or taps on the stepper's
+    /// increment or decrement buttons SwiftUI executes the relevant
+    /// closure that updates `value`, wrapping the `value` to prevent overflow.
+    /// SwiftUI then re-renders the view, updating the text and background
+    /// color to match the current index:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 0
+    ///         let colors: [Color] = [.orange, .red, .gray, .blue, .green,
+    ///                                .purple, .pink]
+    ///
+    ///         func incrementStep() {
+    ///             value += 1
+    ///             if value >= colors.count { value = 0 }
+    ///         }
+    ///
+    ///         func decrementStep() {
+    ///             value -= 1
+    ///             if value < 0 { value = colors.count - 1 }
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             Stepper("Value: \(value) Color: \(colors[value].description)",
+    ///                      onIncrement: incrementStep,
+    ///                      onDecrement: decrementStep)
+    ///             .padding(5)
+    ///             .background(colors[value])
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that uses a title key for the stepper's
+    /// localized title and that changes the background color of its view
+    /// when incremented or decremented selecting a color from a predefined
+    /// array using the stepper value as the
+    /// index.](SwiftUI-Stepper-increment-decrement-closures.png)
+    ///
+    /// - Parameters:
+    ///     - titleKey: The key for the stepper's localized title describing
+    ///       the purpose of the stepper.
+    ///     - onIncrement: The closure to execute when the user clicks or taps the
+    ///       control's plus button.
+    ///     - onDecrement: The closure to execute when the user clicks or taps the
+    ///       control's minus button.
+    ///    - onEditingChanged: A closure that's called when editing begins and
+    ///      ends. For example, on iOS, the user may touch and hold the increment
+    ///      or decrement buttons on a `Stepper` which causes the execution
+    ///      of the `onEditingChanged` closure at the start and end of
+    ///      the gesture.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init(_ titleKey: LocalizedStringKey, onIncrement: (() -> Void)?, onDecrement: (() -> Void)?, onEditingChanged: @escaping (Bool) -> Void = { _ in })
 
-    /// Creates an instance that performs `onIncrement` and `onDecrement` when
-    /// incremented and decremented, respectively.
+    /// Creates a stepper using a title string and that executes closures
+    /// you provide when the user clicks or taps the stepper's increment or
+    /// decrement buttons.
+    ///
+    /// Use `Stepper(_:onIncrement:onDecrement:onEditingChanged:)` to create a
+    /// control with a custom title that executes closures you provide when
+    /// the user clicks or taps on the stepper's increment or decrement buttons.
+    ///
+    /// The example below uses an array that holds a number of ``Color`` values,
+    /// a local state variable, `value`, to set the control's background
+    /// color, and title label. When the user clicks or taps on the stepper's
+    /// increment or decrement buttons SwiftUI executes the relevant
+    /// closure that updates `value`, wrapping the `value` to prevent overflow.
+    /// SwiftUI then re-renders the view, updating the text and background
+    /// color to match the current index:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 0
+    ///         let title: String
+    ///         let colors: [Color] = [.orange, .red, .gray, .blue, .green,
+    ///                                .purple, .pink]
+    ///
+    ///         func incrementStep() {
+    ///             value += 1
+    ///             if value >= colors.count { value = 0 }
+    ///         }
+    ///
+    ///         func decrementStep() {
+    ///             value -= 1
+    ///             if value < 0 { value = colors.count - 1 }
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             Stepper(title, onIncrement: incrementStep, onDecrement: decrementStep)
+    ///                 .padding(5)
+    ///                 .background(colors[value])
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that uses a string for the stepper's title
+    ///   and that changes the background color of its view when incremented or
+    ///   decremented selecting a color from a predefined array using the
+    ///   stepper's value as the
+    ///   index.](SwiftUI-Stepper-increment-decrement-closures.png)
+    ///
+    /// - Parameters:
+    ///     - title: A string describing the purpose of the stepper.
+    ///     - onIncrement: The closure to execute when the user clicks or taps the
+    ///       control's plus button.
+    ///     - onDecrement: The closure to execute when the user clicks or taps the
+    ///       control's minus button.
+    ///    - onEditingChanged: A closure that's called when editing begins and
+    ///      ends. For example, on iOS, the user may touch and hold the increment
+    ///      or decrement buttons on a `Stepper` which causes the execution
+    ///      of the `onEditingChanged` closure at the start and end of
+    ///      the gesture.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<S>(_ title: S, onIncrement: (() -> Void)?, onDecrement: (() -> Void)?, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where S : StringProtocol
 
-    /// Creates an instance configured to increment and decrement `value` by
-    /// units of `step`.
+    /// Creates a stepper with a title key and configured to increment and
+    /// decrement a binding to a value and step amount you provide.
+    ///
+    /// Use `Stepper(_:value:step:onEditingChanged:)` to create a stepper with a
+    /// custom title that increments or decrements a binding to value by the
+    /// step size you specify.
+    ///
+    /// In the example below, the stepper increments or decrements the binding
+    /// value by `5` each time the user clicks or taps on the control's
+    /// increment or decrement buttons, respectively:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 1
+    ///         let step = 5
+    ///
+    ///         var body: some View {
+    ///             Stepper("Current value: \(value), step: \(step)",
+    ///                     value: $value,
+    ///                     step: step)
+    ///                 .padding(10)
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that increments or decrements by 5 each
+    ///   time the user clicks or taps on the control's increment or decrement
+    ///   buttons, respectively.](SwiftUI-Stepper-value-step.png)
+    ///
+    /// - Parameters:
+    ///     - titleKey: The key for the stepper's localized title describing
+    ///       the purpose of the stepper.
+    ///     - value: A ``Binding`` to a value that you provide.
+    ///     - step: The amount to increment or decrement `value` each time the
+    ///       user clicks or taps the stepper's plus or minus button,
+    ///       respectively.  Defaults to `1`.
+    ///     - onEditingChanged: A closure that's called when editing begins and
+    ///       ends. For example, on iOS, the user may touch and hold the
+    ///       increment or decrement buttons on a `Stepper` which causes the
+    ///       execution of the `onEditingChanged` closure at the start and end
+    ///       of the gesture.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<V>(_ titleKey: LocalizedStringKey, value: Binding<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where V : Strideable
 
-    /// Creates an instance configured to increment and decrement `value` by
-    /// units of `step`.
+    /// Creates a stepper with a title and configured to increment and
+    /// decrement a binding to a value and step amount you provide.
+    ///
+    /// Use `Stepper(_:value:step:onEditingChanged:)` to create a stepper with a
+    /// custom title that increments or decrements a binding to value by the
+    /// step size you specify.
+    ///
+    /// In the example below, the stepper increments or decrements the binding
+    /// value by `5` each time one of the user clicks or taps the control's
+    /// increment or decrement buttons:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 1
+    ///         let step = 5
+    ///         let title: String
+    ///
+    ///         var body: some View {
+    ///             Stepper(title, value: $value, step: step)
+    ///                 .padding(10)
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that increments or decrements by 1 each
+    ///   time the control's buttons
+    ///   are pressed.](SwiftUI-Stepper-value-step.png)
+    ///
+    /// - Parameters:
+    ///     - title: A string describing the purpose of the stepper.
+    ///     - value: The ``Binding`` to a value that you provide.
+    ///     - step: The amount to increment or decrement `value` each time the
+    ///       user clicks or taps the stepper's increment or decrement button,
+    ///       respectively. Defaults to `1`.
+    ///     - onEditingChanged: A closure that's called when editing begins and
+    ///       ends. For example, on iOS, the user may touch and hold the
+    ///       increment or decrement buttons on a `Stepper` which causes the
+    ///       execution of the `onEditingChanged` closure at the start and end
+    ///       of the gesture.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<S, V>(_ title: S, value: Binding<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where S : StringProtocol, V : Strideable
 
-    /// Creates an instance configured to increment and decrement `value` by
-    /// units of `step` and clamped to `bounds`.
+    /// Creates a stepper instance that increments and decrements a binding to
+    /// a value, by a step size and within a closed range that you provide.
     ///
-    /// `onIncrement` will be initialized to `nil` if attempting to increment
-    /// `value` will have no effect. Likewise, `onDecrement` will be initialized
-    /// to `nil` if attempting to decrement `value` will have no effect.
+    /// Use `Stepper(_:value:in:step:onEditingChanged:)` to create a stepper
+    /// that increments or decrements a value within a specific range of values
+    /// by a specific step size. In the example below, a stepper increments or
+    /// decrements a binding to value over a range of `1...50` by `5` at each
+    /// press of the stepper's increment or decrement buttons:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 0
+    ///         @State private var titleKey = "Stepper"
+    ///
+    ///         let step = 5
+    ///         let range = 1...50
+    ///
+    ///         var body: some View {
+    ///             VStack(spacing: 20) {
+    ///                 Text("Current Stepper Value: \(value)")
+    ///                 Stepper(titleKey, value: $value, in: range, step: step)
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that increments or decrements within a
+    ///   specified range and step size.](SwiftUI-Stepper-value-step-range.png)
+    ///
+    /// - Parameters:
+    ///     - titleKey: The key for the stepper's localized title describing
+    ///       the purpose of the stepper.
+    ///     - value: A ``Binding`` to a value that your provide.
+    ///     - bounds: A closed range that describes the upper and lower bounds
+    ///       permitted by the stepper.
+    ///     - step: The amount to increment or decrement `value` each time the
+    ///       user clicks or taps the stepper's increment or decrement button,
+    ///       respectively. Defaults to `1`.
+    ///     - onEditingChanged: A closure that's called when editing begins and
+    ///       ends. For example, on iOS, the user may touch and hold the increment
+    ///       or decrement buttons on a `Stepper` which causes the execution
+    ///       of the `onEditingChanged` closure at the start and end of
+    ///       the gesture.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<V>(_ titleKey: LocalizedStringKey, value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where V : Strideable
 
-    /// Creates an instance configured to increment and decrement `value` by
-    /// units of `step` and clamped to `bounds`.
+    /// Creates a stepper instance that increments and decrements a binding to
+    /// a value, by a step size and within a closed range that you provide.
     ///
-    /// `onIncrement` will be initialized to `nil` if attempting to increment
-    /// `value` will have no effect. Likewise, `onDecrement` will be initialized
-    /// to `nil` if attempting to decrement `value` will have no effect.
+    /// Use `Stepper(_:value:in:step:onEditingChanged:)` to create a stepper
+    /// that increments or decrements a value within a specific range of values
+    /// by a specific step size. In the example below, a stepper increments or
+    /// decrements a binding to value over a range of `1...50` by `5` each time
+    /// the user clicks or taps the stepper's increment or decrement buttons:
+    ///
+    ///     struct StepperView: View {
+    ///         @State private var value = 0
+    ///         let step = 5
+    ///         let range = 1...50
+    ///
+    ///         var body: some View {
+    ///             Stepper("Current: \(value) in \(range.description) stepping by \(step)",
+    ///                     value: $value,
+    ///                     in: range,
+    ///                     step: step)
+    ///                 .padding(10)
+    ///         }
+    ///     }
+    ///
+    /// ![A view displaying a stepper that increments or decrements within a
+    ///   specified range and step size.](SwiftUI-Stepper-value-step-range.png)
+    ///
+    /// - Parameters:
+    ///     - title: A string describing the purpose of the stepper.
+    ///     - value: A ``Binding`` to a value that your provide.
+    ///     - bounds: A closed range that describes the upper and lower bounds
+    ///       permitted by the stepper.
+    ///     - step: The amount to increment or decrement `value` each time the
+    ///       user clicks or taps the stepper's increment or decrement button,
+    ///       respectively. Defaults to `1`.
+    ///     - onEditingChanged: A closure that's called when editing begins and
+    ///       ends. For example, on iOS, the user may touch and hold the increment
+    ///       or decrement buttons on a `Stepper` which causes the execution
+    ///       of the `onEditingChanged` closure at the start and end of
+    ///       the gesture.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init<S, V>(_ title: S, value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where S : StringProtocol, V : Strideable
@@ -14365,6 +14842,7 @@ extension Text {
     public init(_ image: Image)
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Text {
 
     /// Creates a text view that displays the formatted representation of a value.
@@ -16946,7 +17424,48 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Applies a modifier to a view.
+    /// Applies a modifier to a view and returns a new view.
+    ///
+    /// Use this modifier to combine a ``View`` and a ``ViewModifier``, to
+    /// create a new view. For example, if you create a view modifier for
+    /// a new kind of caption with blue text surrounded by a rounded rectangle:
+    ///
+    ///     struct BorderedCaption: ViewModifier {
+    ///         func body(content: Content) -> some View {
+    ///             content
+    ///                 .font(.caption2)
+    ///                 .padding(10)
+    ///                 .overlay(
+    ///                     RoundedRectangle(cornerRadius: 15)
+    ///                         .stroke(lineWidth: 1)
+    ///                 )
+    ///                 .foregroundColor(Color.blue)
+    ///         }
+    ///     }
+    ///
+    /// You can use ``modifier(_:)`` to extend ``View`` to create new modifier
+    /// for applying the `BorderedCaption` defined above:
+    ///
+    ///     extension View {
+    ///         func borderedCaption() -> some View {
+    ///             modifier(BorderedCaption())
+    ///         }
+    ///     }
+    ///
+    /// Then you can apply the bordered caption to any view:
+    ///
+    ///     Image(systemName: "bus")
+    ///         .resizable()
+    ///         .frame(width:50, height:50)
+    ///     Text("Downtown Bus")
+    ///         .borderedCaption()
+    ///
+    /// ![A screenshot showing the image of a bus with a caption reading
+    /// Downtown Bus. A view extension, using custom a modifier, renders the
+    ///  caption in blue text surrounded by a rounded
+    ///  rectangle.](SwiftUI-View-ViewModifier.png)
+    ///
+    /// - Parameter modifier: The modifier to apply to this view.
     @inlinable public func modifier<T>(_ modifier: T) -> ModifiedContent<Self, T>
 }
 
@@ -17233,45 +17752,6 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Layers the given view behind this view.
-    ///
-    /// Use `background(_:alignment:)` when you need to place one view behind
-    /// another, with the background view optionally aligned with a specified
-    /// edge of the frontmost view.
-    ///
-    /// The example below creates two views: the `Frontmost` view, and the
-    /// `DiamondBackground` view. The `Frontmost` view uses the
-    /// `DiamondBackground` view for the background of the image element inside
-    /// the `Frontmost` view's ``VStack``.
-    ///
-    ///     struct DiamondBackground: View {
-    ///         var body: some View {
-    ///             VStack {
-    ///                 Rectangle()
-    ///                     .fill(Color.gray)
-    ///                     .frame(width: 250, height: 250, alignment: .center)
-    ///                     .rotationEffect(.degrees(45.0))
-    ///             }
-    ///         }
-    ///     }
-    ///
-    ///     struct Frontmost: View {
-    ///         var body: some View {
-    ///             VStack {
-    ///                 Image(systemName: "folder")
-    ///                     .font(.system(size: 128, weight: .ultraLight))
-    ///                     .background(DiamondBackground())
-    ///             }
-    ///         }
-    ///     }
-    ///
-    /// ![A view showing a large folder image with a grey diamond placed behind
-    /// it as its background view.](SwiftUI-View-background-1.png)
-    ///
-    /// - Parameters:
-    ///   - background: The view to draw behind this view.
-    ///   - alignment: The alignment with a default value of
-    ///     ``Alignment/center`` that you use to position the background view.
     @inlinable public func background<Background>(_ background: Background, alignment: Alignment = .center) -> some View where Background : View
 
 }
@@ -17279,25 +17759,6 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Layers a secondary view in front of this view.
-    ///
-    /// When you apply an overlay to a view, the original view continues to
-    /// provide the layout characteristics for the resulting view. In the
-    /// following example, the heart image is shown overlaid in front of, and
-    /// aligned to the bottom of the folder image.
-    ///
-    ///     Image(systemName: "folder")
-    ///         .font(.system(size: 55, weight: .thin))
-    ///         .overlay(Text("❤️"), alignment: .bottom)
-    ///
-    /// ![View showing placement of a heart overlaid onto a folder
-    /// icon.](SwiftUI-View-overlay-1.png)
-    ///
-    /// - Parameters:
-    ///   - overlay: The view to layer in front of this view.
-    ///   - alignment: The alignment for `overlay` in relation to this view.
-    ///
-    /// - Returns: A view that layers `overlay` in front of the view.
     @inlinable public func overlay<Overlay>(_ overlay: Overlay, alignment: Alignment = .center) -> some View where Overlay : View
 
 
@@ -17529,7 +17990,10 @@ extension View {
     /// Sets the color of the foreground elements displayed by this view.
     ///
     /// - Parameter color: The foreground color to use when displaying this
-    ///   view.
+    ///   view. Pass `nil` to remove any custom foreground color and to allow
+    ///   the system or the container to provide its own foreground color.
+    ///   If a container-specific override doesn't exist, the system uses
+    ///   the primary color.
     ///
     /// - Returns: A view that uses the foreground color you supply.
     @inlinable public func foregroundColor(_ color: Color?) -> some View
@@ -20638,7 +21102,7 @@ extension View {
     ///
     /// The containing list's style will apply that tint as appropriate. watchOS
     /// uses the tint color for its background platter appearance. Sidebars on
-    /// iOS and macOS apply the tint color to their `ItemLabel` icons, which
+    /// iOS and macOS apply the tint color to their `Label` icons, which
     /// otherwise use the accent color by default.
     ///
     /// - Parameter tint: The tint effect to use, or nil to not override the
@@ -20653,7 +21117,7 @@ extension View {
     ///
     /// The containing list's style will apply that tint as appropriate. watchOS
     /// uses the tint color for its background platter appearance. Sidebars on
-    /// iOS and macOS apply the tint color to their `ItemLabel` icons, which
+    /// iOS and macOS apply the tint color to their `Label` icons, which
     /// otherwise use the accent color by default.
     ///
     /// - Parameter color: The color to use to tint the content, or nil to not
@@ -21506,9 +21970,9 @@ extension View {
     ///
     /// The object can be read by any child by using `EnvironmentObject`.
     ///
-    /// - Parameter bindable: the object to store and make available to
+    /// - Parameter object: the object to store and make available to
     ///     the view's subhiearchy.
-    @inlinable public func environmentObject<B>(_ bindable: B) -> some View where B : ObservableObject
+    @inlinable public func environmentObject<T>(_ object: T) -> some View where T : ObservableObject
 
 }
 
@@ -21840,6 +22304,47 @@ extension ViewDimensions : Equatable {
 
 /// A modifier that you apply to a view or another view modifier, producing a
 /// different version of the original value.
+///
+/// Adopt the ``ViewModifier`` protocol when you want to create a reusable
+/// modifier that you can apply to any view. The example below combines several
+/// modifiers to create a new modifier that you can use to create blue caption
+/// text surrounded by a rounded rectangle:
+///
+///     struct BorderedCaption: ViewModifier {
+///         func body(content: Content) -> some View {
+///             content
+///                 .font(.caption2)
+///                 .padding(10)
+///                 .overlay(
+///                     RoundedRectangle(cornerRadius: 15)
+///                         .stroke(lineWidth: 1)
+///                 )
+///                 .foregroundColor(Color.blue)
+///         }
+///     }
+///
+/// You can apply ``modifier(_:)`` directly to a view, but a more common and
+/// idiomatic approach uses ``modifier(_:)`` to define an extension to
+/// ``View`` itself that incorporates the view modifier:
+///
+///     extension View {
+///         func borderedCaption() -> some View {
+///             modifier(BorderedCaption())
+///         }
+///     }
+///
+/// You can then apply the bordered caption to any view, similar to this:
+///
+///     Image(systemName: "bus")
+///         .resizable()
+///         .frame(width:50, height:50)
+///     Text("Downtown Bus")
+///         .borderedCaption()
+///
+/// ![A screenshot showing the image of a bus with a caption reading
+/// Downtown Bus. A view extension, using custom a modifier, renders the
+///  caption in blue text surrounded by a rounded
+///  rectangle.](SwiftUI-View-ViewModifier.png)
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ViewModifier {
 
@@ -22101,7 +22606,7 @@ public protocol WidgetConfiguration {
     /// implementation of the required `body` property.
     associatedtype Body : WidgetConfiguration
 
-    /// Declares the content and behavior of this widget.
+    /// The content and behavior of this widget.
     var body: Self.Body { get }
 }
 
@@ -22328,23 +22833,6 @@ extension Never {
 extension CGPoint {
 
     public func applying(_ m: ProjectionTransform) -> CGPoint
-}
-
-@available(iOS 14.0, macOS 11.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension Never {
-
-    /// The type of widget representing the body of this widget.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
-    public typealias WidgetBody = Never
-}
-
-extension Encoder {
-
-    public func filteredImage(_ image: CGImage) throws -> CGImage
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
