@@ -1,4 +1,4 @@
-// Xcode 12.2
+// Xcode 12.3
 
 import Combine
 import CoreData
@@ -3250,16 +3250,18 @@ extension CommandsBuilder {
 
 }
 
-/// A system style that displays the components in a compact, textual format.
+/// A date picker style that displays the components in a compact, textual
+/// format.
 ///
-/// This style is useful when space is constrained and users expect to
-/// make specific date and time selections. Some variants may include rich
-/// editing controls in a popup.
+/// Use this style when space is constrained and users expect to make specific
+/// date and time selections. Some variants may include rich editing controls
+/// in a pop up.
 @available(iOS 14.0, macCatalyst 13.4, macOS 10.15.4, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct CompactDatePickerStyle : DatePickerStyle {
 
+    /// Creates an instance of the compact date picker style.
     public init()
 }
 
@@ -3449,8 +3451,53 @@ extension ContentSizeCategory {
 /// A container for views that you present as menu items in a contextual menu
 /// after completion of the standard system gesture.
 ///
-/// Relate the controls that a `ContextMenu` contains to the context from
-/// which you show them.
+/// A context menu view allows you to present a situationally specific menu to
+/// the user allowing them to perform actions relevant to the current task
+/// they're performing in your app.
+///
+/// You create a context menu by first defining a `ContextMenu` container
+/// with the buttons that will represent the actions the user can select
+/// from. Next, you add a ``View/contextMenu(_:)`` view modifier to the view that
+/// will enable the context menu. The context menu view modifier takes
+/// the menu items you defined above as its argument.
+///
+/// The example below creates a four-item context menu container
+/// used by the context menu view modifier. The Boolean value
+/// `shouldShowMenu` controls the attachment of context menu; it is set to
+/// `true`, enabling the contextual menu.
+///
+/// Note that it is possible to place the actions performed by the menu
+/// selection directly inside the button closures or, as shown below, to invoke
+/// them via function references.
+///
+///     func selectHearts() {
+///         // Act on hearts selection.
+///     }
+///     func selectClubs() { ... }
+///     func selectSpades() { ... }
+///     func selectDiamonds() { ... }
+///
+///     let menuItems = ContextMenu {
+///         Button("♥️ - Hearts", action: selectHearts)
+///         Button("♣️ - Clubs", action: selectClubs)
+///         Button("♠️ - Spades", action: selectSpades)
+///         Button("♦️ - Diamonds", action: selectDiamonds)
+///     }
+///
+///     struct ContextMenuMenuItems: View {
+///         private var shouldShowMenu = true
+///         var body: some View {
+///             VStack {
+///                 Text("Favorite Card Suit")
+///                     .padding()
+///                     .contextMenu(shouldShowMenu ? menuItems : nil)
+///             }
+///         }
+///     }
+///
+/// ![A screenshot of a context menu showing four menu items: Hearts, Clubs,
+/// Spades and Diamonds.](SwiftUI-contextMenu.png)
+///
 @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use `contextMenu(menuItems:)` instead.")
 @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Use `contextMenu(menuItems:)` instead.")
 @available(tvOS, unavailable)
@@ -3524,8 +3571,79 @@ public protocol CustomizableToolbarContent : ToolbarContent where Self.Body : Cu
 
 /// A control for selecting an absolute date.
 ///
-/// It can be configured to only display specific components of the date, but
-/// still results in picking a complete `Date` instance.
+/// Use a `DatePicker` when you want to provide a view that allows the user to
+/// select a calendar date, and optionally a time. The view binds to a
+/// <doc://com.apple.documentation/documentation/Foundation/Date> instance.
+///
+/// The following example creates a basic `DatePicker`, which appears on iOS as
+/// text representing the date. This example limits the display to only the
+/// calendar date, not the time. When the user taps or clicks the text, a
+/// calendar view animates in, from which the user can select a date. When the
+/// user dismisses the calendar view, the view updates the bound
+/// <doc://com.apple.documentation/documentation/Foundation/Date>.
+///
+///     @State private var date = Date()
+///
+///     var body: some View {
+///         DatePicker(
+///             "Start Date",
+///             selection: $date,
+///             displayedComponents: [.date]
+///         )
+///     }
+///
+/// ![An iOS date picker, consisting of a label that says Start Date, and a
+/// label showing the date Apr 1, 1976.](SwiftUI-DatePicker-basic.png)
+///
+/// You can limit the `DatePicker` to specific ranges of dates, allowing
+/// selections only before or after a certain date, or between two dates. The
+/// following example shows a date-and-time picker that only permits selections
+/// within the year 2021 (in the `UTC` time zone).
+///
+///     @State private var date = Date()
+///     let dateRange: ClosedRange<Date> = {
+///         let calendar = Calendar.current
+///         let startComponents = DateComponents(year: 2021, month: 1, day: 1)
+///         let endComponents = DateComponents(year: 2021, month: 12, day: 31, hour: 23, minute: 59, second: 59)
+///         return calendar.date(from:startComponents)!
+///             ...
+///             calendar.date(from:endComponents)!
+///     }()
+///
+///     var body: some View {
+///         DatePicker(
+///             "Start Date",
+///              selection: $date,
+///              in: dateRange,
+///              displayedComponents: [.date, .hourAndMinute]
+///         )
+///     }
+///
+/// ![A SwiftUI standard date picker on iOS, with the label Start Date, and
+/// buttons for the time 5:15 PM and the date Jul 31,
+/// 2021.](SwiftUI-DatePicker-selectFromRange.png)
+///
+/// ### Styling Date Pickers
+///
+/// To use a different style of date picker, use the
+/// ``View/datePickerStyle(_:)`` view modifier. The following example shows the
+/// graphical date picker style.
+///
+///     @State private var date = Date()
+///
+///     var body: some View {
+///         DatePicker(
+///             "Start Date",
+///             selection: $date,
+///             displayedComponents: [.date]
+///         )
+///         .datePickerStyle(GraphicalDatePickerStyle())
+///     }
+///
+/// ![A SwiftUI date picker using the graphical style, with the label Start Date
+/// and wheels for the month, day, and year, showing the selection
+/// October 22, 2021.](SwiftUI-DatePicker-graphicalStyle.png)
+///
 @available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -3764,7 +3882,8 @@ public struct DatePickerComponents : OptionSet {
     public typealias ArrayLiteralElement = DatePickerComponents
 }
 
-/// A specification for the appearance and interaction of a `DatePicker`.
+/// A type that specifies the appearance and interaction of all date pickers
+/// within a view hierarchy.
 @available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -3803,12 +3922,13 @@ public struct DefaultButtonStyle : PrimitiveButtonStyle {
     public typealias Body = some View
 }
 
-/// The default `DatePicker` style.
+/// The default style for date pickers.
 @available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DefaultDatePickerStyle : DatePickerStyle {
 
+    /// Creates an instance of the default date picker style.
     public init()
 }
 
@@ -3969,6 +4089,10 @@ public struct DefaultTabViewStyle : TabViewStyle {
     public init()
 }
 
+/// The default text field style, based on the text field's context.
+///
+/// The default style represents the recommended style based on the the current
+/// platform and the text field's context within the view hierarchy.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultTextFieldStyle : TextFieldStyle {
 
@@ -4824,12 +4948,55 @@ extension EdgeInsets : Animatable {
 }
 
 /// A button that toggles the edit mode for the current edit scope.
+///
+/// An Edit button toggles the ``EditMode`` for content within a container that
+/// supports ``EditMode/active``. In the following example, an `EditButton`
+/// placed inside a ``NavigationView`` supports editing of a ``List``:
+///
+///     @State private var fruits = [
+///         "Apple",
+///         "Banana",
+///         "Papaya",
+///         "Mango"
+///     ]
+///
+///     var body: some View {
+///         NavigationView{
+///             List {
+///                 ForEach(
+///                     fruits,
+///                     id: \.self
+///                 ) { fruit in
+///                     Text(fruit)
+///                 }
+///                 .onDelete { self.deleteFruit(at :$0) }
+///                 .onMove { self.moveFruit(from: $0, to: $1) }
+///             }
+///             .navigationTitle("Fruits")
+///             .toolbar { EditButton() }
+///         }
+///     }
+///
+/// Because the list defines behaviors for
+/// ``DynamicViewContent/onDelete(perform:)`` and
+/// ``DynamicViewContent/onMove(perform:)``, the editable list displays the
+/// delete and move UI when the user taps Edit, as seen in the
+/// following screenshot. Also notice that the Edit button displays the title
+/// "Done", because the list is in editing mode.
+///
+/// ![A screenshot of an app with an navigation with an EditButton as its
+/// right-side button, labeled Done to indicate it is active. Below the
+/// navigation, a list labeled Fruits contains four members, each showing
+/// its delete and move user interface
+/// elements.](SwiftUI-EditButton-editingList.png)
+///
 @available(iOS 13.0, *)
 @available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct EditButton : View {
 
+    /// Creates an Edit button instance.
     public init()
 
     /// The content and behavior of the view.
@@ -5098,9 +5265,30 @@ public struct EmptyCommands : Commands {
     public func body(content: EmptyModifier.Content) -> EmptyModifier.Body
 }
 
+/// A view that doesn't contain any content.
+///
+/// You will rarely, if ever, need to create an `EmptyView` directly. Instead,
+/// `EmptyView` represents the absence of a view.
+///
+/// SwiftUI uses `EmptyView` in situations where a SwiftUI view type defines one
+/// or more child views with generic parameters, and allows the child views to
+/// be absent. When absent, the child view's type in the generic type parameter
+/// is `EmptyView`.
+///
+/// The following example creates an indeterminate ``ProgressView`` without
+/// a label. The ``ProgressView`` type declares two generic parameters,
+/// `Label` and `CurrentValueLabel`, for the types used by its subviews.
+/// When both subviews are absent, like they are here, the resulting type is
+/// `ProgressView<EmptyView, EmptyView>`, as indicated by the example's output:
+///
+///     let progressView = ProgressView()
+///     print("\(type(of:progressView))")
+///     // Prints: ProgressView<EmptyView, EmptyView>
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct EmptyView : View {
 
+    /// Creates an empty view.
     @inlinable public init()
 
     /// The type of view representing the body of this view.
@@ -7240,16 +7428,16 @@ extension GestureState where Value : ExpressibleByNilLiteral {
     public static func == (a: Gradient, b: Gradient) -> Bool
 }
 
-/// A system style of `DatePicker` that displays an interactive calendar or
-/// clock.
+/// A date picker style that displays an interactive calendar or clock.
 ///
-/// This style is useful when wanting to allow browsing through days in a
+/// This style is useful when you want to allow browsing through days in a
 /// calendar, or when the look of a clock face is appropriate.
 @available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct GraphicalDatePickerStyle : DatePickerStyle {
 
+    /// Creates an instance of the graphical date picker style.
     public init()
 }
 
@@ -7458,14 +7646,39 @@ public struct GroupedListStyle : ListStyle {
 }
 
 /// A view that arranges its children in a horizontal line.
+///
+/// Unlike ``LazyHStack``, which only renders the views when your app needs to
+/// display them onscreen, an `HStack` renders the views all at once, regardless
+/// of whether they are on- or offscreen. Use the regular `HStack` when you have
+/// a small number of child views or don't want the delayed rendering behavior
+/// of the "lazy" version.
+///
+/// The following example shows a simple horizontal stack of five text views:
+///
+///     var body: some View {
+///         HStack(
+///             alignment: .top,
+///             spacing: 10
+///         ) {
+///             ForEach(
+///                 1...5,
+///                 id: \.self
+///             ) {
+///                 Text("Item \($0)")
+///             }
+///         }
+///     }
+/// ![Five text views, named Item 1 through Item 5, arranged in a
+/// horizontal row.](SwiftUI-HStack-simple.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct HStack<Content> : View where Content : View {
 
-    /// Creates an instance with the given spacing and vertical alignment.
+    /// Creates a horizontal stack with the given spacing and vertical alignment.
     ///
     /// - Parameters:
-    ///   - alignment: The guide for aligning the subviews in this stack. It has
-    ///     the same vertical screen coordinate for all children.
+    ///   - alignment: The guide for aligning the subviews in this stack. This
+    ///     guide has the same vertical screen coordinate for every child view.
     ///   - spacing: The distance between adjacent subviews, or `nil` if you
     ///     want the stack to choose a default distance for each pair of
     ///     subviews.
@@ -9473,8 +9686,7 @@ public struct MagnificationGesture : Gesture {
 ///         Button("Open in Preview", action: openInPreview)
 ///         Button("Save as PDF", action: saveAsPDF)
 ///     } label: {
-///         Image(systemName: "document")
-///         Text("PDF")
+///         Label("PDF", systemImage: "doc.fill")
 ///     }
 ///
 /// ### Styling Menus
@@ -13069,6 +13281,45 @@ extension Section where Parent == EmptyView, Content : View, Footer == EmptyView
 }
 
 /// A control into which the user securely enters private text.
+///
+/// Use a `SecureField` when you want behavior similar to a ``TextField``, but
+/// you don't want the user's text to be visible. Typically, you use this for
+/// entering passwords and other sensitive information.
+///
+/// A `SecureField` uses a binding to a string value, and a closure that
+/// executes when the user commits their edits, such as by pressing the
+/// Return key. The field updates the bound string on every keystroke or
+/// other edit, so you can read its value at any time from another control,
+/// such as a Done button.
+///
+/// The following example shows a `SecureField` bound to the string `password`.
+/// If the user commits their edit in the secure field, the `onCommit` closure
+/// sends the password string to a `handleLogin()` method.
+///
+///     @State private var username: String = ""
+///     @State private var password: String = ""
+///
+///     var body: some View {
+///         TextField(
+///             "User name (email address)",
+///             text: $username)
+///             .autocapitalization(.none)
+///             .disableAutocorrection(true)
+///             .border(Color(UIColor.separator))
+///         SecureField(
+///             "Password",
+///             text: $password
+///         ) {
+///             handleLogin(username: username, password: password)
+///         }
+///         .border(Color(UIColor.separator))
+///     }
+///
+/// ![Two vertically arranged views, the first a text field that displays the
+/// email address mruiz2@icloud.com, the second view uses bullets in place of
+/// the characters entered by the user for their password
+/// password.](SwiftUI-SecureField-withTextField.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct SecureField<Label> : View where Label : View {
 
@@ -13090,18 +13341,18 @@ extension SecureField where Label == Text {
     /// - Parameters:
     ///   - titleKey: The key for the localized title of `self`, describing
     ///     its purpose.
-    ///   - text: The text to be displayed and edited.
+    ///   - text: The text to display and edit.
     ///   - onCommit: The action to perform when the user performs an action
-    ///     (usually the return key) while the `SecureField` has focus.
+    ///     (usually pressing the Return key) while the secure field has focus.
     public init(_ titleKey: LocalizedStringKey, text: Binding<String>, onCommit: @escaping () -> Void = {})
 
     /// Creates an instance.
     ///
     /// - Parameters:
     ///   - title: The title of `self`, describing its purpose.
-    ///   - text: The text to be displayed and edited.
+    ///   - text: The text to display and edit.
     ///   - onCommit: The action to perform when the user performs an action
-    ///     (usually the return key) while the `SecureField` has focus.
+    ///     (usually pressing the Return key) while the secure field has focus.
     public init<S>(_ title: S, text: Binding<String>, onCommit: @escaping () -> Void = {}) where S : StringProtocol
 }
 
@@ -13512,7 +13763,7 @@ public struct SidebarListStyle : ListStyle {
 }
 
 /// A gesture containing two gestures that can happen at the same time with
-/// neither of them preceeding the other.
+/// neither of them preceding the other.
 ///
 /// A simultaneous gesture is a container-event handler that evaluates its two
 /// child gestures at the same time. Its value is a struct with two optional
@@ -13592,6 +13843,72 @@ extension SimultaneousGesture.Value : Hashable where First.Value : Hashable, Sec
 }
 
 /// A control for selecting a value from a bounded linear range of values.
+///
+/// A slider consists of a "thumb" image that the user moves between two
+/// extremes of a linear "track". The ends of the track represent the minimum
+/// and maximum possible values. As the user moves the thumb, the slider
+/// updates its bound value.
+///
+/// The following example shows a slider bound to the value `speed`. As the
+/// slider updates this value, a bound ``Text`` view shows the value updating.
+/// The `onEditingChanged` closure passed to the slider receives callbacks when
+/// the user drags the slider. The example uses this to change the
+/// color of the value text.
+///
+///     @State private var speed = 50.0
+///     @State private var isEditing = false
+///
+///     var body: some View {
+///         VStack {
+///             Slider(
+///                 value: $speed,
+///                 in: 0...100,
+///                 onEditingChanged: { editing in
+///                     isEditing = editing
+///                 }
+///             )
+///             Text("\(speed)")
+///                 .foregroundColor(isEditing ? .red : .blue)
+///         }
+///     }
+///
+/// ![An unlabeled slider, with its thumb about one third of the way from the
+/// minimum extreme. Below, a blue label displays the value
+/// 33.045977.](SwiftUI-Slider-simple.png)
+///
+/// You can also use a `step` parameter to provide incremental steps along the
+/// path of the slider. For example, if you have a slider with a range of `0` to
+/// `100`, and you set the `step` value to `5`, the slider's increments would be
+/// `0`, `5`, `10`, and so on. The following example shows this approach, and
+/// also adds optional minimum and maximum value labels.
+///
+///     @State private var speed = 50.0
+///     @State private var isEditing = false
+///
+///     var body: some View {
+///         Slider(
+///             value: $speed,
+///             in: 0...100,
+///             step: 5,
+///             onEditingChanged: { editing in
+///                 isEditing = editing
+///             },
+///             minimumValueLabel: Text("0"),
+///             maximumValueLabel: Text("100")
+///         ) {
+///             Text("Speed")
+///         }
+///         Text("\(speed)")
+///             .foregroundColor(isEditing ? .red : .blue)
+///     }
+///
+/// ![A slider with labels show minimum and maximum values of 0 and 100,
+/// respectively, with its thumb most of the way to the maximum extreme. Below,
+/// a blue label displays the value
+/// 85.000000.](SwiftUI-Slider-withStepAndLabels.png)
+///
+/// The slider also uses the `step` to increase or decrease the value when a
+/// VoiceOver user adjusts the slider with voice commands.
 @available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 public struct Slider<Label, ValueLabel> : View where Label : View, ValueLabel : View {
@@ -13610,42 +13927,50 @@ public struct Slider<Label, ValueLabel> : View where Label : View, ValueLabel : 
 @available(tvOS, unavailable)
 extension Slider {
 
-    /// Creates an instance that selects a value from within a range.
+    /// Creates a slider to select a value from a given range, which displays
+    /// the provided labels.
     ///
     /// - Parameters:
     ///   - value: The selected value within `bounds`.
     ///   - bounds: The range of the valid values. Defaults to `0...1`.
     ///   - onEditingChanged: A callback for when editing begins and ends.
-    ///   - minimumValueLabel: A `View` that describes `bounds.lowerBound`.
-    ///   - maximumValueLabel: A `View` that describes `bounds.lowerBound`.
-    ///   - label: A `View` that describes the purpose of the instance.
+    ///   - minimumValueLabel: A view that describes `bounds.lowerBound`.
+    ///   - maximumValueLabel: A view that describes `bounds.lowerBound`.
+    ///   - label: A `View` that describes the purpose of the instance. Not all
+    ///     slider styles show the label, but even in those cases, SwiftUI
+    ///     uses the label for accessibility. For example, VoiceOver uses the
+    ///     label to identify the purpose of the slider.
     ///
-    /// The `value` of the created instance will be equal to the position of
+    /// The `value` of the created instance is equal to the position of
     /// the given value within `bounds`, mapped into `0...1`.
     ///
-    /// `onEditingChanged` will be called when editing begins and ends. For
-    /// example, on iOS, a `Slider` is considered to be actively editing while
-    /// the user is touching the knob and sliding it around the track.
+    /// The slider calls `onEditingChanged` when editing begins and ends. For
+    /// example, on iOS, editing begins when the user starts to drag the thumb
+    /// along the slider's track.
     @available(tvOS, unavailable)
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V> = 0...1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, minimumValueLabel: ValueLabel, maximumValueLabel: ValueLabel, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 
-    /// Creates an instance that selects a value from within a range.
+    /// Creates a slider to select a value from a given range, subject to a
+    /// step increment, which displays the provided labels.
     ///
     /// - Parameters:
     ///   - value: The selected value within `bounds`.
     ///   - bounds: The range of the valid values. Defaults to `0...1`.
     ///   - step: The distance between each valid value.
     ///   - onEditingChanged: A callback for when editing begins and ends.
-    ///   - minimumValueLabel: A `View` that describes `bounds.lowerBound`.
-    ///   - maximumValueLabel: A `View` that describes `bounds.lowerBound`.
-    ///   - label: A `View` that describes the purpose of the instance.
+    ///   - minimumValueLabel: A view that describes `bounds.lowerBound`.
+    ///   - maximumValueLabel: A view that describes `bounds.lowerBound`.
+    ///   - label: A `View` that describes the purpose of the instance. Not all
+    ///     slider styles show the label, but even in those cases, SwiftUI
+    ///     uses the label for accessibility. For example, VoiceOver uses the
+    ///     label to identify the purpose of the slider.
     ///
-    /// The `value` of the created instance will be equal to the position of
+    /// The `value` of the created instance is equal to the position of
     /// the given value within `bounds`, mapped into `0...1`.
     ///
-    /// `onEditingChanged` will be called when editing begins and ends. For
-    /// example, on iOS, a `Slider` is considered to be actively editing while
-    /// the user is touching the knob and sliding it around the track.
+    /// The slider calls `onEditingChanged` when editing begins and ends. For
+    /// example, on iOS, editing begins when the user starts to drag the thumb
+    /// along the slider's track.
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, minimumValueLabel: ValueLabel, maximumValueLabel: ValueLabel, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 }
 
@@ -13653,38 +13978,46 @@ extension Slider {
 @available(tvOS, unavailable)
 extension Slider where ValueLabel == EmptyView {
 
-    /// Creates an instance that selects a value from within a range.
+    /// Creates a slider to select a value from a given range, which displays
+    /// the provided label.
     ///
     /// - Parameters:
     ///   - value: The selected value within `bounds`.
     ///   - bounds: The range of the valid values. Defaults to `0...1`.
     ///   - onEditingChanged: A callback for when editing begins and ends.
-    ///   - label: A `View` that describes the purpose of the instance.
+    ///   - label: A `View` that describes the purpose of the instance. Not all
+    ///     slider styles show the label, but even in those cases, SwiftUI
+    ///     uses the label for accessibility. For example, VoiceOver uses the
+    ///     label to identify the purpose of the slider.
     ///
-    /// The `value` of the created instance will be equal to the position of
+    /// The `value` of the created instance is equal to the position of
     /// the given value within `bounds`, mapped into `0...1`.
     ///
-    /// `onEditingChanged` will be called when editing begins and ends. For
-    /// example, on iOS, a `Slider` is considered to be actively editing while
-    /// the user is touching the knob and sliding it around the track.
+    /// The slider calls `onEditingChanged` when editing begins and ends. For
+    /// example, on iOS, editing begins when the user starts to drag the thumb
+    /// along the slider's track.
     @available(tvOS, unavailable)
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V> = 0...1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 
-    /// Creates an instance that selects a value from within a range.
+    /// Creates a slider to select a value from a given range, subject to a
+    /// step increment, which displays the provided label.
     ///
     /// - Parameters:
     ///   - value: The selected value within `bounds`.
     ///   - bounds: The range of the valid values. Defaults to `0...1`.
     ///   - step: The distance between each valid value.
     ///   - onEditingChanged: A callback for when editing begins and ends.
-    ///   - label: A `View` that describes the purpose of the instance.
+    ///   - label: A `View` that describes the purpose of the instance. Not all
+    ///     slider styles show the label, but even in those cases, SwiftUI
+    ///     uses the label for accessibility. For example, VoiceOver uses the
+    ///     label to identify the purpose of the slider.
     ///
-    /// The `value` of the created instance will be equal to the position of
+    /// The `value` of the created instance is equal to the position of
     /// the given value within `bounds`, mapped into `0...1`.
     ///
-    /// `onEditingChanged` will be called when editing begins and ends. For
-    /// example, on iOS, a `Slider` is considered to be actively editing while
-    /// the user is touching the knob and sliding it around the track.
+    /// The slider calls `onEditingChanged` when editing begins and ends. For
+    /// example, on iOS, editing begins when the user starts to drag the thumb
+    /// along the slider's track.
     @available(tvOS, unavailable)
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 }
@@ -13693,23 +14026,24 @@ extension Slider where ValueLabel == EmptyView {
 @available(tvOS, unavailable)
 extension Slider where Label == EmptyView, ValueLabel == EmptyView {
 
-    /// Creates an instance that selects a value from within a range.
+    /// Creates a slider to select a value from a given range.
     ///
     /// - Parameters:
     ///   - value: The selected value within `bounds`.
     ///   - bounds: The range of the valid values. Defaults to `0...1`.
     ///   - onEditingChanged: A callback for when editing begins and ends.
     ///
-    /// The `value` of the created instance will be equal to the position of
+    /// The `value` of the created instance is equal to the position of
     /// the given value within `bounds`, mapped into `0...1`.
     ///
-    /// `onEditingChanged` will be called when editing begins and ends. For
-    /// example, on iOS, a `Slider` is considered to be actively editing while
-    /// the user is touching the knob and sliding it around the track.
+    /// The slider calls `onEditingChanged` when editing begins and ends. For
+    /// example, on iOS, editing begins when the user starts to drag the thumb
+    /// along the slider's track.
     @available(tvOS, unavailable)
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V> = 0...1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 
-    /// Creates an instance that selects a value from within a range.
+    /// Creates a slider to select a value from a given range, subject to a
+    /// step increment.
     ///
     /// - Parameters:
     ///   - value: The selected value within `bounds`.
@@ -13717,12 +14051,12 @@ extension Slider where Label == EmptyView, ValueLabel == EmptyView {
     ///   - step: The distance between each valid value.
     ///   - onEditingChanged: A callback for when editing begins and ends.
     ///
-    /// The `value` of the created instance will be equal to the position of
+    /// The `value` of the created instance is equal to the position of
     /// the given value within `bounds`, mapped into `0...1`.
     ///
-    /// `onEditingChanged` will be called when editing begins and ends. For
-    /// example, on iOS, a `Slider` is considered to be actively editing while
-    /// the user is touching the knob and sliding it around the track.
+    /// The slider calls `onEditingChanged` when editing begins and ends. For
+    /// example, on iOS, editing begins when the user starts to drag the thumb
+    /// along the slider's track.
     @available(tvOS, unavailable)
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 }
@@ -14804,7 +15138,7 @@ public struct TapGesture : Gesture {
 
     /// Creates a text view that displays a stored string without localization.
     ///
-    /// Use this intializer to create a text view that displays — without
+    /// Use this initializer to create a text view that displays — without
     /// localization — the text in a string variable.
     ///
     ///     Text(someString) // Displays the contents of `someString` without localization.
@@ -14938,7 +15272,7 @@ extension Text {
 
     /// Creates a text view that displays localized content identified by a key.
     ///
-    /// Use this intializer to look for the `key` parameter in a localization
+    /// Use this initializer to look for the `key` parameter in a localization
     /// table and display the associated string value in the initialized text
     /// view. If the initializer can't find the key in the table, or if no table
     /// exists, the text view displays the string representation of the key
@@ -15563,11 +15897,106 @@ public struct TextEditor : View {
 
 /// A control that displays an editable text interface.
 ///
-/// You can customize the appearance and interaction of a text field using a
-/// ``TextFieldStyle`` instance. The system resolves this configuration at
-/// runtime. Each platform provides a default style that reflects the platform
-/// style, but you can provide a new style that redefines all text field
-/// instances within a particular environment.
+/// You create a text field with a label and a binding to a value. If the
+/// value is a string, the text field updates this value continuously as the
+/// user types or otherwise edits the text in the field. For non-string types,
+/// it updates the value when the user commits their edits, such as by pressing
+/// the Return key.
+///
+/// The text field also allows you to provide two closures that customize its
+/// behavior. The `onEditingChanged` property informs your app when the user
+/// begins or ends editing the text. The `onCommit` property executes when the
+/// user commits their edits.
+///
+/// The following example shows a text field to accept a username, and a
+/// ``Text`` view below it that shadows the continuously-updated value
+/// of `username`. The ``Text`` view changes color as the user begins and ends
+/// editing, and committing the text calls an internal `valdiate(name:)` method.
+///
+///     @State private var username: String = ""
+///     @State private var isEditing = false
+///
+///     var body: some View {
+///         TextField(
+///             "User name (email address)",
+///              text: $username
+///         ) { isEditing in
+///             self.isEditing = isEditing
+///         } onCommit: {
+///             validate(name: username)
+///         }
+///         .autocapitalization(.none)
+///         .disableAutocorrection(true)
+///         .border(Color(UIColor.separator))
+///         Text(username)
+///             .foregroundColor(isEditing ? .red : .blue)
+///     }
+///
+/// ![A text field showing the typed email mruiz2@icloud.com, with a text
+/// view below it also showing this value.](SwiftUI-TextField-echoText.png)
+///
+/// The bound value doesn't have to be a string. By using a
+/// <doc://com.apple.documentation/documentation/Foundation/Formatter>,
+/// you can bind the text field to a non-string type, using the formatter
+/// to convert the typed text into an instance of the bound type. The following
+/// example uses a
+/// <doc://com.apple.documentation/documentation/Foundation/PersonNameComponentsFormatter>
+/// to convert the name typed in the text field to a
+/// <doc://com.apple.documentation/documentation/Foundation/PersonNameComponents>
+/// instance. A ``Text`` view below the text field shows the debug description
+/// string of this instance.
+///
+///     @State private var nameComponents = PersonNameComponents()
+///
+///     var body: some View {
+///         let nameFormatter = PersonNameComponentsFormatter()
+///         TextField(
+///             "Proper name",
+///              value: $nameComponents,
+///              formatter: nameFormatter,
+///              onCommit: {
+///                 validate(components: nameComponents)
+///              })
+///             .disableAutocorrection(true)
+///             .border(Color(UIColor.separator))
+///         Text(nameComponents.debugDescription)
+///     }
+///
+/// ![A text field showing the typed name Maria Ruiz, with a text view below
+///  it showing the string givenName:Maria
+///  familyName:Ruiz.](SwiftUI-TextField-nameComponents.png)
+///
+/// ### Styling Text Fields
+///
+/// SwiftUI provides a default text field style that reflects an appearance and
+/// behavior appropriate to the platform. The default style also takes the
+/// current context into consideration, like whether the text field is in a
+/// container that presents text fields with a special style. Beyond this, you
+/// can customize the appearance and interaction of text fields using the
+/// ``View/textFieldStyle(_:)`` modifier, passing in an instance of
+/// ``TextFieldStyle``. The following example applies the
+/// ``RoundedBorderTextFieldStyle`` to both text fields within a ``VStack``.
+///
+///     @State private var givenName: String = ""
+///     @State private var familyName: String = ""
+///
+///     var body: some View {
+///         VStack {
+///             TextField(
+///                 "Given Name",
+///                  text: $givenName)
+///                 .disableAutocorrection(true)
+///             TextField(
+///                 "Family Name",
+///                 text: $familyName)
+///                 .disableAutocorrection(true)
+///         }
+///         .textFieldStyle(RoundedBorderTextFieldStyle())
+///     }
+/// ![Two vertically-stacked text fields, with the prompt text Given Name and
+/// Family Name, both with rounded
+/// borders.](SwiftUI-TextField-roundedBorderStyle.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct TextField<Label> : View where Label : View {
 
@@ -15590,13 +16019,14 @@ extension TextField where Label == Text {
     /// - Parameters:
     ///   - titleKey: The key for the localized title of the text field,
     ///     describing its purpose.
-    ///   - text: The text to be displayed and edited.
-    ///   - onEditingChanged: An action thats called when the user
+    ///   - text: The text to display and edit.
+    ///   - onEditingChanged: The action to perform when the user
     ///     begins editing `text` and after the user finishes editing `text`.
-    ///     The closure recieves a Boolean indicating whether the text field is
-    ///     currently being edited.
+    ///     The closure receives a Boolean value that indicates the editing
+    ///     status: `true` when the user begins editing, `false` when they
+    ///     finish.
     ///   - onCommit: An action to perform when the user performs an action
-    ///     (for example, when the user hits the return key) while the text
+    ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
     public init(_ titleKey: LocalizedStringKey, text: Binding<String>, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {})
 
@@ -15604,13 +16034,14 @@ extension TextField where Label == Text {
     ///
     /// - Parameters:
     ///   - title: The title of the text view, describing its purpose.
-    ///   - text: The text to be displayed and edited.
-    ///   - onEditingChanged: An action thats called when the user
+    ///   - text: The text to display and edit.
+    ///   - onEditingChanged: The action to perform when the user
     ///     begins editing `text` and after the user finishes editing `text`.
-    ///     The closure recieves a Boolean indicating whether the text field is
-    ///     currently being edited.
+    ///     The closure receives a Boolean value that indicates the editing
+    ///     status: `true` when the user begins editing, `false` when they
+    ///     finish.
     ///   - onCommit: An action to perform when the user performs an action
-    ///     (for example, when the user hits the return key) while the text
+    ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
     public init<S>(_ title: S, text: Binding<String>, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {}) where S : StringProtocol
 
@@ -15624,12 +16055,13 @@ extension TextField where Label == Text {
     ///     string the user edits and the underlying value of type `T`.
     ///     In the event that `formatter` is unable to perform the conversion,
     ///     `binding.value` isn't modified.
-    ///   - onEditingChanged: An action thats called when the user
+    ///   - onEditingChanged: The action to perform when the user
     ///     begins editing `text` and after the user finishes editing `text`.
-    ///     The closure recieves a Boolean indicating whether the text field is
-    ///     currently being edited.
+    ///     The closure receives a Boolean value that indicates the editing
+    ///     status: `true` when the user begins editing, `false` when they
+    ///     finish.
     ///   - onCommit: An action to perform when the user performs an action
-    ///     (for example, when the user hits the return key) while the text
+    ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
     public init<T>(_ titleKey: LocalizedStringKey, value: Binding<T>, formatter: Formatter, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {})
 
@@ -15642,12 +16074,13 @@ extension TextField where Label == Text {
     ///     string the user edits and the underlying value of type `T`.
     ///     In the event that `formatter` is unable to perform the conversion,
     ///     `binding.value` isn't modified.
-    ///   - onEditingChanged: An action thats called when the user
+    ///   - onEditingChanged: The action to perform when the user
     ///     begins editing `text` and after the user finishes editing `text`.
-    ///     The closure recieves a Boolean indicating whether the text field is
-    ///     currently being edited.
+    ///     The closure receives a Boolean value that indicates the editing
+    ///     status: `true` when the user begins editing, `false` when they
+    ///     finish.
     ///   - onCommit: An action to perform when the user performs an action
-    ///     (for example, when the user hits the return key) while the text
+    ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
     public init<S, T>(_ title: S, value: Binding<T>, formatter: Formatter, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {}) where S : StringProtocol
 }
@@ -15770,8 +16203,6 @@ extension Toggle where Label == ToggleStyleConfiguration.Label {
     /// but otherwise preserves the toggle's current style:
     ///
     ///     struct RedBorderedToggleStyle : ToggleStyle {
-    ///         typealias Body = Toggle
-    ///
     ///         func makeBody(configuration: Configuration) -> some View {
     ///             Toggle(configuration)
     ///                 .border(Color.red)
@@ -17024,14 +17455,40 @@ extension UserInterfaceSizeClass : Hashable {
 }
 
 /// A view that arranges its children in a vertical line.
+///
+/// Unlike ``LazyVStack``, which only renders the views when your app needs to
+/// display them onscreen, a `VStack` renders the views all at once, regardless
+/// of whether they are on- or offscreen. Use the regular `VStack` when you have
+/// a small number of child views or don't want the delayed rendering behavior
+/// of the "lazy" version.
+///
+/// The following example shows a simple vertical stack of 10 text views:
+///
+///     var body: some View {
+///         VStack(
+///             alignment: .leading,
+///             spacing: 10
+///         ) {
+///             ForEach(
+///                 1...10,
+///                 id: \.self
+///             ) {
+///                 Text("Item \($0)")
+///             }
+///         }
+///     }
+///
+/// ![Ten text views, named Item 1 through Item 10, arranged in a
+/// vertical line.](SwiftUI-VStack-simple.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct VStack<Content> : View where Content : View {
 
     /// Creates an instance with the given spacing and horizontal alignment.
     ///
     /// - Parameters:
-    ///   - alignment: The guide for aligning the subviews in this stack. It has
-    ///     the same horizontal screen coordinate for all children.
+    ///   - alignment: The guide for aligning the subviews in this stack. This
+    ///     guide has the same vertical screen coordinate for every child view.
     ///   - spacing: The distance between adjacent subviews, or `nil` if you
     ///     want the stack to choose a default distance for each pair of
     ///     subviews.
@@ -17552,7 +18009,8 @@ extension View {
     ///             Button("♦️ - Diamonds", action: selectDiamonds)
     ///         }
     ///
-    /// ![A context menu showing four menu items.](SwiftUI-contextMenu.png)
+    /// ![A screenshot of a context menu showing four menu items: Hearts, Clubs,
+    /// Spades and Diamonds.](SwiftUI-contextMenu.png)
     ///
     /// - Parameter menuItems: A `contextMenu` that contains one or more menu items.
     /// - Returns: A view that adds a contextual menu to this view.
@@ -17606,6 +18064,9 @@ extension View {
     ///         }
     ///     }
     ///
+    /// ![A screenshot of a context menu showing four menu items: Hearts, Clubs,
+    /// Spades and Diamonds.](SwiftUI-contextMenu.png)
+    ///
     /// - Parameter contextMenu: A context menu container for views that you
     ///   present as menu items in a contextual menu.
     ///
@@ -17639,16 +18100,145 @@ extension View {
 
     /// Attaches a gesture to the view with a lower precedence than gestures
     /// defined by the view.
+    ///
+    /// Use this method when you need to attach a gesture to a view. The
+    /// example below defines a custom gesture that prints a message to the
+    /// console and attaches it to the view's ``VStack``. Inside the ``VStack``
+    /// a red heart ``Image`` defines its own ``TapGesture``
+    /// handler that also prints a message to the console, and blue rectangle
+    /// with no custom gesture handlers. Tapping or clicking the image
+    /// prints a message to the console from the tap gesture handler on the
+    /// image, while tapping or clicking  the rectangle inside the ``VStack``
+    /// prints a message in the console from the enclosing vertical stack
+    /// gesture handler.
+    ///
+    ///     struct GestureExample: View {
+    ///         @State private var message = "Message"
+    ///         let newGesture = TapGesture().onEnded {
+    ///             print("Tap on VStack.")
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             VStack(spacing:25) {
+    ///                 Image(systemName: "heart.fill")
+    ///                     .resizable()
+    ///                     .frame(width: 75, height: 75)
+    ///                     .padding()
+    ///                     .foregroundColor(.red)
+    ///                     .onTapGesture {
+    ///                         print("Tap on image.")
+    ///                     }
+    ///                 Rectangle()
+    ///                     .fill(Color.blue)
+    ///             }
+    ///             .gesture(newGesture)
+    ///             .frame(width: 200, height: 200)
+    ///             .border(Color.purple)
+    ///         }
+    ///     }
+    ///
+    /// - Parameters:
+    ///    - gesture: A gesture to attach to the view.
+    ///    - mask: A value that controls how adding this gesture to the view
+    ///      affects other gestures recognized by the view and its subviews.
+    ///      Defaults to ``SwiftUI/GestureMask/all``.
     public func gesture<T>(_ gesture: T, including mask: GestureMask = .all) -> some View where T : Gesture
 
 
     /// Attaches a gesture to the view with a higher precedence than gestures
     /// defined by the view.
+    ///
+    /// Use this method when you need to define a high priority gesture
+    /// to take precedence over the view's existing gestures. The
+    /// example below defines a custom gesture that prints a message to the
+    /// console and attaches it to the view's ``VStack``. Inside the ``VStack``
+    /// a red heart ``Image`` defines its own ``TapGesture`` handler that
+    /// also prints a message to the console, and a blue rectangle
+    /// with no custom gesture handlers. Tapping or clicking any of the
+    /// views results in a console message from the high priority gesture
+    /// attached to the enclosing ``VStack``.
+    ///
+    ///     struct HighPriorityGestureExample: View {
+    ///         @State private var message = "Message"
+    ///         let newGesture = TapGesture().onEnded {
+    ///             print("Tap on VStack.")
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             VStack(spacing:25) {
+    ///                 Image(systemName: "heart.fill")
+    ///                     .resizable()
+    ///                     .frame(width: 75, height: 75)
+    ///                     .padding()
+    ///                     .foregroundColor(.red)
+    ///                     .onTapGesture {
+    ///                         print("Tap on image.")
+    ///                     }
+    ///                 Rectangle()
+    ///                     .fill(Color.blue)
+    ///             }
+    ///             .highPriorityGesture(newGesture)
+    ///             .frame(width: 200, height: 200)
+    ///             .border(Color.purple)
+    ///         }
+    ///     }
+    ///
+    /// - Parameters:
+    ///    - gesture: A gesture to attach to the view.
+    ///    - mask: A value that controls how adding this gesture to the view
+    ///      affects other gestures recognized by the view and its subviews.
+    ///      Defaults to ``SwiftUI/GestureMask/all``.
     public func highPriorityGesture<T>(_ gesture: T, including mask: GestureMask = .all) -> some View where T : Gesture
 
 
     /// Attaches a gesture to the view to process simultaneously with gestures
     /// defined by the view.
+    ///
+    /// Use this method when you need to define and process  a view specific
+    /// gesture simultaneously with the same priority as the
+    /// view's existing gestures. The example below defines a custom gesture
+    /// that prints a message to the console and attaches it to the view's
+    /// ``VStack``. Inside the ``VStack`` is a red heart ``Image`` defines its
+    /// own ``TapGesture`` handler that also prints a message to the console
+    /// and a blue rectangle with no custom gesture handlers.
+    ///
+    /// Tapping or clicking the "heart" image sends two messages to the
+    /// console: one for the image's tap gesture handler, and the other from a
+    /// custom gesture handler attached to the enclosing vertical stack.
+    /// Tapping or clicking on the blue rectangle results only in the single
+    /// message to the console from the tap recognizer attached to the
+    /// ``VStack``:
+    ///
+    ///     struct SimultaneousGestureExample: View {
+    ///         @State private var message = "Message"
+    ///         let newGesture = TapGesture().onEnded {
+    ///             print("Gesture on VStack.")
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             VStack(spacing:25) {
+    ///                 Image(systemName: "heart.fill")
+    ///                     .resizable()
+    ///                     .frame(width: 75, height: 75)
+    ///                     .padding()
+    ///                     .foregroundColor(.red)
+    ///                     .onTapGesture {
+    ///                         print("Gesture on image.")
+    ///                     }
+    ///                 Rectangle()
+    ///                     .fill(Color.blue)
+    ///             }
+    ///             .simultaneousGesture(newGesture)
+    ///             .frame(width: 200, height: 200)
+    ///             .border(Color.purple)
+    ///         }
+    ///     }
+    ///
+    /// - Parameters:
+    ///    - gesture: A gesture to attach to the view.
+    ///    - mask: A value that controls how adding this gesture to the view
+    ///      affects other gestures recognized by the view and its subviews.
+    ///      Defaults to ``SwiftUI/GestureMask/all``.
     public func simultaneousGesture<T>(_ gesture: T, including mask: GestureMask = .all) -> some View where T : Gesture
 
 }
@@ -19224,26 +19814,34 @@ extension View {
     /// list row item.
     ///
     /// In the example below, the `Flavor` enumeration provides content for list
-    /// items. The SwiftUI ``List`` builder iterates over the `Flavor`
-    /// enumeration and extracts the raw value of each of its elements using the
-    /// resulting text to create each list row item. After the list builder
-    /// finishes, the `listRowBackground(_:)` modifier places the view you
-    /// supply behind each of the list row items.
+    /// items. The SwiftUI ``ForEach`` structure computes views for each element
+    /// of the `Flavor` enumeration and extracts the raw value of each of its
+    /// elements using the resulting text to create each list row item. The
+    /// `listRowBackground(_:)` modifier then places the view you supply behind
+    /// each of the list row items:
     ///
-    ///     struct ListRowBackground: View {
-    ///
+    ///     struct ContentView: View {
     ///         enum Flavor: String, CaseIterable, Identifiable {
     ///             var id: String { self.rawValue }
     ///             case vanilla, chocolate, strawberry
     ///         }
     ///
     ///         var body: some View {
-    ///             List(Flavor.allCases, id: \.self) {
-    ///                 Text($0.rawValue)
+    ///             List {
+    ///                 ForEach(Flavor.allCases) {
+    ///                     Text($0.rawValue)
+    ///                         .listRowBackground(Ellipse()
+    ///                                             .background(Color.clear)
+    ///                                             .foregroundColor(.purple)
+    ///                                             .opacity(0.3)
+    ///                         )
+    ///                 }
     ///             }
-    ///             .listRowBackground(Image(systemName: "sparkles"))
     ///         }
     ///     }
+    ///
+    /// ![A screenshot showing the placement of an image as the background to
+    ///   each row in a list.](SwiftUI-View-listRowBackground.png)
     ///
     /// - Parameter view: The ``View`` to use as the background behind the list
     ///   row view.
@@ -19783,14 +20381,12 @@ extension View {
     ///             TabView {
     ///                 View1()
     ///                     .tabItem {
-    ///                         Image(systemName: "list.dash")
-    ///                         Text("Menu")
+    ///                         Label("Menu", systemImage: "list.dash")
     ///                     }
     ///
     ///                 View2()
     ///                     .tabItem {
-    ///                         Image(systemName: "square.and.pencil")
-    ///                         Text("Order")
+    ///                         Label("Order", systemImage: "square.and.pencil")
     ///                     }
     ///             }
     ///         }
@@ -19901,9 +20497,51 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Hides this view.
+    /// Hides this view unconditionally.
     ///
     /// Hidden views are invisible and can't receive or respond to interactions.
+    /// However, they do remain in the view hierarchy and affect layout. Use
+    /// this modifier if you want to include a view for layout purposes, but
+    /// don't want it to display.
+    ///
+    ///     HStack {
+    ///         Image(systemName: "a.circle.fill")
+    ///         Image(systemName: "b.circle.fill")
+    ///         Image(systemName: "c.circle.fill")
+    ///             .hidden()
+    ///         Image(systemName: "d.circle.fill")
+    ///     }
+    ///
+    /// The third circle takes up space, because it's still present, but
+    /// SwiftUI doesn't draw it onscreen.
+    ///
+    /// ![A row of circles with the letters A, B, and D, with a gap where
+    ///   the circle with the letter C should be.](SwiftUI-View-hidden-1.png)
+    ///
+    /// If you want to conditionally include a view in the view hierarchy, use
+    /// an `if` statement instead:
+    ///
+    ///     VStack {
+    ///         HStack {
+    ///             Image(systemName: "a.circle.fill")
+    ///             Image(systemName: "b.circle.fill")
+    ///             if !isHidden {
+    ///                 Image(systemName: "c.circle.fill")
+    ///             }
+    ///             Image(systemName: "d.circle.fill")
+    ///         }
+    ///         Toggle("Hide", isOn: $isHidden)
+    ///     }
+    ///
+    /// Depending on the current value of the `isHidden` state variable in the
+    /// example above, controlled by the ``Toggle`` instance, SwiftUI draws
+    /// the circle or completely omits it from the layout.
+    ///
+    /// ![Two side by side groups of items, each composed of a toggle beneath
+    ///   a row of circles with letters in them. The toggle on the left
+    ///   is off and has four equally spaced circles above it: A, B, C, and D.
+    ///   The toggle on the right is on and has three equally spaced circles
+    ///   above it: A, B, and D.](SwiftUI-View-hidden-2.png)
     ///
     /// - Returns: A hidden view.
     @inlinable public func hidden() -> some View
@@ -20649,6 +21287,40 @@ extension View {
 extension View {
 
     /// Adds an action to perform when this view recognizes a tap gesture.
+    ///
+    /// Use this method to perform a specific `action` when the user clicks or
+    /// taps on the view or container `count` times.
+    ///
+    /// > Note: If you are creating a control that's functionally equivalent
+    /// to a ``Button``, use ``ButtonStyle`` to create a customized button
+    /// instead.
+    ///
+    /// In the example below, the color of the heart images changes to a random
+    /// color from the `colors` array whenever the user clicks or taps on the
+    /// view twice:
+    ///
+    ///     struct TapGestureExample: View {
+    ///         let colors: [Color] = [.gray, .red, .orange, .yellow,
+    ///                                .green, .blue, .purple, .pink]
+    ///         @State private var fgColor: Color = .gray
+    ///
+    ///         var body: some View {
+    ///             Image(systemName: "heart.fill")
+    ///                 .resizable()
+    ///                 .frame(width: 200, height: 200)
+    ///                 .foregroundColor(fgColor)
+    ///                 .onTapGesture(count: 2, perform: {
+    ///                     fgColor = colors.randomElement()!
+    ///                 })
+    ///         }
+    ///     }
+    ///
+    /// ![A screenshot of a view of a heart.](SwiftUI-View-TapGesture.png)
+    ///
+    /// - Parameters:
+    ///    - count: The number of taps or clicks required to trigger the action
+    ///      closure provided in `action`. Defaults to `1`.
+    ///    - action: The action to perform.
     public func onTapGesture(count: Int = 1, perform action: @escaping () -> Void) -> some View
 
 }
@@ -20662,28 +21334,36 @@ extension View {
     /// list items.
     ///
     /// In the example below, the `Flavor` enumeration provides content for list
-    /// items. The SwiftUI ``List`` builder iterates over the `Flavor`
-    /// enumeration and extracts the raw value of each of its elements using the
-    /// resulting text to create each list row item. After the list builder
-    /// finishes, the `listRowInsets(_:)` modifier changes the edge insets of
-    /// each row of the list according to the ``EdgeInsets`` values you provide.
+    /// items. The SwiftUI ``ForEach`` structure computes views for each element
+    /// of the `Flavor` enumeration and extracts the raw value of each of its
+    /// elements using the resulting text to create each list row item. The
+    /// `listRowInsets(_:)` modifier then changes the edge insets of each row
+    /// of the list according to the ``EdgeInsets`` provided:
     ///
-    ///     struct ListRowInsets: View {
+    ///     struct ContentView: View {
     ///         enum Flavor: String, CaseIterable, Identifiable {
     ///             var id: String { self.rawValue }
     ///             case vanilla, chocolate, strawberry
     ///         }
     ///
     ///         var body: some View {
-    ///             List(Flavor.allCases, id: \.self) {
-    ///                 Text($0.rawValue)
+    ///             List {
+    ///                 ForEach(Flavor.allCases) {
+    ///                     Text($0.rawValue)
+    ///                         .listRowInsets(.init(top: 0,
+    ///                                              leading: 25,
+    ///                                              bottom: 0,
+    ///                                              trailing: 0))
+    ///                 }
     ///             }
-    ///             .listRowInsets(EdgeInsets(top: 0, leading: 75, bottom: 0, trailing: 0))
     ///         }
     ///     }
     ///
-    /// - Parameter insets: ``EdgeInsets`` to apply to the edges of the view.
+    /// ![A screenshot showing a list with leading 25 point inset on each
+    ///  row.](SwiftUI-View-ListRowInsets.png)
     ///
+    /// - Parameter insets: The ``EdgeInsets`` to apply to the edges of the
+    ///   view.
     /// - Returns: A view that uses the given edge insets when used as a list
     ///   cell.
     @inlinable public func listRowInsets(_ insets: EdgeInsets?) -> some View
@@ -21302,17 +21982,73 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Applies the given transaction mutation function to all transactions used
+    /// Applies the given transaction mutation function to all animations used
     /// within the view.
     ///
-    /// Use this modifier on leaf views rather than container views. The
+    /// Use this modifier to change or replace the animation used in a view.
+    /// Consider three identical animations controlled by a
+    /// button that executes all three animations simultaneously:
+    ///
+    ///  * The first animation rotates the "Rotation" ``Text`` view by 360
+    ///    degrees.
+    ///  * The second uses the `transaction(_:)` modifier to change the
+    ///    animation by adding a delay to the start of the animation
+    ///    by two seconds and then increases the rotational speed of the
+    ///    "Rotation\nModified" ``Text`` view animation by a factor of 2.
+    ///  * The third animation uses the `transaction(_:)` modifier to
+    ///    replace the rotation animation affecting the "Animation\nReplaced"
+    ///    ``Text`` view with a spring animation.
+    ///
+    /// The following code implements these animations:
+    ///
+    ///     struct TransactionExample: View {
+    ///         @State var flag = false
+    ///
+    ///         var body: some View {
+    ///             VStack(spacing: 50) {
+    ///                 HStack(spacing: 30) {
+    ///                     Text("Rotation")
+    ///                         .rotationEffect(Angle(degrees:
+    ///                                                 self.flag ? 360 : 0))
+    ///
+    ///                     Text("Rotation\nModified")
+    ///                         .rotationEffect(Angle(degrees:
+    ///                                                 self.flag ? 360 : 0))
+    ///                         .transaction { view in
+    ///                             view.animation =
+    ///                                 view.animation?.delay(2.0).speed(2)
+    ///                         }
+    ///
+    ///                     Text("Animation\nReplaced")
+    ///                         .rotationEffect(Angle(degrees:
+    ///                                                 self.flag ? 360 : 0))
+    ///                         .transaction { view in
+    ///                             view.animation = .interactiveSpring(
+    ///                                 response: 0.60,
+    ///                                 dampingFraction: 0.20,
+    ///                                 blendDuration: 0.25)
+    ///                         }
+    ///                 }
+    ///
+    ///                 Button("Animate") {
+    ///                     withAnimation(.easeIn(duration: 2.0)) {
+    ///                         self.flag.toggle()
+    ///                     }
+    ///                 }
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// Use this modifier on leaf views such as ``Image`` or ``Button`` rather
+    /// than container views such as ``VStack`` or ``HStack``. The
     /// transformation applies to all child views within this view; calling
-    /// `transaction(_:)` on a container view can lead to unbounded scope.
+    /// `transaction(_:)` on a container view can lead to unbounded scope of
+    /// execution depending on the depth of the view hierarchy.
     ///
     /// - Parameter transform: The transformation to apply to transactions
     ///   within this view.
     ///
-    /// - Returns: A view that wraps this view and applies `transformation` to
+    /// - Returns: A view that wraps this view and applies a transformation to
     ///   all transactions used within the view.
     @inlinable public func transaction(_ transform: @escaping (inout Transaction) -> Void) -> some View
 
@@ -21897,9 +22633,8 @@ extension View {
     ///
     /// Adding help to a view configures the view's accessibility hint and
     /// its tooltip ("help tag") on macOS.
-    ///
-    /// For more information on using help tags, see [Help]
-    /// (https://developer.apple.com/design/human-interface-guidelines/macos/user-interaction/help/)
+    /// For more information on using help tags, see
+    /// [Help](https://developer.apple.com/design/human-interface-guidelines/macos/user-interaction/help/)
     /// in the macOS Human Interface Guidelines.
     ///
     ///     Button(action: composeMessage) {
@@ -21915,9 +22650,8 @@ extension View {
     ///
     /// Adding help to a view configures the view's accessibility hint and
     /// its tooltip ("help tag") on macOS.
-    ///
-    /// For more information on using help tags, see [Help]
-    /// (https://developer.apple.com/design/human-interface-guidelines/macos/user-interaction/help/)
+    /// For more information on using help tags, see
+    /// [Help](https://developer.apple.com/design/human-interface-guidelines/macos/user-interaction/help/)
     /// in the macOS Human Interface Guidelines.
     ///
     ///     Slider("Opacity", value: $selectedShape.opacity)
@@ -21931,9 +22665,8 @@ extension View {
     ///
     /// Adding help to a view configures the view's accessibility hint and
     /// its tooltip ("help tag") on macOS.
-    ///
-    /// For more information on using help tags, see [Help]
-    /// (https://developer.apple.com/design/human-interface-guidelines/macos/user-interaction/help/)
+    /// For more information on using help tags, see
+    /// [Help](https://developer.apple.com/design/human-interface-guidelines/macos/user-interaction/help/)
     /// in the macOS Human Interface Guidelines.
     ///
     ///     Image(systemName: "pin.circle")
@@ -22394,14 +23127,15 @@ extension ViewModifier {
 
 }
 
-/// A system style of date picker that displays each component as columns
-/// in a scrollable wheel.
+/// A date picker style that displays each component as columns in a scrollable
+/// wheel.
 @available(iOS 13.0, *)
 @available(macOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct WheelDatePickerStyle : DatePickerStyle {
 
+    /// Creates an instance of the wheel date picker style.
     public init()
 }
 
