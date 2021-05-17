@@ -1,4 +1,4 @@
-// Xcode 12.4
+// Xcode 12.5
 
 import Combine
 import CoreData
@@ -10,8 +10,8 @@ import Foundation
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
-import os.log
 import os
+import os.log
 import os.signpost
 
 /// The kind of an Accessibility action. Includes name information for custom
@@ -58,15 +58,6 @@ public enum AccessibilityAdjustmentDirection {
     ///   - rhs: Another value to compare.
     public static func == (a: AccessibilityAdjustmentDirection, b: AccessibilityAdjustmentDirection) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -81,6 +72,15 @@ public enum AccessibilityAdjustmentDirection {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -178,15 +178,6 @@ extension AccessibilityChildBehavior {
 
 extension AccessibilityLabeledPairRole : Hashable {
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -201,6 +192,15 @@ extension AccessibilityLabeledPairRole : Hashable {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -423,7 +423,7 @@ public struct AccessibilityTraits : SetAlgebra {
     /// - Parameter member: The element of the set to remove.
     /// - Returns: For ordinary sets, an element equal to `member` if `member` is
     ///   contained in the set; otherwise, `nil`. In some cases, a returned
-    ///   element may be distinguishable from `newMember` by identity comparison
+    ///   element may be distinguishable from `member` by identity comparison
     ///   or some other means.
     ///
     ///   For sets where the set type and element type are the same, like
@@ -489,12 +489,6 @@ public struct AccessibilityTraits : SetAlgebra {
     ///   set and `[newMember]`, or `nil` if the intersection is empty.
     public mutating func update(with newMember: AccessibilityTraits) -> AccessibilityTraits?
 
-    /// A type for which the conforming type provides a containment test.
-    public typealias Element = AccessibilityTraits
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = AccessibilityTraits
-
     /// Returns a Boolean value indicating whether two values are equal.
     ///
     /// Equality is the inverse of inequality. For any values `a` and `b`,
@@ -504,50 +498,213 @@ public struct AccessibilityTraits : SetAlgebra {
     ///   - lhs: A value to compare.
     ///   - rhs: Another value to compare.
     public static func == (a: AccessibilityTraits, b: AccessibilityTraits) -> Bool
+
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = AccessibilityTraits
+
+    /// A type for which the conforming type provides a containment test.
+    public typealias Element = AccessibilityTraits
 }
 
-/// A storage type for an action sheet presentation.
+/// A representation of an action sheet presentation.
+///
+/// Use an action sheet when you want the user to make a choice between two
+/// or more options, in response to their own action. If you want the user to
+/// act in response to the state of the app or the system, rather than a user
+/// action, use an ``Alert`` instead.
+///
+/// You show an action sheet by using the
+/// ``View/actionSheet(isPresented:content:)`` view modifier to create an
+/// action sheet, which then appears whenever the bound `isPresented` value is
+/// `true`. The `content` closure you provide to this modifier produces a
+/// customized instance of the `ActionSheet` type. To supply the options, create
+/// instances of ``ActionSheet/Button`` to distinguish between ordinary options,
+/// destructive options, and cancellation of the user's original action.
+///
+/// The action sheet handles its own dismissal by setting the bound
+/// `isPresented` value back to `false` when the user taps a button in the
+/// action sheet.
+///
+/// The following example creates an action sheet with three options: a Cancel
+/// button, a destructive button, and a default button. The second and third of
+/// these call methods are named `overwriteWorkout` and `appendWorkout`,
+/// respectively.
+///
+///     @State private var showActionSheet = false
+///     var body: some View {
+///         Button("Tap to show action sheet") {
+///             showActionSheet = true
+///         }
+///         .actionSheet(isPresented: $showActionSheet) {
+///             ActionSheet(title: Text("Resume Workout Recording"),
+///                         message: Text("Choose a destination for workout data"),
+///                         buttons: [
+///                             .cancel(),
+///                             .destructive(
+///                                 Text("Overwrite Current Workout"),
+///                                 action: overwriteWorkout
+///                             ),
+///                             .default(
+///                                 Text("Append to Current Workout"),
+///                                 action: appendWorkout
+///                             )
+///                         ]
+///             )
+///         }
+///     }
+///
+/// The system may interpret the order of items as they appear in the `buttons`
+/// array to accommodate platform conventions. In this example, the Cancel
+/// button is the first member of the array, but the action sheet puts it in its
+/// standard position at the bottom of the sheet.
+///
+/// ![An action sheet with the title Resume Workout Recording in bold text and
+/// the message Choose a destination for workout data in smaller text. Below
+/// the text, three buttons: a destructive Overwrite Current Workout button in
+/// red, a default-styled Overwrite Current Workout button, and a Cancel button,
+/// farther below and set off in its own button
+/// group.](SwiftUI-ActionSheet-cancel-and-destructive.png)
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 @available(macOS, unavailable)
 public struct ActionSheet {
 
     /// Creates an action sheet with the provided buttons.
+    /// - Parameters:
+    ///   - title: The title of the action sheet.
+    ///   - message: The message to display in the body of the action sheet.
+    ///   - buttons: The buttons to show in the action sheet.
     public init(title: Text, message: Text? = nil, buttons: [ActionSheet.Button] = [.cancel()])
 
     /// A button representing an operation of an action sheet presentation.
+    ///
+    /// The ``ActionSheet`` button is type-aliased to the ``Alert`` button type,
+    /// which provides default, cancel, and destructive styles.
     public typealias Button = Alert.Button
 }
 
-/// A representation for an alert presentation.
+/// A representation of an alert presentation.
+///
+/// Use an alert when you want the user to act in response to the state of the
+/// app or the system. If you want the user to make a choice in response to
+/// their own action, use an ``ActionSheet`` instead.
+///
+/// You show an alert by using the ``View/alert(isPresented:content:)`` view
+/// modifier to create an alert, which then appears whenever the bound
+/// `isPresented` value is `true`. The `content` closure you provide to this
+/// modifer produces a customized instance of the `Alert` type.
+///
+/// In the following example, a button presents a simple alert when
+/// tapped, by updating a local `showAlert` property that binds to the alert.
+///
+///     @State private var showAlert = false
+///     var body: some View {
+///         Button("Tap to show alert") {
+///             showAlert = true
+///         }
+///         .alert(isPresented: $showAlert) {
+///             Alert(
+///                 title: Text("Current Location Not Available"),
+///                 message: Text("Your current location can’t be " +
+///                                 "determined at this time.")
+///             )
+///         }
+///     }
+///
+/// ![A default alert dialog with the title Current Location Not Available in bold
+/// text, the message your current location can’t be determined at this time in
+/// smaller text, and a default OK button.](SwiftUI-Alert-OK.png)
+///
+/// To customize the alert, add instances of the ``Alert/Button`` type, which
+/// provides standardized buttons for common tasks like canceling and performing
+/// destructive actions. The following example uses two buttons: a default
+/// button labeled "Try Again" that calls a `saveWorkoutData` method,
+/// and a "destructive" button that calls a `deleteWorkoutData` method.
+///
+///     @State private var showAlert = false
+///     var body: some View {
+///         Button("Tap to show alert") {
+///             showAlert = true
+///         }
+///         .alert(isPresented: $showAlert) {
+///             Alert(
+///                 title: Text("Unable to Save Workout Data"),
+///                 message: Text("The connection to the server was lost."),
+///                 primaryButton: .default(
+///                     Text("Try Again"),
+///                     action: saveWorkoutData
+///                 ),
+///                 secondaryButton: .destructive(
+///                     Text("Delete"),
+///                     action: deleteWorkoutData
+///                 )
+///             )
+///         }
+///     }
+///
+/// ![An alert dialog with the title, Unable to Save Workout Data in bold text, and
+/// the message, The connection to the server was lost, in smaller text. Below
+/// the text, two buttons: a default button with Try Again in blue text, and a 
+/// button with Delete in red text.](SwiftUI-Alert-default-and-destructive.png)
+///
+/// The alert handles its own dismissal when the user taps one of the buttons in the alert, by setting
+/// the bound `isPresented` value back to `false`.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Alert {
 
     /// Creates an alert with one button.
+    /// - Parameters:
+    ///   - title: The title of the alert.
+    ///   - message: The message to display in the body of the alert.
+    ///   - dismissButton: The button that dismisses the alert.
     public init(title: Text, message: Text? = nil, dismissButton: Alert.Button? = nil)
 
     /// Creates an alert with two buttons.
     ///
     /// The system determines the visual ordering of the buttons.
+    /// - Parameters:
+    ///   - title: The title of the alert.
+    ///   - message: The message to display in the body of the alert.
+    ///   - primaryButton: The first button to show in the alert.
+    ///   - secondaryButton: The second button to show in the alert.
     public init(title: Text, message: Text? = nil, primaryButton: Alert.Button, secondaryButton: Alert.Button)
 
     /// A button representing an operation of an alert presentation.
     public struct Button {
 
-        /// Creates an `Alert.Button` with the default style.
+        /// Creates an alert button with the default style.
+        /// - Parameters:
+        ///   - label: The text to display on the button.
+        ///   - action: A closure to execute when the user taps or presses the
+        ///   button.
+        /// - Returns: An alert button with the default style.
         public static func `default`(_ label: Text, action: (() -> Void)? = {}) -> Alert.Button
 
-        /// Creates an `Alert.Button` that indicates cancellation of some
-        /// operation.
+        /// Creates an alert button that indicates cancellation, with a custom
+        /// label.
+        /// - Parameters:
+        ///   - label: The text to display on the button.
+        ///   - action: A closure to execute when the user taps or presses the
+        ///   button.
+        /// - Returns: An alert button that indicates cancellation.
         public static func cancel(_ label: Text, action: (() -> Void)? = {}) -> Alert.Button
 
-        /// An alert button that indicates cancellation.
+        /// Creates an alert button that indicates cancellation, with a
+        /// system-provided label.
         ///
-        /// The system automatically chooses the label of the button for the
-        /// appropriate locale.
+        /// The system automatically chooses locale-appropriate text for the
+        /// button's label.
+        /// - Parameter action: A closure to execute when the user taps or presses the
+        ///   button.
+        /// - Returns: An alert button that indicates cancellation.
         public static func cancel(_ action: (() -> Void)? = {}) -> Alert.Button
 
-        /// Creates an `Alert.Button` with a style indicating destruction of
-        /// some data.
+        /// Creates an alert button with a style that indicates a destructive
+        /// action.
+        /// - Parameters:
+        ///   - label: The text to display on the button.
+        ///   - action: A closure to execute when the user taps or presses the
+        ///   button.
+        /// - Returns: An alert button that indicates a destructive action.
         public static func destructive(_ label: Text, action: (() -> Void)? = {}) -> Alert.Button
     }
 }
@@ -735,15 +892,6 @@ extension Angle : Hashable, Comparable {
     ///   - rhs: Another value to compare.
     public static func == (a: Angle, b: Angle) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -758,6 +906,15 @@ extension Angle : Hashable, Comparable {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -792,7 +949,7 @@ extension Angle : Animatable {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -1209,7 +1366,7 @@ extension AnyTransition {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -1606,31 +1763,6 @@ extension AppStorage where Value : ExpressibleByNilLiteral {
         public typealias RawValue = Int8
     }
 
-    /// The raw type that can be used to represent all values of the conforming
-    /// type.
-    ///
-    /// Every distinct value of the conforming type has a corresponding unique
-    /// value of the `RawValue` type, but there may be values of the `RawValue`
-    /// type that don't have a corresponding value of the conforming type.
-    public typealias RawValue = Int8
-
-    /// The corresponding value of the raw type.
-    ///
-    /// A new instance initialized with `rawValue` will be equivalent to this
-    /// instance. For example:
-    ///
-    ///     enum PaperSize: String {
-    ///         case A4, A5, Letter, Legal
-    ///     }
-    ///
-    ///     let selectedSize = PaperSize.Letter
-    ///     print(selectedSize.rawValue)
-    ///     // Prints "Letter"
-    ///
-    ///     print(selectedSize == PaperSize(rawValue: selectedSize.rawValue)!)
-    ///     // Prints "true"
-    public var rawValue: Int8 { get }
-
     /// Creates a new instance with the specified raw value.
     ///
     /// If there is no value of the type that corresponds with the specified raw
@@ -1652,8 +1784,33 @@ extension AppStorage where Value : ExpressibleByNilLiteral {
     /// A type that can represent a collection of all values of this type.
     public typealias AllCases = [Axis]
 
+    /// The raw type that can be used to represent all values of the conforming
+    /// type.
+    ///
+    /// Every distinct value of the conforming type has a corresponding unique
+    /// value of the `RawValue` type, but there may be values of the `RawValue`
+    /// type that don't have a corresponding value of the conforming type.
+    public typealias RawValue = Int8
+
     /// A collection of all values of this type.
     public static var allCases: [Axis] { get }
+
+    /// The corresponding value of the raw type.
+    ///
+    /// A new instance initialized with `rawValue` will be equivalent to this
+    /// instance. For example:
+    ///
+    ///     enum PaperSize: String {
+    ///         case A4, A5, Letter, Legal
+    ///     }
+    ///
+    ///     let selectedSize = PaperSize.Letter
+    ///     print(selectedSize.rawValue)
+    ///     // Prints "Letter"
+    ///
+    ///     print(selectedSize == PaperSize(rawValue: selectedSize.rawValue)!)
+    ///     // Prints "true"
+    public var rawValue: Int8 { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -1954,15 +2111,6 @@ public enum BlendMode {
     ///   - rhs: Another value to compare.
     public static func == (a: BlendMode, b: BlendMode) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -1977,6 +2125,15 @@ public enum BlendMode {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -2121,12 +2278,26 @@ public struct Button<Label> : View where Label : View {
     public init(action: @escaping () -> Void, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -2211,7 +2382,7 @@ public protocol ButtonStyle {
     /// hierarchy where this style is the current button style.
     ///
     /// - Parameter configuration : The properties of the button.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a button.
     typealias Configuration = ButtonStyleConfiguration
@@ -2227,7 +2398,7 @@ public struct ButtonStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -2263,7 +2434,7 @@ public struct ButtonStyleConfiguration {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -2300,7 +2471,7 @@ extension Capsule : InsettableShape {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -2420,7 +2591,7 @@ extension Color : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -2452,15 +2623,6 @@ extension Color {
         ///   - rhs: Another value to compare.
         public static func == (a: Color.RGBColorSpace, b: Color.RGBColorSpace) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -2475,6 +2637,15 @@ extension Color {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 
     public init(_ colorSpace: Color.RGBColorSpace = .sRGB, red: Double, green: Double, blue: Double, opacity: Double = 1)
@@ -2626,12 +2797,26 @@ public struct ColorPicker<Label> : View where Label : View {
     public init(selection: Binding<CGColor>, supportsOpacity: Bool = true, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -2748,15 +2933,6 @@ public enum ColorRenderingMode {
     ///   - rhs: Another value to compare.
     public static func == (a: ColorRenderingMode, b: ColorRenderingMode) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -2771,6 +2947,15 @@ public enum ColorRenderingMode {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -2803,15 +2988,6 @@ public enum ColorScheme : CaseIterable {
     ///   - rhs: Another value to compare.
     public static func == (a: ColorScheme, b: ColorScheme) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -2832,6 +3008,15 @@ public enum ColorScheme : CaseIterable {
 
     /// A collection of all values of this type.
     public static var allCases: [ColorScheme] { get }
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 extension ColorScheme {
@@ -2877,15 +3062,6 @@ public enum ColorSchemeContrast : CaseIterable {
     ///   - rhs: Another value to compare.
     public static func == (a: ColorSchemeContrast, b: ColorSchemeContrast) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -2906,6 +3082,15 @@ public enum ColorSchemeContrast : CaseIterable {
 
     /// A collection of all values of this type.
     public static var allCases: [ColorSchemeContrast] { get }
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 extension ColorSchemeContrast {
@@ -3159,9 +3344,9 @@ public protocol Commands {
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-@_functionBuilder public struct CommandsBuilder {
+@resultBuilder public struct CommandsBuilder {
 
-    /// Builds an empty command set from an block containing no statements.
+    /// Builds an empty command set from a block containing no statements.
     public static func buildBlock() -> EmptyCommands
 
     /// Passes a single command group written as a child group through
@@ -3286,7 +3471,7 @@ public struct CompactDatePickerStyle : DatePickerStyle {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -3319,15 +3504,6 @@ extension ContainerRelativeShape : InsettableShape {
     ///   - rhs: Another value to compare.
     public static func == (a: ContentMode, b: ContentMode) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -3348,6 +3524,15 @@ extension ContainerRelativeShape : InsettableShape {
 
     /// A collection of all values of this type.
     public static var allCases: [ContentMode] { get }
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -3392,15 +3577,6 @@ public enum ContentSizeCategory : Hashable, CaseIterable {
     ///   - rhs: Another value to compare.
     public static func == (a: ContentSizeCategory, b: ContentSizeCategory) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -3421,6 +3597,15 @@ public enum ContentSizeCategory : Hashable, CaseIterable {
 
     /// A collection of all values of this type.
     public static var allCases: [ContentSizeCategory] { get }
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -3441,7 +3626,7 @@ extension ContentSizeCategory {
 
 extension ContentSizeCategory {
 
-    /// Create a size category from its UIContentSizeCateogry equivalent.
+    /// Create a size category from its UIContentSizeCategory equivalent.
     @available(iOS 14.0, tvOS 14.0, *)
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
@@ -3652,12 +3837,26 @@ public struct DatePicker<Label> : View where Label : View {
     public typealias Components = DatePickerComponents
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -3864,6 +4063,9 @@ public struct DatePickerComponents : OptionSet {
     /// Displays day, month, and year based on the locale
     public static let date: DatePickerComponents
 
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = DatePickerComponents
+
     /// The element type of the option set.
     ///
     /// To inherit all the default implementations from the `OptionSet` protocol,
@@ -3877,9 +4079,6 @@ public struct DatePickerComponents : OptionSet {
     /// value of the `RawValue` type, but there may be values of the `RawValue`
     /// type that don't have a corresponding value of the conforming type.
     public typealias RawValue = UInt
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = DatePickerComponents
 }
 
 /// A type that specifies the appearance and interaction of all date pickers
@@ -3974,8 +4173,8 @@ public struct DefaultLabelStyle : LabelStyle {
     public typealias Body = some View
 }
 
-/// The instance that describes a platform's default behavior and appearance for
-/// a list.
+/// The list style that describes a platform's default behavior and appearance
+/// for a list.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct DefaultListStyle : ListStyle {
 
@@ -4185,12 +4384,26 @@ public struct DisclosureGroup<Label, Content> : View where Label : View, Content
     public init(isExpanded: Binding<Bool>, @ViewBuilder content: @escaping () -> Content, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -4252,11 +4465,62 @@ public struct Divider : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
 /// A scene that enables support for opening, creating, and saving documents.
+///
+/// Use a `DocumentGroup` scene to tell SwiftUI what kinds of documents your
+/// app can open when you declare your app using the ``App`` protocol.
+///
+/// Initialize a document group scene by passing in the document model and a
+/// view capable of displaying the document type. The document types you supply
+/// to `DocumentGroup` must conform to ``FileDocument`` or
+/// ``ReferenceFileDocument``. SwiftUI uses the model to add document support
+/// to your app. In macOS this includes document-based menu support, including
+/// the ability to open multiple documents. In iOS this includes a document
+/// browser that can navigate to the documents stored on the file system
+/// and multiwindow support:
+///
+///     @main
+///     struct MyApp: App {
+///         var body: some Scene {
+///             DocumentGroup(newDocument: TextFile()) { file in
+///                 ContentView(document: file.$document)
+///             }
+///         }
+///     }
+///
+/// If your app only needs to display but not modify a specific
+/// document type, you can use the file viewer document group scene. You
+/// supply the file type of the document, and a view that displays the
+/// document type that you provide:
+///
+///     @main
+///     struct MyApp: App {
+///         var body: some Scene {
+///             DocumentGroup(viewing: MyImageFormatDocument.self) {
+///                 MyImageFormatViewer(image: $0.document)
+///             }
+///         }
+///     }
+///
+/// Your app can support multiple document types by adding additional
+/// document group scenes:
+///
+///     @main
+///     struct MyApp: App {
+///         var body: some Scene {
+///             DocumentGroup(newDocument: TextFile()) { group in
+///                 ContentView(document: group.$document)
+///             }
+///             DocumentGroup(viewing: MyImageFormatDocument.self) { group in
+///                 MyImageFormatViewer(image: group.document)
+///             }
+///         }
+///     }
+///
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -4286,21 +4550,62 @@ public struct DocumentGroup<Document, Content> : Scene where Content : View {
 @available(watchOS, unavailable)
 extension DocumentGroup where Document : FileDocument {
 
-    /// Creates a document group that is able to create and edit file documents.
+    /// Creates a document group for creating and editing file documents.
+    ///
+    /// Use a ``DocumentGroup`` scene to tell SwiftUI what kinds of documents
+    /// your app can open when you declare your app using the ``App`` protocol.
+    /// You initialize a document group scene by passing in the document model
+    /// and a view capable of displaying the document's contents. The document
+    /// types you supply to ``DocumentGroup`` must conform to ``FileDocument``
+    /// or ``ReferenceFileDocument``. SwiftUI uses the model to add document
+    /// support to your app. In macOS this includes document-based menu support
+    /// including the ability to open multiple documents. In iOS this includes
+    /// a document browser that can navigate to the documents stored on the
+    /// file system and multiwindow support:
+    ///
+    ///     @main
+    ///     struct MyApp: App {
+    ///         var body: some Scene {
+    ///             DocumentGroup(newDocument: TextFile()) { file in
+    ///                 ContentView(document: file.$document)
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// The document types you supply to ``DocumentGroup`` must conform to
+    /// ``FileDocument`` or ``ReferenceFileDocument``. Your app can support
+    ///  multiple document types by adding additional ``DocumentGroup`` scenes.
     ///
     /// - Parameters:
-    ///   - newDocument: The initial document used when the user creates
+    ///   - newDocument: The initial document to use when a user creates
     ///     a new document.
     ///   - editor: The editing UI for the provided document.
     public init(newDocument: @autoclosure @escaping () -> Document, @ViewBuilder editor: @escaping (FileDocumentConfiguration<Document>) -> Content)
 
-    /// Creates a document group that is able to view file documents.
+    /// Creates a document group capable of viewing file documents.
+    ///
+    /// Use this method to create a document group that can view files of a
+    /// specific type. The example below creates a new document viewer for
+    /// `MyImageFormatDocument` and displays them with `MyImageFormatViewer`:
+    ///
+    ///     @main
+    ///     struct MyApp: App {
+    ///         var body: some Scene {
+    ///             DocumentGroup(viewing: MyImageFormatDocument.self) { file in
+    ///                 MyImageFormatViewer(image: file.document)
+    ///             }
+    ///         }
+    ///     }
     ///
     /// - Parameters:
-    ///   - documentType: The type of document being viewed.
+    ///   - documentType: The type of document your app can view.
     ///   - viewer: The viewing UI for the provided document.
     ///
-    /// - See Also: `CFBundleTypeRole` with a value of "Viewer"
+    /// You tell the system about the app's role with respect to the document
+    /// type by setting the
+    ///  <doc://com.apple.documentation/documentation/BundleResources/Information_Property_List/CFBundleDocumentTypes/CFBundleTypeRole>
+    ///   `Info.plist` key with a value of `Viewer`.
+    ///
     public init(viewing documentType: Document.Type, @ViewBuilder viewer: @escaping (FileDocumentConfiguration<Document>) -> Content)
 }
 
@@ -4593,15 +4898,6 @@ public enum DropOperation {
     ///   - rhs: Another value to compare.
     public static func == (a: DropOperation, b: DropOperation) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -4616,6 +4912,15 @@ public enum DropOperation {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.4, macOS 10.15, *)
@@ -4840,14 +5145,6 @@ extension DynamicViewContent {
         public typealias RawValue = Int8
     }
 
-    /// The raw type that can be used to represent all values of the conforming
-    /// type.
-    ///
-    /// Every distinct value of the conforming type has a corresponding unique
-    /// value of the `RawValue` type, but there may be values of the `RawValue`
-    /// type that don't have a corresponding value of the conforming type.
-    public typealias RawValue = Int8
-
     /// Creates a new instance with the specified raw value.
     ///
     /// If there is no value of the type that corresponds with the specified raw
@@ -4866,6 +5163,20 @@ extension DynamicViewContent {
     /// - Parameter rawValue: The raw value to use for the new instance.
     public init?(rawValue: Int8)
 
+    /// A type that can represent a collection of all values of this type.
+    public typealias AllCases = [Edge]
+
+    /// The raw type that can be used to represent all values of the conforming
+    /// type.
+    ///
+    /// Every distinct value of the conforming type has a corresponding unique
+    /// value of the `RawValue` type, but there may be values of the `RawValue`
+    /// type that don't have a corresponding value of the conforming type.
+    public typealias RawValue = Int8
+
+    /// A collection of all values of this type.
+    public static var allCases: [Edge] { get }
+
     /// The corresponding value of the raw type.
     ///
     /// A new instance initialized with `rawValue` will be equivalent to this
@@ -4882,12 +5193,6 @@ extension DynamicViewContent {
     ///     print(selectedSize == PaperSize(rawValue: selectedSize.rawValue)!)
     ///     // Prints "true"
     public var rawValue: Int8 { get }
-
-    /// A type that can represent a collection of all values of this type.
-    public typealias AllCases = [Edge]
-
-    /// A collection of all values of this type.
-    public static var allCases: [Edge] { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -5000,12 +5305,26 @@ public struct EditButton : View {
     public init()
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -5041,15 +5360,6 @@ public enum EditMode {
     ///   - rhs: Another value to compare.
     public static func == (a: EditMode, b: EditMode) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -5064,6 +5374,15 @@ public enum EditMode {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, tvOS 13.0, *)
@@ -5097,7 +5416,7 @@ extension EditMode : Hashable {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -5294,7 +5613,7 @@ public struct EmptyCommands : Commands {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -5974,7 +6293,7 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -6015,13 +6334,8 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
     /// All possible modifier keys.
     public static let all: EventModifiers
 
-    /// The raw type that can be used to represent all values of the conforming
-    /// type.
-    ///
-    /// Every distinct value of the conforming type has a corresponding unique
-    /// value of the `RawValue` type, but there may be values of the `RawValue`
-    /// type that don't have a corresponding value of the conforming type.
-    public typealias RawValue = Int
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = EventModifiers
 
     /// The element type of the option set.
     ///
@@ -6029,8 +6343,13 @@ public protocol EnvironmentalModifier : ViewModifier where Self.Body == Never {
     /// the `Element` type must be `Self`, the default.
     public typealias Element = EventModifiers
 
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = EventModifiers
+    /// The raw type that can be used to represent all values of the conforming
+    /// type.
+    ///
+    /// Every distinct value of the conforming type has a corresponding unique
+    /// value of the `RawValue` type, but there may be values of the `RawValue`
+    /// type that don't have a corresponding value of the conforming type.
+    public typealias RawValue = Int
 }
 
 /// A gesture that consists of two gestures where only one of them can succeed.
@@ -6200,6 +6519,10 @@ public struct FetchedResults<Result> : RandomAccessCollection where Result : NSF
     /// argument.
     public typealias Index = Int
 
+    /// A type that represents the indices that are valid for subscripting the
+    /// collection, in ascending order.
+    public typealias Indices = Range<Int>
+
     /// A type that provides the collection's iteration interface and
     /// encapsulates its iteration state.
     ///
@@ -6215,18 +6538,14 @@ public struct FetchedResults<Result> : RandomAccessCollection where Result : NSF
     /// protocol, but it is restated here with stricter constraints. In a
     /// collection, the subsequence should also conform to `Collection`.
     public typealias SubSequence = Slice<FetchedResults<Result>>
-
-    /// A type that represents the indices that are valid for subscripting the
-    /// collection, in ascending order.
-    public typealias Indices = Range<Int>
 }
 
 /// A document model definition used to serialize documents to and from file
 /// contents.
 ///
-/// Conformance to `FileDocument` is expected to have value semantics and be
-/// thread-safe. Serialization and deserialization will be done on a background
-/// thread.
+/// Conformance to `FileDocument` requires value semantics and thread-safety.
+/// Serialization and deserialization occur on a background thread.
+///
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -6237,22 +6556,25 @@ public protocol FileDocument {
 
     /// The types the document is able to save or export to.
     ///
-    /// Defaults to `readableContentTypes`.
+    /// If you don't implement this property, the protocol returns
+    /// the value in ``readableContentTypes`` by default.
     static var writableContentTypes: [UTType] { get }
 
-    /// Initialize self by reading from the contents of a given `ReadConfiguration`.
+    /// Creates a file document from the given configuration.
     init(configuration: Self.ReadConfiguration) throws
 
     /// The configuration for reading document contents.
     typealias ReadConfiguration = FileDocumentReadConfiguration
 
-    /// Serialize the document to file contents for a specified `configuration`.
-    /// - Parameter configuration: the configuration for the current document
+    /// Serializes the document to file contents for a specified configuration.
+    ///
+    /// - Parameter configuration: The configuration for the current document
     ///   contents.
     ///
     /// - Returns: The destination to serialize the document contents to. The
-    ///   value can be a newly created `FileWrapper` or an updated `FileWrapper`
-    ///   of the one provided in `configuration`.
+    ///   value can be a newly created
+    ///   <doc://com.apple.documentation/documentation/Foundation/FileWrapper>
+    ///   or an updated file wrapper of the one provided in `configuration`.
     func fileWrapper(configuration: Self.WriteConfiguration) throws -> FileWrapper
 
     /// The configuration for serializing document contents.
@@ -6266,7 +6588,8 @@ extension FileDocument {
 
     /// The types the document is able to save or export to.
     ///
-    /// Defaults to `readableContentTypes`.
+    /// If you don't implement this property, the protocol returns
+    /// the value in ``readableContentTypes`` by default.
     public static var writableContentTypes: [UTType] { get }
 }
 
@@ -6278,22 +6601,23 @@ public struct FileDocumentConfiguration<Document> where Document : FileDocument 
 
     /// The current document model.
     ///
-    /// Setting a new value will mark the document as dirty for later saving
-    /// as well as register an undo action to restore the model to its previous
-    /// value.
+    /// Setting a new value marks the document as having changes for later
+    /// saving and registers an undo action to restore the model to its
+    /// previous value.
     ///
-    /// If `isEditable` is `false`, setting a new value will have no effect.
+    /// If ``isEditable`` is `false`, setting a new value won't have an effect
+    /// and the document is in viewing mode.
     public var document: Document { get nonmutating set }
 
     public var $document: Binding<Document> { get }
 
-    /// The url of the open file document.
+    /// The URL of the open file document.
     public var fileURL: URL?
 
-    /// Whether the document is able to be edited.
+    /// Whether the document is editable.
     ///
-    /// This can return `false` if the document is in viewing mode or if the
-    /// file is unable to be written to.
+    /// This value is `false` if the document is in viewing mode, or if the
+    /// file is not writable.
     public var isEditable: Bool
 }
 
@@ -6426,10 +6750,7 @@ public protocol FocusedValueKey {
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct FocusedValues {
 
-    /// Reads and writes values associated with a given environment key.
-    ///
-    /// Setting has no effect if the current focus scope already contains a
-    /// value for the key.
+    /// Reads and writes values associated with a given focused value key.
     public subscript<Key>(key: Key.Type) -> Key.Value? where Key : FocusedValueKey
 }
 
@@ -6569,15 +6890,6 @@ extension Font {
         ///   - rhs: Another value to compare.
         public static func == (a: Font.TextStyle, b: Font.TextStyle) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -6595,6 +6907,15 @@ extension Font {
 
         /// A type that can represent a collection of all values of this type.
         public typealias AllCases = [Font.TextStyle]
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
@@ -6676,15 +6997,6 @@ extension Font {
         ///   - rhs: Another value to compare.
         public static func == (a: Font.Weight, b: Font.Weight) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -6699,6 +7011,15 @@ extension Font {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 
     @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -6720,15 +7041,6 @@ extension Font {
         ///   - rhs: Another value to compare.
         public static func == (a: Font.Leading, b: Font.Leading) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -6743,6 +7055,15 @@ extension Font {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
@@ -6794,15 +7115,6 @@ extension Font {
         ///   - rhs: Another value to compare.
         public static func == (a: Font.Design, b: Font.Design) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -6817,6 +7129,15 @@ extension Font {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
@@ -6871,7 +7192,43 @@ extension Font.Leading : Hashable {
 }
 
 /// A structure that computes views on demand from an underlying collection of
-/// of identified data.
+/// identified data.
+///
+/// Use `ForEach` to provide views based on a
+/// <doc://com.apple.documentation/documentation/Swift/RandomAccessCollection>
+/// of some data type. Either the collection's elements must conform to
+/// <doc://com.apple.documentation/documentation/Swift/Identifiable> or you
+/// need to provide an `id` parameter to the `ForEach` initializer.
+///
+/// The following example creates a `NamedFont` type that conforms to
+/// <doc://com.apple.documentation/documentation/Swift/Identifiable>, and an
+/// array of this type called `namedFonts`. A `ForEach` instance iterates
+/// over the array, producing new ``Text`` instances that display examples
+/// of each SwiftUI ``Font`` style provided in the array.
+///
+///     private struct NamedFont: Identifiable {
+///         let name: String
+///         let font: Font
+///         var id: String { name }
+///     }
+///
+///     private let namedFonts: [NamedFont] = [
+///         NamedFont(name: "Large Title", font: .largeTitle),
+///         NamedFont(name: "Title", font: .title),
+///         NamedFont(name: "Headline", font: .headline),
+///         NamedFont(name: "Body", font: .body),
+///         NamedFont(name: "Caption", font: .caption)
+///     ]
+///
+///     var body: some View {
+///         ForEach(namedFonts) { namedFont in
+///             Text(namedFont.name)
+///                 .font(namedFont.font)
+///         }
+///     }
+///
+/// ![A vertically arranged stack of labels showing various standard fonts,
+/// such as Large Title and Headline.](SwiftUI-ForEach-fonts.png)
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ForEach<Data, ID, Content> where Data : RandomAccessCollection, ID : Hashable {
 
@@ -6879,8 +7236,7 @@ public struct ForEach<Data, ID, Content> where Data : RandomAccessCollection, ID
     /// views dynamically.
     public var data: Data
 
-    /// A function you can use to create content on demand using the underlying
-    /// data.
+    /// A function to create content on demand using the underlying data.
     public var content: (Data.Element) -> Content
 }
 
@@ -6894,7 +7250,7 @@ extension ForEach : View where Content : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -6930,7 +7286,7 @@ extension ForEach where Content : View {
     /// current state and animations.
     ///
     /// - Parameters:
-    ///   - data: The data that the `ForEach` instance uses to create views
+    ///   - data: The data that the ``ForEach`` instance uses to create views
     ///     dynamically.
     ///   - id: The key path to the provided data's identifier.
     ///   - content: The view builder that creates views dynamically.
@@ -6977,12 +7333,26 @@ public struct Form<Content> : View where Content : View {
     public init(@ViewBuilder content: () -> Content)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -7043,7 +7413,7 @@ public struct GeometryProxy {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -7219,14 +7589,14 @@ extension Gesture {
     /// and its subviews.
     public static let all: GestureMask
 
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = GestureMask
+
     /// The element type of the option set.
     ///
     /// To inherit all the default implementations from the `OptionSet` protocol,
     /// the `Element` type must be `Self`, the default.
     public typealias Element = GestureMask
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = GestureMask
 
     /// The raw type that can be used to represent all values of the conforming
     /// type.
@@ -7255,8 +7625,8 @@ extension Gesture {
 ///
 ///         var longPress: some Gesture {
 ///             LongPressGesture(minimumDuration: 3)
-///                 .updating($isDetectingLongPress) { currentstate, gestureState, transaction in
-///                     gestureState = currentstate
+///                 .updating($isDetectingLongPress) { currentState, gestureState, transaction in
+///                     gestureState = currentState
 ///                 }
 ///         }
 ///
@@ -7550,12 +7920,26 @@ public struct GroupBox<Label, Content> : View where Label : View, Content : View
     public init(label: Label, @ViewBuilder content: () -> Content)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -7579,7 +7963,7 @@ extension GroupBox where Label == EmptyView {
 /// Defines the implementation of all `GroupBox` instances within a view
 /// hierarchy.
 ///
-/// To configure the current `GroupBoxStyle` for a view hiearchy, use the
+/// To configure the current `GroupBoxStyle` for a view hierarchy, use the
 /// `.groupBoxStyle()` modifier.
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
@@ -7596,7 +7980,7 @@ public protocol GroupBoxStyle {
     ///
     /// This method will be called for each instance of `GroupBox` created within
     /// a view hierarchy where this style is the current `GroupBoxStyle`.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a `GroupBox` instance being created.
     typealias Configuration = GroupBoxStyleConfiguration
@@ -7614,7 +7998,7 @@ public struct GroupBoxStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -7624,7 +8008,7 @@ public struct GroupBoxStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -7635,7 +8019,11 @@ public struct GroupBoxStyleConfiguration {
     public let content: GroupBoxStyleConfiguration.Content
 }
 
-/// The instance that describes the behavior and appearance of a grouped list.
+/// The list style that describes the behavior and appearance of a grouped list.
+///
+/// On iOS, the grouped list style displays a larger header and footer than
+/// the ``PlainListStyle``, which visually distances the members of different
+/// sections.
 @available(iOS 13.0, tvOS 13.0, *)
 @available(macOS, unavailable)
 @available(watchOS, unavailable)
@@ -7688,7 +8076,7 @@ public struct GroupedListStyle : ListStyle {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -7771,10 +8159,56 @@ public struct IconOnlyLabelStyle : LabelStyle {
     public typealias Body = some View
 }
 
-/// A view that displays an environment-dependent image.
+/// A view that displays an image.
+///
+/// Use an `Image` instance when you want to add images to your SwiftUI app.
+/// You can create images from many sources:
+///
+/// * Image files in your app's asset library or bundle. Supported types include
+/// PNG, JPEG, HEIC, and more.
+/// * Instances of platform-specific image types, like
+/// <doc://com.apple.documentation/documentation/UIKit/UIImage> and
+/// <doc://com.apple.documentation/documentation/AppKit/NSImage>.
+/// * A bitmap stored in a Core Graphics
+///  <doc://com.apple.documentation/documentation/coregraphics/cgimage>
+///  instance.
+/// * System graphics from the SF Symbols set.
+///
+/// The following example shows how to load an image from the app's asset
+/// library or bundle and scale it to fit within its container:
+///
+///     Image("Landscape_4")
+///         .resizable()
+///         .aspectRatio(contentMode: .fit)
+///     Text("Water wheel")
+///
+/// ![An image of a water wheel and its adjoining building, resized to fit the
+/// width of an iPhone display. The words Water wheel appear under this
+/// image.](SwiftUI-Image-waterWheel-resize.png)
+///
+/// You can use methods on the `Image` type as well as
+/// standard view modifiers to adjust the size of the image to fit your app's
+/// interface. Here, the `Image` type's
+/// ``Image/resizable(capInsets:resizingMode:)`` method scales the image to fit
+/// the current view. Then, the
+/// ``View/aspectRatio(_:contentMode:)-771ow`` view modifier adjusts
+/// this resizing behavior to maintain the image's original aspect ratio, rather
+/// than scaling the x- and y-axes independently to fill all four sides of the
+/// view. The article
+/// <doc:Fitting-Images-into-Available-Space> shows how to apply scaling,
+/// clipping, and tiling to `Image` instances of different sizes.
 ///
 /// An `Image` is a late-binding token; the system resolves its actual value
-/// only when it's about to use the image in a given environment.
+/// only when it's about to use the image in an environment.
+///
+/// ### Making Images Accessible
+///
+/// To use an image as a control, use one of the initializers that takes a
+/// `label` parameter. This allows the system's accessibility frameworks to use
+/// the label as the name of the control for users who use features like
+/// VoiceOver. For images that are only present for aesthetic reasons, use an
+/// initializer with the `decorative` parameter; the accessibility systems
+/// ignore these images.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Image : Equatable {
 
@@ -7795,38 +8229,38 @@ extension Image {
     /// Creates a labeled image that you can use as content for controls.
     ///
     /// - Parameters:
-    ///   - name: the name of the image resource to lookup, as well as the
+    ///   - name: The name of the image resource to lookup, as well as the
     ///     localization key with which to label the image.
-    ///   - bundle: the bundle to search for the image resource and localization
-    ///     content. If `nil`, uses the main `Bundle`. Defaults to `nil`.
+    ///   - bundle: The bundle to search for the image resource and localization
+    ///     content. If `nil`, SwiftUI uses the main `Bundle`. Defaults to `nil`.
     public init(_ name: String, bundle: Bundle? = nil)
 
     /// Creates a labeled image that you can use as content for controls, with
     /// the specified label.
     ///
     /// - Parameters:
-    ///   - name: the name of the image resource to lookup
-    ///   - bundle: the bundle to search for the image resource. If `nil`, uses
-    ///     the main `Bundle`. Defaults to `nil`.
-    ///   - label: The label associated with the image. The label is used for
-    ///     things like accessibility.
+    ///   - name: The name of the image resource to lookup
+    ///   - bundle: The bundle to search for the image resource. If `nil`,
+    ///     SwiftUI uses the main `Bundle`. Defaults to `nil`.
+    ///   - label: The label associated with the image. SwiftUI uses the label
+    ///     for accessibility.
     public init(_ name: String, bundle: Bundle? = nil, label: Text)
 
     /// Creates an unlabeled, decorative image.
     ///
-    /// This image is ignored for accessibility purposes.
+    /// SwiftUI ignores this image for accessibility purposes.
     ///
     /// - Parameters:
-    ///   - name: the name of the image resource to lookup
-    ///   - bundle: the bundle to search for the image resource. If `nil`, uses
-    ///     the main `Bundle`. Defaults to `nil`.
+    ///   - name: The name of the image resource to lookup
+    ///   - bundle: The bundle to search for the image resource. If `nil`,
+    ///     SwiftUI uses the main `Bundle`. Defaults to `nil`.
     public init(decorative name: String, bundle: Bundle? = nil)
 
     /// Creates a system symbol image.
     ///
     /// This initializer creates an image using a system-provided symbol. To
     /// create a custom symbol image from your app's asset catalog, use
-    /// `init(_:)` instead.
+    /// ``Image/init(_:bundle:)`` instead.
     ///
     /// - Parameters:
     ///   - systemName: The name of the system symbol image.
@@ -7841,13 +8275,80 @@ extension Image : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
+    /// Indicates whether SwiftUI renders an image as-is, or
+    /// by using a different mode.
+    ///
+    /// The ``TemplateRenderingMode`` enumeration has two cases:
+    /// ``TemplateRenderingMode/original`` and ``TemplateRenderingMode/template``.
+    /// The original mode renders pixels as they appear in the original source
+    /// image. Template mode renders all nontransparent pixels as the
+    /// foreground color, which you can use for purposes like creating image
+    /// masks.
+    ///
+    /// The following example shows both rendering modes, as applied to an icon
+    /// image of a green circle with darker green border:
+    ///
+    ///     Image("dot_green")
+    ///         .renderingMode(.original)
+    ///     Image("dot_green")
+    ///         .renderingMode(.template)
+    ///
+    /// ![Two identically-sized circle images. The circle on top is green
+    /// with a darker green border. The circle at the bottom is a solid color,
+    /// either white on a black background, or black on a white background,
+    /// depending on the system's current dark mode
+    /// setting.](SwiftUI-Image-TemplateRenderingMode-dots.png)
+    ///
+    /// You also use `renderingMode` to produce multicolored system graphics
+    /// from the SF Symbols set. Use the ``TemplateRenderingMode/original``
+    /// mode to apply a foreground color to all parts of the symbol except
+    /// those that have a distinct color in the graphic. The following
+    /// example shows three uses of the `person.crop.circle.badge.plus` symbol
+    /// to achieve different effects:
+    ///
+    /// * A default appearance with no foreground color or template rendering
+    /// mode specified. The symbol appears all black in light mode, and all
+    /// white in Dark Mode.
+    /// * The multicolor behavior achieved by using `original` template
+    /// rendering mode, along with a blue foreground color. This mode causes the
+    /// graphic to override the foreground color for distinctive parts of the
+    /// image, in this case the plus icon.
+    /// * A single-color template behavior achieved by using `template`
+    /// rendering mode with a blue foreground color. This mode applies the
+    /// foreground color to the entire image, regardless of the user's Appearance preferences.
+    ///
+    ///```swift
+    ///HStack {
+    ///    Image(systemName: "person.crop.circle.badge.plus")
+    ///    Image(systemName: "person.crop.circle.badge.plus")
+    ///        .renderingMode(.original)
+    ///        .foregroundColor(.blue)
+    ///    Image(systemName: "person.crop.circle.badge.plus")
+    ///        .renderingMode(.template)
+    ///        .foregroundColor(.blue)
+    ///}
+    ///.font(.largeTitle)
+    ///```
+    ///
+    /// ![A horizontal layout of three versions of the same symbol: a person
+    /// icon in a circle with a plus icon overlaid at the bottom left. Each
+    /// applies a diffent set of colors based on its rendering mode, as
+    /// described in the preceding
+    /// list.](SwiftUI-Image-TemplateRenderingMode-sfsymbols.png)
+    ///
+    /// Use the SF Symbols app to find system images that offer the multicolor
+    /// feature. Keep in mind that some multicolor symbols use both the
+    /// foreground and accent colors.
+    ///
+    /// - Parameter renderingMode: The mode SwiftUI uses to render images.
+    /// - Returns: A modified ``Image``.
     public func renderingMode(_ renderingMode: Image.TemplateRenderingMode?) -> Image
 }
 
@@ -7855,31 +8356,49 @@ extension Image {
 extension Image {
 
     /// The orientation of an image.
+    ///
+    /// Many image formats such as JPEG include orientation metadata in the
+    /// image data. In other cases, you can specify image orientation
+    /// in code. Properly specifying orientation is often important both for
+    /// displaying the image and for certain kinds of image processing.
+    ///
+    /// In SwiftUI, you provide an orientation value when initializing an
+    /// ``Image`` from an existing
+    /// <doc://com.apple.documentation/documentation/coregraphics/cgimage>.
     @frozen public enum Orientation : UInt8, CaseIterable, Hashable {
 
+        /// A value that indicates the original pixel data matches the image's
+        /// intended display orientation.
         case up
 
+        /// A value that indicates a horizontal flip of the image from the
+        /// orientation of its original pixel data.
         case upMirrored
 
+        /// A value that indicates a 180° rotation of the image from the
+        /// orientation of its original pixel data.
         case down
 
+        /// A value that indicates a vertical flip of the image from the
+        /// orientation of its original pixel data.
         case downMirrored
 
+        /// A value that indicates a 90° counterclockwise rotation from the
+        /// orientation of its original pixel data.
         case left
 
+        /// A value that indicates a 90° clockwise rotation and horizontal
+        /// flip of the image from the orientation of its original pixel
+        /// data.
         case leftMirrored
 
+        /// A value that indicates a 90° clockwise rotation of the image from
+        /// the orientation of its original pixel data.
         case right
 
+        /// A value that indicates a 90° counterclockwise rotation and
+        /// horizontal flip from the orientation of its original pixel data.
         case rightMirrored
-
-        /// The raw type that can be used to represent all values of the conforming
-        /// type.
-        ///
-        /// Every distinct value of the conforming type has a corresponding unique
-        /// value of the `RawValue` type, but there may be values of the `RawValue`
-        /// type that don't have a corresponding value of the conforming type.
-        public typealias RawValue = UInt8
 
         /// Creates a new instance with the specified raw value.
         ///
@@ -7899,6 +8418,20 @@ extension Image {
         /// - Parameter rawValue: The raw value to use for the new instance.
         public init?(rawValue: UInt8)
 
+        /// A type that can represent a collection of all values of this type.
+        public typealias AllCases = [Image.Orientation]
+
+        /// The raw type that can be used to represent all values of the conforming
+        /// type.
+        ///
+        /// Every distinct value of the conforming type has a corresponding unique
+        /// value of the `RawValue` type, but there may be values of the `RawValue`
+        /// type that don't have a corresponding value of the conforming type.
+        public typealias RawValue = UInt8
+
+        /// A collection of all values of this type.
+        public static var allCases: [Image.Orientation] { get }
+
         /// The corresponding value of the raw type.
         ///
         /// A new instance initialized with `rawValue` will be equivalent to this
@@ -7915,22 +8448,23 @@ extension Image {
         ///     print(selectedSize == PaperSize(rawValue: selectedSize.rawValue)!)
         ///     // Prints "true"
         public var rawValue: UInt8 { get }
-
-        /// A type that can represent a collection of all values of this type.
-        public typealias AllCases = [Image.Orientation]
-
-        /// A collection of all values of this type.
-        public static var allCases: [Image.Orientation] { get }
     }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
+    /// A type that indicates how SwiftUI renders images.
     public enum TemplateRenderingMode {
 
+        /// A mode that renders all non-transparent pixels as the foreground
+        /// color.
         case template
 
+        /// A mode that renders pixels of bitmap images as-is.
+        ///
+        /// For system images created from the SF Symbol set, multicolor symbols
+        /// respect the current foreground and accent colors.
         case original
 
         /// Returns a Boolean value indicating whether two values are equal.
@@ -7943,15 +8477,6 @@ extension Image {
         ///   - rhs: Another value to compare.
         public static func == (a: Image.TemplateRenderingMode, b: Image.TemplateRenderingMode) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -7966,16 +8491,46 @@ extension Image {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 
-    /// The scale to apply to vector images relative to text.
+    /// A scale to apply to vector images relative to text.
+    ///
+    /// Use this type with the ``View/imageScale(_:)`` modifier, or the
+    /// ``EnvironmentValues/imageScale`` environment key, to set the image scale.
+    ///
+    /// The following example shows the three `Scale` values as applied to
+    /// a system symbol image, each set against a text view:
+    ///
+    ///     HStack { Image(systemName: "swift").imageScale(.small); Text("Small") }
+    ///     HStack { Image(systemName: "swift").imageScale(.medium); Text("Medium") }
+    ///     HStack { Image(systemName: "swift").imageScale(.large); Text("Large") }
+    ///
+    /// ![Vertically arranged text views that read Small, Medium, and
+    /// Large. On the left of each view is a system image that uses the Swift symbol.
+    /// The image next to the Small text is slightly smaller than the text.
+    /// The image next to the Medium text matches the size of the text. The
+    /// image next to the Large text is larger than the
+    /// text.](SwiftUI-EnvironmentAdditions-Image-scale.png)
+    ///
     @available(macOS 11.0, *)
     public enum Scale {
 
+        /// A scale that produces small images.
         case small
 
+        /// A scale that produces medium-sized images.
         case medium
 
+        /// A scale that produces large images.
         case large
 
         /// Returns a Boolean value indicating whether two values are equal.
@@ -7988,15 +8543,6 @@ extension Image {
         ///   - rhs: Another value to compare.
         public static func == (a: Image.Scale, b: Image.Scale) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -8011,20 +8557,43 @@ extension Image {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
+    /// The level of quality for rendering an image that requires interpolation,
+    /// such as a scaled image.
+    ///
+    /// The ``Image/interpolation(_:)`` modifier specifies the interpolation
+    /// behavior when using the ``Image/resizable(capInsets:resizingMode:)``
+    /// modifier on an ``Image``. Use this behavior to prioritize rendering
+    /// performance or image quality.
     public enum Interpolation {
 
+        /// A value that indicates SwiftUI doesn't interpolate image data.
         case none
 
+        /// A value that indicates a low level of interpolation quality, which may
+        /// speed up image rendering.
         case low
 
+        /// A value that indicates a medium level of interpolation quality,
+        /// between the low- and high-quality values.
         case medium
 
+        /// A value that indicates a high level of interpolation quality, which
+        /// may slow down image rendering.
         case high
 
         /// Returns a Boolean value indicating whether two values are equal.
@@ -8037,15 +8606,6 @@ extension Image {
         ///   - rhs: Another value to compare.
         public static func == (a: Image.Interpolation, b: Image.Interpolation) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -8060,41 +8620,67 @@ extension Image {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
+    /// Specifies the current level of quality for rendering an
+    /// image that requires interpolation.
+    ///
+    /// See the article <doc:Fitting-Images-into-Available-Space> for examples
+    /// of using `interpolation(_:)` when scaling an ``Image``.
+    /// - Parameter interpolation: The quality level, expressed as a value of
+    /// the `Interpolation` type, that SwiftUI applies when interpolating
+    /// an image.
+    /// - Returns: An image with the given interpolation value set.
     public func interpolation(_ interpolation: Image.Interpolation) -> Image
 
+    /// Specifies whether SwiftUI applies antialiasing when rendering
+    /// the image.
+    /// - Parameter isAntialiased: A Boolean value that specifies whether to
+    /// allow antialiasing. Pass `true` to allow antialising, `false` otherwise.
+    /// - Returns: An image with the antialiasing behavior set.
     public func antialiased(_ isAntialiased: Bool) -> Image
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
-    /// Creates a labeled image based on a `CGImage`, usable as content for
-    /// controls.
+    /// Creates a labeled image based on a Core Graphics image instance, usable
+    /// as content for controls.
     ///
     /// - Parameters:
-    ///   - cgImage: the base graphical image
-    ///   - scale: the scale factor the image is intended for
-    ///     (e.g. 1.0, 2.0, 3.0)
-    ///   - orientation: the orientation of the image
-    ///   - label: The label associated with the image. The label is used for
-    ///     things like accessibility.
+    ///   - cgImage: The base graphical image.
+    ///   - scale: The scale factor for the image,
+    ///     with a value like `1.0`, `2.0`, or `3.0`.
+    ///   - orientation: The orientation of the image. The default is
+    ///     ``Image/Orientation/up``.
+    ///   - label: The label associated with the image. SwiftUI uses the label
+    ///     for accessibility.
     public init(_ cgImage: CGImage, scale: CGFloat, orientation: Image.Orientation = .up, label: Text)
 
-    /// Creates an unlabeled, decorative image based on a `CGImage`.
+    /// Creates an unlabeled, decorative image based on a Core Graphics image
+    /// instance.
     ///
-    /// This image is ignored for accessibility purposes.
+    /// SwiftUI ignores this image for accessibility purposes.
     ///
     /// - Parameters:
-    ///   - cgImage: the base graphical image
-    ///   - scale: the scale factor the image is intended for
-    ///     (e.g. 1.0, 2.0, 3.0)
-    ///   - orientation: the orientation of the image
+    ///   - cgImage: The base graphical image.
+    ///   - scale: The scale factor for the image,
+    ///     with a value like `1.0`, `2.0`, or `3.0`.
+    ///   - orientation: The orientation of the image. The default is
+    ///     ``Image/Orientation/up``.
     public init(decorative cgImage: CGImage, scale: CGFloat, orientation: Image.Orientation = .up)
 }
 
@@ -8102,16 +8688,23 @@ extension Image {
 @available(macOS, unavailable)
 extension Image {
 
+    /// Creates a SwiftUI image from a UIKit image instance.
+    /// - Parameter uiImage: The UIKit image to wrap with a SwiftUI ``Image``
+    /// instance.
     public init(uiImage: UIImage)
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Image {
 
+    /// The modes that SwiftUI uses to resize an image to fit within its containing view.
     public enum ResizingMode {
 
+        /// A mode to repeat the image at its original size, as many times as
+        /// necessary to fill the available space.
         case tile
 
+        /// A mode to enlarge or reduce the size of an image so that it fills the available space.
         case stretch
 
         /// Returns a Boolean value indicating whether two values are equal.
@@ -8124,15 +8717,6 @@ extension Image {
         ///   - rhs: Another value to compare.
         public static func == (a: Image.ResizingMode, b: Image.ResizingMode) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -8147,8 +8731,23 @@ extension Image {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 
+    /// Sets the mode by which SwiftUI resizes an image to fit its space.
+    /// - Parameters:
+    ///   - capInsets: Inset values that indicate a portion of the image that
+    ///   SwiftUI doesn't resize.
+    ///   - resizingMode: The mode by which SwiftUI resizes the image.
+    /// - Returns: An image, with the new resizing behavior set.
     public func resizable(capInsets: EdgeInsets = EdgeInsets(), resizingMode: Image.ResizingMode = .stretch) -> Image
 }
 
@@ -8235,7 +8834,14 @@ public struct InlinePickerStyle : PickerStyle {
     public init()
 }
 
-/// The instance that describes the behavior and appearance of an inset grouped list.
+/// The list style that describes the behavior and appearance of an inset
+/// grouped list.
+///
+/// On iOS, the inset grouped list style displays a continuous background color
+/// that extends from the section header, around both sides of list items in the
+/// section, and down to the section footer. This visually groups the items
+/// to a greater degree than either the ``InsetListStyle`` or
+/// ``GroupedListStyle`` does.
 @available(iOS 14.0, *)
 @available(macOS, unavailable)
 @available(tvOS, unavailable)
@@ -8246,7 +8852,7 @@ public struct InsetGroupedListStyle : ListStyle {
     public init()
 }
 
-/// The behavior and appearance of an inset list.
+/// The list style that describes the behavior and appearance of an inset list.
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -8311,7 +8917,7 @@ extension InsettableShape {
 /// resulting keyboard shortcut. That is, a key equivalent whose raw value is
 /// the capitalized string "A" corresponds with the keyboard shortcut
 /// Command-Shift-A. The exact mapping may depend on the keyboard layout—for
-/// example, a key equivalent whith the character value "}" produces a shortcut
+/// example, a key equivalent with the character value "}" produces a shortcut
 /// equivalent to Command-Shift-] on ANSI keyboards, but would produce a
 /// different shortcut for keyboard layouts where punctuation characters are in
 /// different locations.
@@ -8445,8 +9051,8 @@ public struct KeyboardShortcut {
 ///
 /// You can also apply styles to labels in several ways. In the case of dynamic
 /// changes to the view after device rotation or change to a window size you
-/// might want to show only the text portion of the label using the title-only
-/// label style:
+/// might want to show only the text portion of the label using the
+/// ``TitleOnlyLabelStyle`` label style:
 ///
 ///     Label("Lightning", systemImage: "bolt.fill")
 ///         .labelStyle(TitleOnlyLabelStyle())
@@ -8455,6 +9061,14 @@ public struct KeyboardShortcut {
 ///
 ///     Label("Lightning", systemImage: "bolt.fill")
 ///         .labelStyle(IconOnlyLabelStyle())
+///
+/// Some containers might apply a different default label style, such as only
+/// showing icons within toolbars on macOS and iOS. To opt in to showing both
+/// the title and the icon, you can apply the ``TitleAndIconLabelStyle`` label
+/// style:
+///
+///     Label("Lightning", systemImage: "bolt.fill")
+///         .labelStyle(TitleAndIconLabelStyle())
 ///
 /// You can also create a customized label style by modifying an existing
 /// style; this example adds a red border to the default label style:
@@ -8506,12 +9120,26 @@ public struct Label<Title, Icon> : View where Title : View, Icon : View {
     public init(@ViewBuilder title: () -> Title, @ViewBuilder icon: () -> Icon)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -8591,7 +9219,7 @@ public protocol LabelStyle {
     /// hierarchy where this style is the current label style.
     ///
     /// - Parameter configuration: The properties of the label.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a label.
     typealias Configuration = LabelStyleConfiguration
@@ -8607,7 +9235,7 @@ public struct LabelStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -8617,7 +9245,7 @@ public struct LabelStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -8653,15 +9281,6 @@ public enum LayoutDirection : Hashable, CaseIterable {
     ///   - rhs: Another value to compare.
     public static func == (a: LayoutDirection, b: LayoutDirection) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -8682,6 +9301,15 @@ public enum LayoutDirection : Hashable, CaseIterable {
 
     /// A collection of all values of this type.
     public static var allCases: [LayoutDirection] { get }
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 extension LayoutDirection {
@@ -8729,7 +9357,7 @@ public struct LazyHGrid<Content> : View where Content : View {
     ///   - rows: An array of grid items to size and position each column of
     ///    the grid.
     ///   - alignment: The alignment of the grid within its parent view.
-    ///   - spacing: The spacing beween the grid and the next item in its
+    ///   - spacing: The spacing between the grid and the next item in its
     ///   parent view.
     ///   - pinnedViews: Views to pin to the bounds of a parent scroll view.
     ///   - content: The content of the grid.
@@ -8738,7 +9366,7 @@ public struct LazyHGrid<Content> : View where Content : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -8778,7 +9406,7 @@ public struct LazyHStack<Content> : View where Content : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -8814,7 +9442,7 @@ public struct LazyVGrid<Content> : View where Content : View {
     ///   - columns: An array of grid items to size and position each row of
     ///    the grid.
     ///   - alignment: The alignment of the grid within its parent view.
-    ///   - spacing: The spacing beween the grid and the next item in its
+    ///   - spacing: The spacing between the grid and the next item in its
     ///   parent view.
     ///   - pinnedViews: Views to pin to the bounds of a parent scroll view.
     ///   - content: The content of the grid.
@@ -8823,7 +9451,7 @@ public struct LazyVGrid<Content> : View where Content : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -8864,7 +9492,7 @@ public struct LazyVStack<Content> : View where Content : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -8890,15 +9518,6 @@ public enum LegibilityWeight : Hashable {
     ///   - rhs: Another value to compare.
     public static func == (a: LegibilityWeight, b: LegibilityWeight) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -8913,6 +9532,15 @@ public enum LegibilityWeight : Hashable {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 extension LegibilityWeight {
@@ -8937,7 +9565,7 @@ extension LegibilityWeight {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -9002,12 +9630,26 @@ public struct Link<Label> : View where Label : View {
     public init(destination: URL, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -9051,7 +9693,220 @@ extension Link where Label == Text {
     public init<S>(_ title: S, destination: URL) where S : StringProtocol
 }
 
-/// A container that presents rows of data arranged in a single column.
+/// A container that presents rows of data arranged in a single column,
+/// optionally providing the ability to select one or more members.
+///
+/// In its simplest form, a `List` creates its contents statically, as shown in
+/// the following example:
+///
+///     var body: some View {
+///         List {
+///             Text("A List Item")
+///             Text("A Second List Item")
+///             Text("A Third List Item")
+///         }
+///     }
+///
+/// ![A vertical list with three text views.](SwiftUI-List-static.png)
+///
+/// More commonly, you create lists dynamically from an underlying collection
+/// of data. The following example shows how to create a simple list from an
+/// array of an `Ocean` type which conforms to
+/// <doc://com.apple.documentation/documentation/Swift/Identifiable>:
+///
+///     struct Ocean: Identifiable {
+///         let name: String
+///         let id = UUID()
+///     }
+///     private var oceans = [
+///         Ocean(name: "Pacific"),
+///         Ocean(name: "Atlantic"),
+///         Ocean(name: "Indian"),
+///         Ocean(name: "Southern"),
+///         Ocean(name: "Arctic")
+///     ]
+///
+///     var body: some View {
+///         List(oceans) {
+///             Text($0.name)
+///         }
+///     }
+///
+/// ![A vertical list with five text views, each with the name of an
+/// ocean.](SwiftUI-List-collection.png)
+///
+/// ### Supporting Selection in Lists
+///
+/// To make members of a list selectable, provide a binding to a selection
+/// variable. Binding to a single instance of the list data's `Identifiable.ID`
+/// type creates a single-selection list. Binding to a
+/// <doc://com.apple.documentation/documentation/Swift/Set> creates a list that
+/// supports multiple selections. The following example shows how to add
+/// multi-select to the previous
+/// example. A ``Text`` view below the list shows the number of items
+/// currently selected.
+///
+///     struct Ocean: Identifiable, Hashable {
+///         let name: String
+///         let id = UUID()
+///     }
+///     private var oceans = [
+///         Ocean(name: "Pacific"),
+///         Ocean(name: "Atlantic"),
+///         Ocean(name: "Indian"),
+///         Ocean(name: "Southern"),
+///         Ocean(name: "Arctic")
+///     ]
+///     @State private var multiSelection = Set<UUID>()
+///     
+///     var body: some View {
+///         NavigationView {
+///             List(oceans, selection: $multiSelection) {
+///                 Text($0.name)
+///             }
+///             .navigationTitle("Oceans")
+///             .toolbar { EditButton() }
+///         }
+///         Text("\(multiSelection.count) selections")
+///     }
+///
+/// ![A navigation view with the title Oceans and an active edit button with
+/// the title Done. Below this, a vertical list with five text views, each with
+/// the name of an ocean. Each text view has a circle to indicate selectability,
+/// and two of these circles are selected. At the bottom, a text view reads
+/// 2 selection(s).](SwiftUI-List-multi-selection.png)
+///
+/// ### Creating Multi-Dimensional Lists
+///
+/// To support two-dimensional lists, your list's content can create instances
+/// of the ``Section`` type, which then provide their own contents.
+///
+/// The following example creates sections named after the world's oceans,
+/// each of which has ``Text`` children named for major seas attached to those
+/// oceans. The example also allows for selection of a single list item,
+/// identified by the `id` of the example's `Sea` type.
+///
+///     struct ContentView: View {
+///         struct Sea: Hashable, Identifiable {
+///             let name: String
+///             let id = UUID()
+///         }
+///         struct OceanRegion: Identifiable {
+///             let name: String
+///             let seas: [Sea]
+///             let id = UUID()
+///         }
+///         private let oceanRegions: [OceanRegion]  = [
+///             OceanRegion(name: "Pacific",
+///                         seas: [Sea(name: "Australasian Mediterranean"),
+///                                Sea(name: "Philippine"),
+///                                Sea(name: "Coral"),
+///                                Sea(name: "South China")]),
+///             OceanRegion(name: "Atlantic",
+///                         seas: [Sea(name: "American Mediterranean"),
+///                                Sea(name: "Sargasso"),
+///                                Sea(name: "Caribbean")]),
+///             OceanRegion(name: "Indian",
+///                         seas: [Sea(name: "Bay of Bengal")]),
+///             OceanRegion(name: "Southern",
+///                         seas: [Sea(name:"Weddell")]),
+///             OceanRegion(name: "Arctic",
+///                         seas: [Sea(name: "Greenland")])
+///         ]
+///         @State private var singleSelection : UUID?
+///
+///         var body: some View {
+///             NavigationView {
+///                 List(selection: $singleSelection){
+///                     ForEach(oceanRegions) { region in
+///                         Section(header: Text("Major \(region.name) Ocean Seas")) {
+///                             ForEach(region.seas) { sea in
+///                                 Text(sea.name)
+///                             }
+///                         }
+///                     }
+///                 }
+///                 .navigationTitle("Oceans and Seas")
+///                 .toolbar { EditButton() }
+///             }
+///         }
+///     }
+///
+/// ![A vertical list split into sections titled Major Pacific Ocean Seas,
+/// Major Atlantic Ocean Seas, etc. Each section has a different number of
+/// rows, with the names of various seas. Within the Major Atlantic Ocean
+/// Seas section, the row Sargasso is
+/// selected.](SwiftUI-List-sections-defaultListStyle.png)
+///
+/// ### Creating Hierarchical Lists
+/// 
+/// You can also create a hierarchical list of arbitrary depth by providing
+/// tree-structured data and a `children` parameter that provides a key path to
+/// get the child nodes at any level. The following example uses a deeply-nested
+/// collection of a custom `FileItem` type to simulate the contents of a
+/// file system. The list created from this data uses collapsing cells to allow
+/// the user to navigate the tree structure.
+///
+///     struct ContentView: View {
+///         struct FileItem: Hashable, Identifiable, CustomStringConvertible {
+///             var id: Self { self }
+///             var name: String
+///             var children: [FileItem]? = nil
+///             var description: String {
+///                 switch children {
+///                 case nil:
+///                     return "📄 \(name)"
+///                 case .some(let children):
+///                     return children.isEmpty ? "📂 \(name)" : "📁 \(name)"
+///                 }
+///             }
+///         }
+///         let fileHierarchyData: [FileItem] = [
+///           FileItem(name: "users", children:
+///             [FileItem(name: "user1234", children:
+///               [FileItem(name: "Photos", children:
+///                 [FileItem(name: "photo001.jpg"),
+///                  FileItem(name: "photo002.jpg")]),
+///                FileItem(name: "Movies", children:
+///                  [FileItem(name: "movie001.mp4")]),
+///                   FileItem(name: "Documents", children: [])
+///               ]),
+///              FileItem(name: "newuser", children:
+///                [FileItem(name: "Documents", children: [])
+///                ])
+///             ]),
+///             FileItem(name: "private", children: nil)
+///         ]
+///         var body: some View {
+///             List(fileHierarchyData, children: \.children) { item in
+///                 Text(item.description)
+///             }
+///         }
+///     }
+/// 
+/// ![A list providing a drill-down view of a tree structure. Each row 
+/// expands to show its children, which are indented slightly. The top row
+/// is titled users, with users1234 below it, below which are rows titled
+/// Photos, Movies, and Documents, each with a folder
+/// icon.](SwiftUI-List-hierarchical.png)
+///
+/// ### Styling Lists
+///
+/// SwiftUI chooses a display style for a list based on the platform and the
+/// view type in which it appears. Use the ``View/listStyle(_:)`` modifier to
+/// apply a different ``ListStyle`` to all lists within a view. For example,
+/// adding `.listStyle(InsetGroupedListStyle())` to the example shown in the
+/// "Creating Multi-Dimensional Lists" topic applies the
+/// ``InsetGroupedListStyle``, as seen in the following screenshot.
+///
+/// ![A vertical list split into sections titled Major Pacific Ocean Seas,
+/// Major Atlantic Ocean Seas, etc. Each section has a different number of
+/// rows, with the names of various seas. Within the Major Atlantic Ocean
+/// Seas section, the row Sargasso is selected. The sections display a border
+/// around the sides of each list item, connecting with the section headers,
+/// which provides a visual grouping not provided by the default list
+/// style.](SwiftUI-List-sections-insetGroupedListStyle.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct List<SelectionValue, Content> : View where SelectionValue : Hashable, Content : View {
 
@@ -9085,7 +9940,7 @@ public struct List<SelectionValue, Content> : View where SelectionValue : Hashab
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -9152,14 +10007,15 @@ extension List {
     @available(watchOS, unavailable)
     public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, selection: Binding<Set<SelectionValue>>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
 
-    /// Creates a list that computes its views on demand over a constant range.
+    /// Creates a list that computes its views on demand over a constant range,
+    /// optionally allowing users to select multiple rows.
     ///
     /// This instance only reads the initial value of `data` and doesn't need to
     /// identify views across updates. To compute views on demand over a dynamic
     /// range, use ``List/init(_:id:selection:rowContent:)-8ef64``.
     ///
     /// - Parameters:
-    ///   - data: A *constant* range of data to populate the list.
+    ///   - data: A constant range of data to populate the list.
     ///   - selection: A binding to a set that identifies selected rows.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
@@ -9232,14 +10088,15 @@ extension List {
     @available(watchOS, unavailable)
     public init<Data, ID, RowContent>(_ data: Data, id: KeyPath<Data.Element, ID>, children: KeyPath<Data.Element, Data?>, selection: Binding<SelectionValue?>?, @ViewBuilder rowContent: @escaping (Data.Element) -> RowContent) where Content == OutlineGroup<Data, ID, RowContent, RowContent, DisclosureGroup<RowContent, OutlineSubgroupChildren>>, Data : RandomAccessCollection, ID : Hashable, RowContent : View
 
-    /// Creates a list that computes its views on demand over a constant range.
+    /// Creates a list that computes its views on demand over a constant range,
+    /// optionally allowing users to select a single row.
     ///
     /// This instance only reads the initial value of `data` and doesn't need to
     /// identify views across updates. To compute views on demand over a dynamic
     /// range, use ``List/init(_:id:selection:rowContent:)-9r2hz``.
     ///
     /// - Parameters:
-    ///   - data: A *constant* range of data to populate the list.
+    ///   - data: A constant range of data to populate the list.
     ///   - selection: A binding to a selected value.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
@@ -9318,7 +10175,7 @@ extension List where SelectionValue == Never {
     /// range, use ``List/init(_:id:rowContent:)``.
     ///
     /// - Parameters:
-    ///   - data: A *constant* range of data to populate the list.
+    ///   - data: A constant range of data to populate the list.
     ///   - rowContent: A view builder that creates the view for a single row of
     ///     the list.
     public init<RowContent>(_ data: Range<Int>, @ViewBuilder rowContent: @escaping (Int) -> RowContent) where Content == ForEach<Range<Int>, Int, HStack<RowContent>>, RowContent : View
@@ -9433,23 +10290,6 @@ public protocol ListStyle {
         public typealias StringLiteralType = String
     }
 
-    /// A type that represents a string literal.
-    ///
-    /// Valid types for `StringLiteralType` are `String` and `StaticString`.
-    public typealias StringLiteralType = String
-
-    /// A type that represents an extended grapheme cluster literal.
-    ///
-    /// Valid types for `ExtendedGraphemeClusterLiteralType` are `Character`,
-    /// `String`, and `StaticString`.
-    public typealias ExtendedGraphemeClusterLiteralType = String
-
-    /// A type that represents a Unicode scalar literal.
-    ///
-    /// Valid types for `UnicodeScalarLiteralType` are `Unicode.Scalar`,
-    /// `Character`, `String`, and `StaticString`.
-    public typealias UnicodeScalarLiteralType = String
-
     /// Returns a Boolean value indicating whether two values are equal.
     ///
     /// Equality is the inverse of inequality. For any values `a` and `b`,
@@ -9459,6 +10299,23 @@ public protocol ListStyle {
     ///   - lhs: A value to compare.
     ///   - rhs: Another value to compare.
     public static func == (a: LocalizedStringKey, b: LocalizedStringKey) -> Bool
+
+    /// A type that represents an extended grapheme cluster literal.
+    ///
+    /// Valid types for `ExtendedGraphemeClusterLiteralType` are `Character`,
+    /// `String`, and `StaticString`.
+    public typealias ExtendedGraphemeClusterLiteralType = String
+
+    /// A type that represents a string literal.
+    ///
+    /// Valid types for `StringLiteralType` are `String` and `StaticString`.
+    public typealias StringLiteralType = String
+
+    /// A type that represents a Unicode scalar literal.
+    ///
+    /// Valid types for `UnicodeScalarLiteralType` are `Unicode.Scalar`,
+    /// `Character`, `String`, and `StaticString`.
+    public typealias UnicodeScalarLiteralType = String
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -9492,9 +10349,9 @@ extension LocalizedStringKey.StringInterpolation {
 ///
 ///         var longPress: some Gesture {
 ///             LongPressGesture(minimumDuration: 3)
-///                 .updating($isDetectingLongPress) { currentstate, gestureState,
+///                 .updating($isDetectingLongPress) { currentState, gestureState,
 ///                         transaction in
-///                     gestureState = currentstate
+///                     gestureState = currentState
 ///                     transaction.animation = Animation.easeIn(duration: 2.0)
 ///                 }
 ///                 .onEnded { finished in
@@ -9534,11 +10391,11 @@ public struct LongPressGesture : Gesture {
     @available(tvOS, unavailable)
     public init(minimumDuration: Double = 0.5, maximumDistance: CGFloat = 10)
 
-    /// The type representing the gesture's value.
-    public typealias Value = Bool
-
     /// The type of gesture representing the body of `Self`.
     public typealias Body = Never
+
+    /// The type representing the gesture's value.
+    public typealias Value = Bool
 }
 
 /// A gesture that recognizes a magnification motion and tracks the amount of
@@ -9588,11 +10445,11 @@ public struct MagnificationGesture : Gesture {
     ///   the gesture starts.
     public init(minimumScaleDelta: CGFloat = 0.01)
 
-    /// The type representing the gesture's value.
-    public typealias Value = CGFloat
-
     /// The type of gesture representing the body of `Self`.
     public typealias Body = Never
+
+    /// The type representing the gesture's value.
+    public typealias Value = CGFloat
 }
 
 /// A set of view properties that may be synchronized between views
@@ -9644,14 +10501,14 @@ public struct MagnificationGesture : Gesture {
     /// Both the `position` and `size` properties.
     public static let frame: MatchedGeometryProperties
 
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = MatchedGeometryProperties
+
     /// The element type of the option set.
     ///
     /// To inherit all the default implementations from the `OptionSet` protocol,
     /// the `Element` type must be `Self`, the default.
     public typealias Element = MatchedGeometryProperties
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = MatchedGeometryProperties
 
     /// The raw type that can be used to represent all values of the conforming
     /// type.
@@ -9706,12 +10563,26 @@ public struct MagnificationGesture : Gesture {
 public struct Menu<Label, Content> : View where Label : View, Content : View {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -9795,7 +10666,7 @@ public struct MenuPickerStyle : PickerStyle {
 /// A type that applies standard interaction behavior and a custom appearance
 /// to all menus within a view hierarchy.
 ///
-/// To configure the current menu style for a view hiearchy, use the
+/// To configure the current menu style for a view hierarchy, use the
 /// ``View/menuStyle(_:)`` modifier.
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
@@ -9811,7 +10682,7 @@ public protocol MenuStyle {
     ///
     /// The system calls this method for each ``Menu`` instance in a view
     /// hierarchy where this style is the current menu style.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a menu.
     typealias Configuration = MenuStyleConfiguration
@@ -9843,7 +10714,7 @@ public struct MenuStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -9853,7 +10724,7 @@ public struct MenuStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 }
@@ -9865,7 +10736,7 @@ public struct MenuStyleConfiguration {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 
     /// The content that the modifier transforms into a new view or new
@@ -9926,6 +10797,20 @@ extension ModifiedContent : Equatable where Content : Equatable, Modifier : Equa
 extension ModifiedContent : View where Content : View, Modifier : ViewModifier {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: ModifiedContent<Content, Modifier>.Body { get }
 }
 
@@ -10221,15 +11106,6 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     /// `@Namespace` dynamic property.
     @frozen public struct ID : Hashable {
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -10254,6 +11130,15 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
         ///   - lhs: A value to compare.
         ///   - rhs: Another value to compare.
         public static func == (a: Namespace.ID, b: Namespace.ID) -> Bool
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
@@ -10287,15 +11172,6 @@ public struct NavigationBarItem {
         ///   - rhs: Another value to compare.
         public static func == (a: NavigationBarItem.TitleDisplayMode, b: NavigationBarItem.TitleDisplayMode) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -10310,6 +11186,15 @@ public struct NavigationBarItem {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
@@ -10324,54 +11209,188 @@ extension NavigationBarItem.TitleDisplayMode : Hashable {
 }
 
 /// A view that controls a navigation presentation.
+///
+/// A `NavigationLink` defines a destination for a navigation-based interface
+/// and allows the user to perform that navigation. Optionally, you can use
+/// the `NavigationLink` to perform a navigation programmatically. You do so in
+/// one of two ways:
+///
+/// * Bind the `NavigationLink` to a Boolean value. Setting the value to `true`
+/// performs the navigation.
+/// * Bind the `NavigationLink` to a `selection` variable and provide a `tag`
+/// of the variable's type. Setting the value of `selection` to `tag` performs
+/// the navigation.
+///
+/// The following example defines a `DestinationPageView`, and then sets up a
+/// ``NavigationView`` with three instances of `NavigationLink`, each going to
+/// a destination page of a different color. The user can tap any of these links
+/// to navigate to that destination. The navigation to the purple
+/// page also binds to the state variable `shouldShowPurple`. Three seconds
+/// after the navigation appears, an
+/// <doc://com.apple.documentation/documentation/Dispatch/DispatchQueue/2300020-asyncAfter>
+/// call sets `shouldShowPurple` to `true`, which programmatically performs the
+/// navigation to the purple page.
+///
+///     struct DestinationPageView: View {
+///         var color: Color
+///         var body: some View {
+///             Text("Destination Page")
+///                 .font(.title)
+///                 .foregroundColor(color)
+///         }
+///     }
+///
+///     struct ContentView: View {
+///         @State private var shouldShowPurple = false
+///
+///         var body: some View {
+///             NavigationView {
+///                 List {
+///                     NavigationLink(
+///                         destination: DestinationPageView(color: .purple),
+///                         isActive: $shouldShowPurple
+///                     ) {
+///                         Text("Purple Page")
+///                     }
+///                     NavigationLink(
+///                         destination: DestinationPageView(color: .pink)
+///                     ) {
+///                         Text("Pink Page")
+///                     }
+///                     NavigationLink(
+///                         destination: DestinationPageView(color: .orange)
+///                     ) {
+///                         Text("Orange Page")
+///                     }
+///                 }
+///                 .navigationTitle("Colors")
+///                 Text("Select a color page from the links.")
+///             }
+///             .onAppear {
+///                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
+///                     shouldShowPurple = true
+///                 }
+///             }
+///         }
+///     }
+///
+/// ![An iPad in landscape mode, showing a multicolumn navigation view. In
+/// the left column, a list of three items: Purple Page, Pink Page, and Orange
+/// Page. On the right, a detail view that says Destination Page in
+/// purple.](SwiftUI-NavigationLink-programmatic-navigation.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct NavigationLink<Label, Destination> : View where Label : View, Destination : View {
 
-    /// Creates an instance that presents `destination`.
+    /// Creates a navigation link that presents the destination view.
+    /// - Parameters:
+    ///   - destination: A view for the navigation link to present.
+    ///   - label: A view builder to produce a label describing the `destination`
+    ///    to present.
     public init(destination: Destination, @ViewBuilder label: () -> Label)
 
-    /// Creates an instance that presents `destination` when active.
+    /// Creates a navigation link that presents the destination view when active.
+    /// - Parameters:
+    ///   - destination: A view for the navigation link to present.
+    ///   - isActive: A binding to a Boolean value that indicates whether
+    ///   `destination` is currently presented.
+    ///   - label: A view builder to produce a label describing the `destination`
+    ///    to present.
     public init(destination: Destination, isActive: Binding<Bool>, @ViewBuilder label: () -> Label)
 
-    /// Creates an instance that presents `destination` when `selection` is set
-    /// to `tag`.
+    /// Creates a navigation link that presents the destination view when
+    /// a bound selection variable equals a given tag value.
+    /// - Parameters:
+    ///   - destination: A view for the navigation link to present.
+    ///   - tag: The value of `selection` that causes the link to present
+    ///   `destination`.
+    ///   - selection: A bound variable that causes the link to present
+    ///   `destination` when `selection` becomes equal to `tag`.
+    ///   - label: A view builder to produce a label describing the
+    ///   `destination` to present.
     public init<V>(destination: Destination, tag: V, selection: Binding<V?>, @ViewBuilder label: () -> Label) where V : Hashable
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension NavigationLink where Label == Text {
 
-    /// Creates an instance that presents `destination`, with a `Text` label
-    /// generated from a title string.
+    /// Creates a navigation link that presents a destination view, with a text label
+    /// that the link generates from a localized string key.
+    /// - Parameters:
+    ///   - titleKey: A localized string key for creating a text label.
+    ///   - destination: A view for the navigation link to present.
     public init(_ titleKey: LocalizedStringKey, destination: Destination)
 
-    /// Creates an instance that presents `destination`, with a `Text` label
-    /// generated from a title string.
+    /// Creates a navigation link that presents a destination view, with a text label
+    /// that the link generates from a title string.
+    /// - Parameters:
+    ///   - title: A string for creating a text label.
+    ///   - destination: A view for the navigation link to present.
     public init<S>(_ title: S, destination: Destination) where S : StringProtocol
 
-    /// Creates an instance that presents `destination` when active, with a
-    /// `Text` label generated from a title string.
+    /// Creates a navigation link that presents a destination view when active, with a
+    /// text label that the link generates from a localized string key.
+    /// - Parameters:
+    ///   - titleKey: A localized string key for creating a text label.
+    ///   - destination: A view for the navigation link to present.
+    ///   - isActive: A binding to a Boolean value that indicates whether
+    ///   `destination` is currently presented.
     public init(_ titleKey: LocalizedStringKey, destination: Destination, isActive: Binding<Bool>)
 
-    /// Creates an instance that presents `destination` when active, with a
-    /// `Text` label generated from a title string.
+    /// Creates a navigation link that presents a destination view when active, with a
+    /// text label that the link generates from a title string.
+    /// - Parameters:
+    ///   - title: A string for creating a text label.
+    ///   - destination: A view for the navigation link to present.
+    ///   - isActive: A binding to a Boolean value that indicates whether
+    ///   `destination` is currently presented.
     public init<S>(_ title: S, destination: Destination, isActive: Binding<Bool>) where S : StringProtocol
 
-    /// Creates an instance that presents `destination` when `selection` is set
-    /// to `tag`, with a `Text` label generated from a title string.
+    /// Creates a navigation link that presents a destination view when a bound
+    /// selection variable matches a value you provide, using a text label
+    /// that the link generates from a localized string key.
+    /// - Parameters:
+    ///   - titleKey: A localized string key for creating a text label.
+    ///   - destination: A view for the navigation link to present.
+    ///   - tag: The value of `selection` that causes the link to present
+    ///   `destination`.
+    ///   - selection: A bound variable that causes the link to present
+    ///   `destination` when `selection` becomes equal to `tag`.
     public init<V>(_ titleKey: LocalizedStringKey, destination: Destination, tag: V, selection: Binding<V?>) where V : Hashable
 
-    /// Creates an instance that presents `destination` when `selection` is set
-    /// to `tag`, with a `Text` label generated from a title string.
+    /// Creates a navigation link that presents a destination view when a bound
+    /// selection variable matches a value you provide, using a text label
+    /// that the link generates from a title string.
+    /// - Parameters:
+    ///   - title: A string for creating a text label.
+    ///   - destination: A view for the navigation link to present.
+    ///   - tag: The value of `selection` that causes the link to present
+    ///   `destination`.
+    ///   - selection: A bound variable that causes the link to present
+    ///   `destination` when `selection` becomes equal to `tag`.
     public init<S, V>(_ title: S, destination: Destination, tag: V, selection: Binding<V?>) where S : StringProtocol, V : Hashable
 }
 
@@ -10381,10 +11400,24 @@ extension NavigationLink where Label == Text {
 @available(watchOS, unavailable)
 extension NavigationLink {
 
-    /// Sets whether or not the `NavigationLink` should present its destination
-    /// as the "detail" component of the containing `NavigationView`.
+    /// Sets the navigation link to present its destination as the detail
+    /// component of the containing navigation view.
     ///
-    /// If not set, defaults to `true`.
+    /// This method sets the behavior when the navigation link is used in a
+    /// multi-column navigation view, such as
+    /// ``DoubleColumnNavigationViewStyle``. If `isDetailLink` is `true`,
+    /// performing the link in the primary column sets the contents of the
+    /// secondary (detail) column to be the link's destination view.  If
+    /// `isDetailLink` is `false`, the link navigates to the destination view
+    /// within the primary column.
+    ///
+    /// If you do not set the detail link behavior with this method, the
+    /// behavior defaults to `true`.
+    ///
+    /// - Parameter isDetailLink: A Boolean value that specifies whether this
+    /// link presents its destination as the detail component when used in a
+    /// multi-column navigation view.
+    /// - Returns: A view that applies the specified detail link behavior.
     @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -10392,17 +11425,101 @@ extension NavigationLink {
 
 }
 
-/// A view for presenting a stack of views representing a visible path in a
+/// A view for presenting a stack of views that represent a visible path in a
 /// navigation hierarchy.
+///
+/// To create a navigation-based app --- in which the user can go forward and
+/// backward through a series of views --- wrap the root view with a
+/// `NavigationView`. You can then use view modifiers like
+/// ``View/navigationTitle(_:)-avgj`` to customize the navigation interface.
+///
+/// The following example defines a `DestinationPageView`, and then sets up a
+/// `NavigationView` with three instances of ``NavigationLink``, providing
+/// links to pages with purple, pink, and orange text, respectively. The user
+/// can tap any of these links to go to the specified destination.
+///
+///     struct DestinationPageView: View {
+///         var color: Color
+///         var body: some View {
+///             Text("Destination Page")
+///                 .font(.title)
+///                 .foregroundColor(color)
+///         }
+///     }
+///
+///     struct ContentView: View {
+///         var body: some View {
+///             NavigationView {
+///                 List {
+///                     NavigationLink(
+///                         destination: DestinationPageView(color: .purple)
+///                     ) {
+///                         Text("Purple Page")
+///                     }
+///                     NavigationLink(
+///                         destination: DestinationPageView(color: .pink)
+///                     ) {
+///                         Text("Pink Page")
+///                     }
+///                     NavigationLink(
+///                         destination: DestinationPageView(color: .orange)
+///                     ) {
+///                         Text("Orange Page")
+///                     }
+///                 }
+///                 Text("Select a color page from the links.")
+///             }
+///         }
+///     }
+///
+/// The navigation view presents itself as a multicolumn view when the
+/// horizontal size class is ``UserInterfaceSizeClass/regular``, and a single
+/// column view when the size class is ``UserInterfaceSizeClass/compact``.
+/// The following screenshot shows the navigation view on an iPad in landscape
+/// orientation. When the user selects one of the navigation links from the
+/// list, the appropriate `DestinationPageView` instance replaces the
+/// placeholder text in the detail column.
+///
+/// ![A navigation view on an iPad in landscape orientation, presented as two
+/// columns: a top-level list, and a detail view. The list contains the entries
+/// Purple Page, Pink Page, and Orange Page. The detail shows a text view that
+/// reads Select a color page from the
+/// links.](SwiftUI-NavigationView-iPad-landscape-multi-column.png)
+///
+/// On an iPhone in portrait orientation, the horizontal size class is compact,
+/// so the navigation view uses a single column presentation that navigates
+/// through a stack. Tapping one of the links replaces the list with the detail
+/// view, which provides a back button to return to the list.
+///
+/// ![A navigation view on an iPhone in portrait orientation, presented as a
+/// single column consisting of a top-level list. The list contains the entries
+/// Purple Page, Pink Page, and Orange
+/// Page.](SwiftUI-NavigationView-iPhone-portrait-single-column.png)
+///
+/// ### Styling Navigation Views
+///
+/// Use the ``View/navigationViewStyle(_:)`` view modifier to change the
+/// appearance and behavior of navigation views. For example, you can use
+/// the ``StackNavigationViewStyle`` to force the use of the single-column
+/// stack navigation in wider environments, such as an iPad in landscape
+/// orientation.
+///
+/// ![A navigation view on an iPad in landscape orientation, presented as a
+/// single column consisting of a top-level list. The list contains the entries
+/// Purple Page, Pink Page, and Orange
+/// Page.](SwiftUI-NavigationView-iPad-landscape-single-column.png)
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 7.0, *)
 public struct NavigationView<Content> : View where Content : View {
 
+    /// Creates a navigation view for the provided content.
+    /// - Parameter content: A view builder that produces the content that the
+    /// navigation view wraps.
     public init(@ViewBuilder content: () -> Content)
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -10486,7 +11603,7 @@ public protocol NavigationViewStyle {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -10746,12 +11863,26 @@ extension OutlineGroup where Parent : View, Parent == Leaf, Subgroup == Disclosu
 extension OutlineGroup : View where Parent : View, Leaf : View, Subgroup : View {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -10767,7 +11898,7 @@ public struct OutlineSubgroupChildren : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -10958,7 +12089,7 @@ extension Path : Shape {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -11135,7 +12266,7 @@ extension Path {
 ///         }
 ///
 ///         Text("Selected flavor: \(selectedFlavor.rawValue)")
-///         Text("Selected toppping: \(selectedTopping.rawValue)")
+///         Text("Selected topping: \(selectedTopping.rawValue)")
 ///     }
 ///     .pickerStyle(SegmentedPickerStyle())
 ///
@@ -11152,12 +12283,26 @@ public struct Picker<Label, SelectionValue, Content> : View where Label : View, 
     public init(selection: Binding<SelectionValue>, label: Label, @ViewBuilder content: () -> Content)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -11249,14 +12394,14 @@ public struct PinnedScrollableViews : OptionSet {
     /// The footer view of each `Section` will be pinned.
     public static let sectionFooters: PinnedScrollableViews
 
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = PinnedScrollableViews
+
     /// The element type of the option set.
     ///
     /// To inherit all the default implementations from the `OptionSet` protocol,
     /// the `Element` type must be `Self`, the default.
     public typealias Element = PinnedScrollableViews
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = PinnedScrollableViews
 
     /// The raw type that can be used to represent all values of the conforming
     /// type.
@@ -11292,7 +12437,7 @@ public struct PlainButtonStyle : PrimitiveButtonStyle {
     public typealias Body = some View
 }
 
-/// The instance that describes the behavior and appearance of a plain list.
+/// The list style that describes the behavior and appearance of a plain list.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct PlainListStyle : ListStyle {
 
@@ -11311,8 +12456,11 @@ public struct PlainTextFieldStyle : TextFieldStyle {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public enum PopoverAttachmentAnchor {
 
+    /// The anchor point for the popover relative to the source's frame.
     case rect(Anchor<CGRect>.Source)
 
+    /// The anchor point for the popover expressed as a unit point  that
+    /// describes possible alignments relative to a SwiftUI view.
     case point(UnitPoint)
 }
 
@@ -11458,6 +12606,12 @@ public struct PreviewDevice : RawRepresentable, ExpressibleByStringLiteral {
     /// - Parameter value: The value of the new instance.
     public init(stringLiteral: String)
 
+    /// A type that represents an extended grapheme cluster literal.
+    ///
+    /// Valid types for `ExtendedGraphemeClusterLiteralType` are `Character`,
+    /// `String`, and `StaticString`.
+    public typealias ExtendedGraphemeClusterLiteralType = String
+
     /// The raw type that can be used to represent all values of the conforming
     /// type.
     ///
@@ -11470,12 +12624,6 @@ public struct PreviewDevice : RawRepresentable, ExpressibleByStringLiteral {
     ///
     /// Valid types for `StringLiteralType` are `String` and `StaticString`.
     public typealias StringLiteralType = String
-
-    /// A type that represents an extended grapheme cluster literal.
-    ///
-    /// Valid types for `ExtendedGraphemeClusterLiteralType` are `Character`,
-    /// `String`, and `StaticString`.
-    public typealias ExtendedGraphemeClusterLiteralType = String
 
     /// A type that represents a Unicode scalar literal.
     ///
@@ -11522,15 +12670,6 @@ public enum PreviewPlatform {
     ///   - rhs: Another value to compare.
     public static func == (a: PreviewPlatform, b: PreviewPlatform) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -11545,6 +12684,15 @@ public enum PreviewPlatform {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -11619,7 +12767,7 @@ public protocol PrimitiveButtonStyle {
     /// hierarchy where this style is the current button style.
     ///
     /// - Parameter configuration : The properties of the button.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a button.
     typealias Configuration = PrimitiveButtonStyleConfiguration
@@ -11635,7 +12783,7 @@ public struct PrimitiveButtonStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -11708,12 +12856,26 @@ public struct PrimitiveButtonStyleConfiguration {
 public struct ProgressView<Label, CurrentValueLabel> : View where Label : View, CurrentValueLabel : View {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -11905,7 +13067,7 @@ extension ProgressView {
 /// A type that applies standard interaction behavior to all progress views
 /// within a view hierarchy.
 ///
-/// To configure the current progress view style for a view hiearchy, use the
+/// To configure the current progress view style for a view hierarchy, use the
 /// ``View/progressViewStyle(_:)`` modifier.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public protocol ProgressViewStyle {
@@ -11923,7 +13085,7 @@ public protocol ProgressViewStyle {
     ///
     /// - Parameter configuration: The properties of the progress view, such as
     ///  its preferred progress type.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// A type alias for the properties of a progress view instance.
     typealias Configuration = ProgressViewStyleConfiguration
@@ -11940,7 +13102,7 @@ public struct ProgressViewStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -11950,7 +13112,7 @@ public struct ProgressViewStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -12049,7 +13211,7 @@ extension ProjectionTransform {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -12072,7 +13234,7 @@ extension ProjectionTransform {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -12108,14 +13270,14 @@ public struct RedactionReasons : OptionSet {
     /// placeholder data to users.
     public static let placeholder: RedactionReasons
 
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = RedactionReasons
+
     /// The element type of the option set.
     ///
     /// To inherit all the default implementations from the `OptionSet` protocol,
     /// the `Element` type must be `Self`, the default.
     public typealias Element = RedactionReasons
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = RedactionReasons
 
     /// The raw type that can be used to represent all values of the conforming
     /// type.
@@ -12162,7 +13324,7 @@ public protocol ReferenceFileDocument : ObservableObject {
     /// When saving a `ReferenceFileDocument`, edits to the document are blocked
     /// until snapshot with a copy of any mutable references can be created.
     /// Once the snapshot is created, the document becomes editable in parallel
-    /// to the snapshot being serialized using `write(snaphot:to:contentType:)`.
+    /// to the snapshot being serialized using `write(snapshot:to:contentType:)`.
     ///
     /// - Parameter contentType: The content type being written, for which the
     ///   snapshot should be created.
@@ -12248,7 +13410,7 @@ public struct ReferenceFileDocumentConfiguration<Document> where Document : Refe
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -12304,11 +13466,11 @@ public struct RotationGesture : Gesture {
     ///   gesture starts. The default value is a one-degree angle.
     public init(minimumAngleDelta: Angle = .degrees(1))
 
-    /// The type representing the gesture's value.
-    public typealias Value = Angle
-
     /// The type of gesture representing the body of `Self`.
     public typealias Body = Never
+
+    /// The type representing the gesture's value.
+    public typealias Value = Angle
 }
 
 /// A text field style with a system-defined rounded border.
@@ -12340,15 +13502,6 @@ public enum RoundedCornerStyle {
     ///   - rhs: Another value to compare.
     public static func == (a: RoundedCornerStyle, b: RoundedCornerStyle) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -12363,6 +13516,15 @@ public enum RoundedCornerStyle {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -12402,7 +13564,7 @@ extension RoundedCornerStyle : Hashable {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -12467,14 +13629,14 @@ extension RoundedRectangle : InsettableShape {
     /// All safe area regions.
     public static let all: SafeAreaRegions
 
+    /// The type of the elements of an array literal.
+    public typealias ArrayLiteralElement = SafeAreaRegions
+
     /// The element type of the option set.
     ///
     /// To inherit all the default implementations from the `OptionSet` protocol,
     /// the `Element` type must be `Self`, the default.
     public typealias Element = SafeAreaRegions
-
-    /// The type of the elements of an array literal.
-    public typealias ArrayLiteralElement = SafeAreaRegions
 
     /// The raw type that can be used to represent all values of the conforming
     /// type.
@@ -12529,7 +13691,7 @@ extension RoundedRectangle : InsettableShape {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -12744,10 +13906,10 @@ extension Scene {
 
 }
 
-/// A function builder for composing a collection of scenes into a single
+/// A result builder for composing a collection of scenes into a single
 /// composite scene.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-@_functionBuilder public struct SceneBuilder {
+@resultBuilder public struct SceneBuilder {
 
     /// Passes a single scene written as a child scene through unmodified.
     public static func buildBlock<Content>(_ content: Content) -> Content where Content : Scene
@@ -12935,15 +14097,6 @@ public enum ScenePhase : Comparable {
     ///   - rhs: Another value to compare.
     public static func == (a: ScenePhase, b: ScenePhase) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -12970,6 +14123,15 @@ public enum ScenePhase : Comparable {
     ///   - lhs: A value to compare.
     ///   - rhs: Another value to compare.
     public static func < (a: ScenePhase, b: ScenePhase) -> Bool
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -12997,7 +14159,7 @@ extension ScenePhase : Hashable {
 /// large size, such as model data, should not be stored in `SceneStorage`, as
 /// poor performance may result.
 ///
-/// If the `Scene` is explictly destroyed (e.g. the switcher snapshot is
+/// If the `Scene` is explicitly destroyed (e.g. the switcher snapshot is
 /// destroyed on iPadOS or the window is closed on macOS), the data is also
 /// destroyed. Do not use `SceneStorage` with sensitive data.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -13156,6 +14318,33 @@ extension SceneStorage where Value : ExpressibleByNilLiteral {
 /// A scrollable view.
 ///
 /// The scroll view displays its content within the scrollable content region.
+/// As the user performs platform-appropriate scroll gestures, the scroll view
+/// adjusts what portion of the underlying content is visible. `ScrollView` can
+/// scroll horizontally, vertically, or both, but does not provide zooming
+/// functionality.
+///
+/// In the following example, a `ScrollView` allows the user to scroll through
+/// a ``VStack`` containing 100 ``Text`` views. The image after the listing
+/// shows the scroll view's temporarily visible scrollbar at the right; you can
+/// disable it with the `showsIndicators` parameter of the `ScrollView`
+/// initializer.
+///
+///     var body: some View {
+///         ScrollView {
+///             VStack(alignment: .leading) {
+///                 ForEach(0..<100) {
+///                     Text("Row \($0)")
+///                 }
+///             }
+///         }
+///     }
+/// ![A scroll view with a series of vertically arranged rows, reading
+/// Row 1, Row 2, and so on. At the right, a scrollbar indicates that
+/// this is the top of the scrollable
+/// area.](SwiftUI-ScrollView-rows-with-indicator.png)
+///
+/// To perform programmatic scrolling, wrap one or more scroll views with a
+/// ``ScrollViewReader``.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct ScrollView<Content> : View where Content : View {
 
@@ -13193,12 +14382,18 @@ public struct ScrollView<Content> : View where Content : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
-/// A proxy value allowing the scrollable views within a view hierarchy
-/// to be scrolled programmatically.
+/// A proxy value that supports programmatic scrolling of the scrollable
+/// views within a view hierarchy.
+///
+/// You don't create instances of `ScrollViewProxy` directly. Instead, your
+/// ``ScrollViewReader`` receives an instance of `ScrollViewProxy` in its
+/// `content` view builder. You use actions within this view builder, such
+/// as button and gesture handlers or the ``View/onChange(of:perform:)``
+/// method, to call the proxy's ``ScrollViewProxy/scrollTo(_:anchor:)`` method.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ScrollViewProxy {
 
@@ -13206,44 +14401,123 @@ public struct ScrollViewProxy {
     /// with a child view with identifier `id`, and then scrolls to
     /// that view.
     ///
-    /// If `anchor` is nil the container of the identified view will be
-    /// scrolled the minimum amount to make the identified view wholly
-    /// visible.
+    /// If `anchor` is `nil`, this method finds the container of the identified
+    /// view, and scrolls the minimum amount to make the identified view
+    /// wholly visible.
     ///
-    /// If `anchor` is non-nil it defines the points in the identified
-    /// view and the scroll view that will be aligned, e.g. `.top`
-    /// aligns the top of the identified view to the top of the scroll
-    /// view, `.bottom` aligns the bottom of the identified view to the
-    /// bottom of the scroll view, and so on.
+    /// If `anchor` is non-`nil`, it defines the points in the identified
+    /// view and the scroll view to align. For example, setting `anchor` to
+    /// ``UnitPoint/top`` aligns the top of the identified view to the top of
+    /// the scroll view. Similarly, setting `anchor` to ``UnitPoint/bottom``
+    /// aligns the bottom of the identified view to the bottom of the scroll
+    /// view, and so on.
     ///
+    /// - Parameters:
+    ///   - id: The identifier of a child view to scroll to.
+    ///   - anchor: The alignment behavior of the scroll action.
     public func scrollTo<ID>(_ id: ID, anchor: UnitPoint? = nil) where ID : Hashable
 }
 
-/// A view whose child is defined as a function of a `ScrollViewProxy`
-/// targeting the scrollable views within the child.
+/// A view that provides programmatic scrolling, by working with a proxy
+/// to scroll to known child views.
+///
+/// The scroll view reader's content view builder receives a ``ScrollViewProxy``
+/// instance; you use the proxy's ``ScrollViewProxy/scrollTo(_:anchor:)`` to
+/// perform scrolling.
+///
+/// The following example creates a ``ScrollView`` containing 100 views that
+/// together display a color gradient. It also contains two buttons, one each
+/// at the top and bottom. The top button tells the ``ScrollViewProxy`` to
+/// scroll to the bottom button, and vice versa.
+///
+///     @Namespace var topID
+///     @Namespace var bottomID
+///
+///     var body: some View {
+///         ScrollViewReader { proxy in
+///             ScrollView {
+///                 Button("Scroll to Bottom") {
+///                     withAnimation {
+///                         proxy.scrollTo(bottomID)
+///                     }
+///                 }
+///                 .id(topID)
+///
+///                 VStack(spacing: 0) {
+///                     ForEach(0..<100) { i in
+///                         color(fraction: Double(i) / 100)
+///                             .frame(height: 32)
+///                     }
+///                 }
+///
+///                 Button("Top") {
+///                     withAnimation {
+///                         proxy.scrollTo(topID)
+///                     }
+///                 }
+///                 .id(bottomID)
+///             }
+///         }
+///     }
+///
+///     func color(fraction: Double) -> Color {
+///         Color(red: fraction, green: 1 - fraction, blue: 0.5)
+///     }
+///
+/// ![A scroll view, with a button labeled "Scroll to Bottom" at top.
+/// Below this, a series of vertically aligned rows, each filled with a
+/// color, that are progressing from green to
+/// red.](SwiftUI-ScrollViewReader-scroll-to-bottom-button.png)
+///
+/// > Important: You may not use the ``ScrollViewProxy``
+/// during execution of the `content` view builder; doing so results in a
+/// runtime error. Instead, only actions created within `content` can call
+/// the proxy, such as gesture handlers or a view's `onChange(of:perform:)`
+/// method.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @frozen public struct ScrollViewReader<Content> : View where Content : View {
 
+    /// The view builder that creates the reader's content.
     public var content: (ScrollViewProxy) -> Content
 
-    /// Initializes with the closure `content`. The proxy passed to the
-    /// closure may NOT be messaged while `content` is executing (this
-    /// will cause a runtime error) but only from actions created
-    /// within `content` such as gesture handlers or the `onChange()`
-    /// function.
+    /// Creates an instance that can perform programmatic scrolling of its
+    /// child scroll views.
+    /// 
+    /// - Parameter content: The reader's content, containing one or more
+    /// scroll views. This view builder receives a ``ScrollViewProxy``
+    /// instance that you use to perform scrolling.
     @inlinable public init(@ViewBuilder content: @escaping (ScrollViewProxy) -> Content)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
-/// An affordance for creating hierarchical view content.
+/// A container view that you can use to add hierarchy to certain collection views.
+///
+/// Use `Section` instances in views like ``List``, ``Picker``, and
+/// ``Form`` to organize content into separate sections. Each section has
+/// custom content that you provide on a per-instance basis. You can also
+/// provide headers and footers for each section.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Section<Parent, Content, Footer> {
 }
@@ -13254,9 +14528,14 @@ extension Section : View where Parent : View, Content : View, Footer : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 
+    /// Creates a section with a header, footer, and the provided section content.
+    /// - Parameters:
+    ///   - header: A view to use as the section's header.
+    ///   - footer: A view to use as the section's footer.
+    ///   - content: The section's content.
     public init(header: Parent, footer: Footer, @ViewBuilder content: () -> Content)
 
     public var internalBody: some View { get }
@@ -13265,18 +14544,29 @@ extension Section : View where Parent : View, Content : View, Footer : View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent == EmptyView, Content : View, Footer : View {
 
+    /// Creates a section with a footer and the provided section content.
+    /// - Parameters:
+    ///   - footer: A view to use as the section's footer.
+    ///   - content: The section's content.
     public init(footer: Footer, @ViewBuilder content: () -> Content)
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent : View, Content : View, Footer == EmptyView {
 
+    /// Creates a section with a header and the provided section content.
+    /// - Parameters:
+    ///   - header: A view to use as the section's header.
+    ///   - content: The section's content.
     public init(header: Parent, @ViewBuilder content: () -> Content)
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent == EmptyView, Content : View, Footer == EmptyView {
 
+    /// Creates a section with the provided section content.
+    /// - Parameters:
+    ///   - content: The section's content.
     public init(@ViewBuilder content: () -> Content)
 }
 
@@ -13324,12 +14614,26 @@ extension Section where Parent == EmptyView, Content : View, Footer == EmptyView
 public struct SecureField<Label> : View where Label : View {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -13694,6 +14998,20 @@ extension Shape {
 extension Shape {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: _ShapeView<Self, ForegroundStyle> { get }
 }
 
@@ -13752,7 +15070,11 @@ public struct SidebarCommands : Commands {
     public typealias Body = some Commands
 }
 
-/// The behavior and appearance of a sidebar or source list.
+/// The list style that describes the behavior and appearance of a
+/// sidebar list.
+///
+/// On macOS and iOS, the sidebar list style displays disclosure indicators in
+/// the section headers that allow the user to collapse and expand sections.
 @available(iOS 14.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -13817,15 +15139,6 @@ extension SimultaneousGesture.Value : Equatable where First.Value : Equatable, S
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension SimultaneousGesture.Value : Hashable where First.Value : Hashable, Second.Value : Hashable {
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -13840,6 +15153,15 @@ extension SimultaneousGesture.Value : Hashable where First.Value : Hashable, Sec
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 /// A control for selecting a value from a bounded linear range of values.
@@ -13914,12 +15236,26 @@ extension SimultaneousGesture.Value : Hashable where First.Value : Hashable, Sec
 public struct Slider<Label, ValueLabel> : View where Label : View, ValueLabel : View {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -14063,6 +15399,104 @@ extension Slider where Label == EmptyView, ValueLabel == EmptyView {
 
 /// A flexible space that expands along the major axis of its containing stack
 /// layout, or on both axes if not contained in a stack.
+///
+/// A spacer creates an adaptive view with no content that expands as much as
+/// it can. For example, when placed within an ``HStack``, a spacer expands
+/// horizontally as much as the stack allows, moving sibling views out of the
+/// way, within the limits of the stack's size.
+/// SwiftUI sizes a stack that doesn't contain a spacer up to the combined
+/// ideal widths of the content of the stack's child views.
+///
+/// The following example provides a simple checklist row to illustrate how you
+/// can use a spacer:
+///
+///     struct ChecklistRow: View {
+///         let name: String
+///
+///         var body: some View {
+///             HStack {
+///                 Image(systemName: "checkmark")
+///                 Text(name)
+///             }
+///             .border(Color.blue)
+///         }
+///     }
+///
+/// ![A figure of a blue rectangular border that marks the boundary of an
+/// HStack, wrapping a checkmark image to the left of the name Megan. The
+/// checkmark and name are centered vertically and separated by system
+/// standard-spacing within the stack.](Spacer-1.png)
+///
+/// Adding a spacer before the image creates an adaptive view with no content
+/// that expands to push the image and text to the right side of the stack.
+/// The stack also now expands to take as much space as the parent view allows,
+/// shown by the blue border that indicates the boundary of the stack:
+///
+///     struct ChecklistRow: View {
+///         let name: String
+///
+///         var body: some View {
+///             HStack {
+///                 Spacer()
+///                 Image(systemName: "checkmark")
+///                 Text(name)
+///             }
+///             .border(Color.blue)
+///         }
+///     }
+///
+/// ![A figure of a blue rectangular border that marks the boundary of an
+/// HStack, wrapping a checkmark image to the left of the name Megan. The
+/// checkmark and name are centered vertically, separated by system-standard
+/// spacing, and pushed to the right side of the stack.](Spacer-2.png)
+///
+/// Moving the spacer between the image and the name pushes those elements to
+/// the left and right sides of the ``HStack``, respectively. Because the stack
+/// contains the spacer, it expands to take as much horizontal space as the
+/// parent view allows; the blue border indicates its size:
+///
+///     struct ChecklistRow: View {
+///         let name: String
+///
+///         var body: some View {
+///             HStack {
+///                 Image(systemName: "checkmark")
+///                 Spacer()
+///                 Text(name)
+///             }
+///             .border(Color.blue)
+///         }
+///     }
+///
+/// ![A figure of a blue rectangular border that marks the boundary of an
+/// HStack, wrapping a checkmark image to the left of the name Megan. The
+/// checkmark and name are centered vertically, with the checkmark on the
+/// left edge of the stack, and the text on the right side of the
+/// stack.](Spacer-3.png)
+///
+/// Adding two spacer views on the outside of the stack leaves the image and
+/// text together, while the stack expands to take as much horizontal space
+/// as the parent view allows:
+///
+///     struct ChecklistRow: View {
+///         let name: String
+///
+///         var body: some View {
+///             HStack {
+///                 Spacer()
+///                 Image(systemName: "checkmark")
+///                 Text(name)
+///                 Spacer()
+///             }
+///             .border(Color.blue)
+///         }
+///     }
+///
+/// ![A figure of a blue rectangular border marks the boundary of an HStack,
+/// wrapping a checkmark image to the left of text spelling the name Megan.
+/// The checkmark and name are centered vertically, separated by
+/// system-standard spacing, and centered horizontally
+/// in the stack.](Spacer-4.png)
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct Spacer {
 
@@ -14077,7 +15511,7 @@ extension Slider where Label == EmptyView, ValueLabel == EmptyView {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -14432,12 +15866,26 @@ public struct Stepper<Label> : View where Label : View {
     public init(onIncrement: (() -> Void)?, onDecrement: (() -> Void)?, onEditingChanged: @escaping (Bool) -> Void = { _ in }, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -14896,7 +16344,7 @@ extension StrokeStyle : Animatable {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -14967,12 +16415,26 @@ public struct TabView<SelectionValue, Content> : View where SelectionValue : Has
     public init(selection: Binding<SelectionValue>?, @ViewBuilder content: () -> Content)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -15022,11 +16484,11 @@ public struct TapGesture : Gesture {
     ///   gesture.
     public init(count: Int = 1)
 
-    /// The type representing the gesture's value.
-    public typealias Value = ()
-
     /// The type of gesture representing the body of `Self`.
     public typealias Body = Never
+
+    /// The type representing the gesture's value.
+    public typealias Value = ()
 }
 
 /// A view that displays one or more lines of read-only text.
@@ -15368,15 +16830,6 @@ extension Text {
         ///   - rhs: Another value to compare.
         public static func == (a: Text.TruncationMode, b: Text.TruncationMode) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -15391,6 +16844,15 @@ extension Text {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 
     /// A scheme for transforming the capitalization of characters within text.
@@ -15421,15 +16883,6 @@ extension Text {
         ///   - rhs: Another value to compare.
         public static func == (a: Text.Case, b: Text.Case) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -15444,6 +16897,15 @@ extension Text {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 }
 
@@ -15453,7 +16915,7 @@ extension Text : View {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -15745,15 +17207,6 @@ extension Text.Case : Hashable {
     ///   - rhs: Another value to compare.
     public static func == (a: TextAlignment, b: TextAlignment) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -15774,6 +17227,15 @@ extension Text.Case : Hashable {
 
     /// A collection of all values of this type.
     public static var allCases: [TextAlignment] { get }
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 /// A built-in group of commands for searching, editing, and transforming
@@ -15886,12 +17348,26 @@ public struct TextEditor : View {
     public init(text: Binding<String>)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -16001,12 +17477,26 @@ public struct TextEditor : View {
 public struct TextField<Label> : View where Label : View {
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -16110,6 +17600,51 @@ public struct TextFormattingCommands : Commands {
     public typealias Body = some Commands
 }
 
+/// A label style that shows both the title and icon of the label using a
+/// system-standard layout.
+///
+/// In most cases, labels show both their title and icon by default. However,
+/// some containers might apply a different default label style to their content,
+/// such as only showing icons within toolbars on macOS and iOS. To opt in to
+/// showing both the title and the icon, you can apply the title and icon
+/// label style:
+///
+///     Label("Lightning", systemImage: "bolt.fill")
+///         .labelStyle(TitleAndIconLabelStyle())
+///
+/// To apply the title and icon style to a group of labels, apply the style to
+/// the view hierarchy that contains the labels:
+///
+///     VStack {
+///         Label("Rain", systemImage: "cloud.rain")
+///         Label("Snow", systemImage: "snow")
+///         Label("Sun", systemImage: "sun.max")
+///     }
+///     .labelStyle(TitleAndIconLabelStyle())
+///
+/// The relative layout of the title and icon is dependent on the context it is
+/// displayed in. In most cases, however, the label is arranged horizontally
+/// with the icon leading.
+@available(iOS 14.5, macOS 11.3, tvOS 14.5, watchOS 7.4, *)
+public struct TitleAndIconLabelStyle : LabelStyle {
+
+    /// Creates a label style that shows both the title and icon of the label
+    /// using a system-standard layout.
+    public init()
+
+    /// Creates a view that represents the body of a label.
+    ///
+    /// The system calls this method for each ``Label`` instance in a view
+    /// hierarchy where this style is the current label style.
+    ///
+    /// - Parameter configuration: The properties of the label.
+    public func makeBody(configuration: TitleAndIconLabelStyle.Configuration) -> some View
+
+
+    /// A view that represents the body of a label.
+    public typealias Body = some View
+}
+
 /// A label style that only displays the title of the label.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct TitleOnlyLabelStyle : LabelStyle {
@@ -16179,12 +17714,26 @@ public struct Toggle<Label> : View where Label : View {
     public init(isOn: Binding<Bool>, @ViewBuilder label: () -> Label)
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: some View { get }
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = some View
 }
 
@@ -16252,7 +17801,7 @@ extension Toggle where Label == Text {
 /// A type that specifies the appearance and interaction of all toggles within a
 /// view hierarchy.
 ///
-/// To configure the current toggle style for a view hiearchy, use the
+/// To configure the current toggle style for a view hierarchy, use the
 /// ``View/toggleStyle(_:)`` modifier.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol ToggleStyle {
@@ -16267,7 +17816,7 @@ public protocol ToggleStyle {
     ///
     /// - Parameter configuration: The properties of the toggle, such as its
     ///   label and its “on” state.
-    func makeBody(configuration: Self.Configuration) -> Self.Body
+    @ViewBuilder func makeBody(configuration: Self.Configuration) -> Self.Body
 
     /// The properties of a toggle instance.
     typealias Configuration = ToggleStyleConfiguration
@@ -16283,7 +17832,7 @@ public struct ToggleStyleConfiguration {
         /// The type of view representing the body of this view.
         ///
         /// When you create a custom view, Swift infers this type from your
-        /// implementation of the required `body` property.
+        /// implementation of the required ``View/body-swift.property`` property.
         public typealias Body = Never
     }
 
@@ -16331,7 +17880,7 @@ public protocol ToolbarContent {
 
 /// Constructs a toolbar item set from multi-expression closures.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-@_functionBuilder public struct ToolbarContentBuilder {
+@resultBuilder public struct ToolbarContentBuilder {
 
     public static func buildBlock<Content>(_ content: Content) -> some ToolbarContent where Content : ToolbarContent
 
@@ -16528,45 +18077,49 @@ public struct ToolbarItemGroup<Content> : ToolbarContent where Content : View {
     public typealias Body = Never
 }
 
-/// A structure which defines the placement of a toolbar item.
+/// A structure that defines the placement of a toolbar item.
 ///
 /// There are two types of placements:
-/// - Semantic placements, such as `.principal` and `.navigation`,
-///   which denote the intent of the item being added.
-///   SwiftUI will determine the appropriate placement for the item
-///   based on this intent, as well as the current platform.
-/// - Positional placements, such as `.navigationBarLeading`,
-///   which denote a precise placement for the item,
-///   usually for a particular platform.
+/// - Semantic placements, such as ``ToolbarItemPlacement/principal`` and
+///   ``ToolbarItemPlacement/navigation``, denote the intent of the
+///   item being added. SwiftUI determines the appropriate placement for
+///   the item based on this intent and its surrounding context, like the
+///   current platform.
+/// - Positional placements, such as
+///   ``ToolbarItemPlacement/navigationBarLeading``, denote a precise
+///   placement for the item, usually for a particular platform.
+///
+/// In compact horizontal size classes, the system limits both the leading
+/// and the trailing positions of the navigation bar to a single item each.
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ToolbarItemPlacement {
 
-    /// The item is placed automatically, depending on many factors including
-    /// the platform, size class, or presence of other items.
+    /// The system places the item automatically, depending on many factors
+    /// including the platform, size class, or presence of other items.
     ///
-    /// On macOS and Mac Catalyst, items are placed in the current toolbar
-    /// section in order of leading to trailing. On watchOS, only the first
-    /// item will appear, pinned beneath the navigation bar.
+    /// In macOS and in Mac Catalyst apps, the system places items in the
+    /// current toolbar section in order of leading to trailing. On watchOS,
+    /// only the first item appears, pinned beneath the navigation bar.
     ///
-    /// On iOS, iPadOS and tvOS, items are placed in the trailing position of
-    /// the navigation bar.
+    /// In iOS, iPadOS, and tvOS, the system places items in the trailing
+    /// position of the navigation bar.
     ///
     /// In compact horizontal size classes, both the leading and the trailing
     /// positions of the navigation bar are limited to a single item each.
     public static let automatic: ToolbarItemPlacement
 
-    /// The item is placed in the principal item section.
+    /// The system places the item in the principal item section.
     ///
-    /// Principal actions receive prominent placement.
-    /// As an example, the location field for a web browser would be
-    /// considered a principal item.
+    /// Principal actions are key units of functionality that receive prominent
+    /// placement. For example, the location field for a web browser is a
+    /// principal item.
     ///
-    /// On macOS and Mac Catalyst, the principal item will be placed in the
-    /// center of the toolbar.
+    /// In macOS and in Mac Catalyst apps, the system places the principal item
+    /// in the center of the toolbar.
     ///
-    /// On iOS, iPadOS, and tvOS, the principal item will be placed in
-    /// the center of the navigation bar. This item will take precendent over
-    /// a title specified through `.navigationTitle()`.
+    /// In iOS, iPadOS, and tvOS, the system places the principal item in the
+    /// center of the navigation bar. This item takes precedent over a title
+    /// specified through ``View/navigationTitle``.
     @available(watchOS, unavailable)
     public static let principal: ToolbarItemPlacement
 
@@ -16574,46 +18127,46 @@ public struct ToolbarItemPlacement {
     ///
     /// Navigation actions allow the user to move between contexts.
     /// For example, the forward and back buttons of a web browser
-    /// are considered navigation actions.
+    /// are navigation actions.
     ///
-    /// On macOS and Mac Catalyst, navigation items will be placed in the
-    /// leading edge of the toolbar ahead of the inline title if that is
+    /// In macOS and in Mac Catalyst apps, the system places navigation items
+    /// in the leading edge of the toolbar ahead of the inline title if that is
     /// present in the toolbar.
     ///
-    /// On iOS, iPadOS, and tvOS, navigation items will appear in the leading
-    /// edge of the navigation bar. If a system navigation item like a back
-    /// button is present in a compact width, they will instead appear in
-    /// the .primaryAction placement.
+    /// In iOS, iPadOS, and tvOS, navigation items appear in the leading
+    /// edge of the navigation bar. If a system navigation item such as a back
+    /// button is present in a compact width, it instead appears in
+    /// the ``ToolbarItemPlacement/primaryAction`` placement.
     @available(watchOS, unavailable)
     public static let navigation: ToolbarItemPlacement
 
     /// The item represents a primary action.
     ///
-    /// A primary action is considered to be a more frequently used action
-    /// for the current context. For example, a button which allows the user
-    /// to compose a new message in a chat application.
+    /// A primary action is a more frequently used action for the current
+    /// context. For example, a button the user clicks or taps to compose a new
+    /// message in a chat app.
     ///
-    /// On macOS and Mac Catalyst, the primary action is considered to be the
-    /// leading edge of the toolbar.
+    /// In macOS and in Mac Catalyst apps, the location for the primary action
+    /// is the leading edge of the toolbar.
     ///
-    /// On iOS, iPadOS and tvOS, the primary action is considered to be
+    /// In iOS, iPadOS, and tvOS, the location for the primary action is
     /// the trailing edge of the navigation bar.
     ///
-    /// On watchOS, the primary action is placed beneath the navigation
-    /// bar and revealed by scrolling.
+    /// In watchOS the system places the primary action beneath the
+    /// navigation bar; the user reveals the action by scrolling.
     public static let primaryAction: ToolbarItemPlacement
 
     /// The item represents a change in status for the current context.
     ///
-    /// Status items are informational in nature,
-    /// and do not represent an action that can be taken by the user.
-    /// For example, a message indicating the last time the server has been
-    /// checked for new messages.
+    /// Status items are informational in nature, and don't represent an
+    /// action that can be taken by the user. For example, a message that
+    /// indicates the time of the last communication with the server to check
+    /// for new messages.
     ///
-    /// On macOS and Mac Catalyst, status items will be placed in the center
-    /// of the toolbar.
+    /// In macOS and in Mac Catalyst apps, the system places status items in
+    /// the center of the toolbar.
     ///
-    /// On iOS and iPadOS, status items will be placed in the center of the
+    /// In iOS and iPadOS, the system places status items in the center of the
     /// bottom toolbar.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -16621,62 +18174,61 @@ public struct ToolbarItemPlacement {
 
     /// The item represents a confirmation action for a modal interface.
     ///
-    /// Confirmation actions are used to receive user confirmation of a
+    /// Use confirmation actions to receive user confirmation of a
     /// particular action. An example of a confirmation action would be
     /// an action with the label "Add" to add a new event to the calendar.
     ///
-    /// On macOS and Mac Catalyst, confirmationAction items will be placed
-    /// on the trailing edge in the trailing-most position of the sheet
-    /// and gain the apps accent color as a background color.
+    /// In macOS and in Mac Catalyst apps, the system places
+    /// `confirmationAction` items on the trailing edge
+    /// in the trailing-most position of the sheet and gain the apps accent
+    /// color as a background color.
     ///
-    /// On iOS, iPadOS, and tvOS, confirmationAction items will be placed in
-    /// the same location as a `.primaryAction` placement.
+    /// In iOS, iPadOS, and tvOS, the system places `confirmationAction` items
+    /// in the same location as a ``ToolbarItemPlacement/primaryAction``
+    /// placement.
     ///
-    /// On watchOS, confirmationAction items will be placed in the trailing
-    /// edge of the navigation bar.
+    /// In watchOS, the system places `confirmationAction` items in the
+    /// trailing edge of the navigation bar.
     public static let confirmationAction: ToolbarItemPlacement
 
     /// The item represents a cancellation action for a modal interface.
     ///
-    /// Cancellation actions can be used to dismiss the modal interface
-    /// without taking any action, usually via a 'Cancel' button.
+    /// Cancellation actions dismiss the modal interface without taking any
+    /// action, usually by tapping or clicking a Cancel button.
     ///
-    /// On macOS and Mac Catalyst, cancellationAction items will be placed
-    /// on the trailing edge of the sheet but be placed before any
-    /// confirmationAction items.
+    /// In macOS and in Mac Catalyst apps, the system places
+    /// `cancellationAction` items on the trailing edge of the sheet but
+    /// places them before any ``confirmationAction`` items.
     ///
-    /// On iOS, iPadOS, tvOS and watchOS, cancellationAction items will
-    /// be placed on the leading edge of the navigation bar.
+    /// In iOS, iPadOS, tvOS, and watchOS, the system places
+    /// `cancellationAction` items on the leading edge of the navigation bar.
     public static let cancellationAction: ToolbarItemPlacement
 
     /// The item represents a destructive action for a modal interface.
     ///
-    /// Destructive actions are used represent the opposite of a
-    /// confirmational action. For example, a button labeled 'Don't Save',
-    /// which declines to save the current document before quitting.
+    /// Destructive actions represent the opposite of a confirmation action.
+    /// For example, a button labeled "Don't Save" that allows the user to
+    /// discard unsaved changes to a document before quitting.
     ///
-    /// On macOS and Mac Catalyst, destructiveAction items will be placed in
-    /// the leading edge of the sheet and will be given a special appearance
-    /// to caution against accidental use.
+    /// In macOS and in Mac Catalyst apps, the system places `destructiveAction`
+    /// items in the leading edge of the sheet and gives them a special
+    /// appearance to caution against accidental use.
     ///
-    /// On iOS, tvOS and watchOS, destructiveAction items will be placed in the
-    /// trailing edge of the navigation bar.
+    /// In iOS, tvOS, and watchOS, the system places `destructiveAction` items
+    /// in the trailing edge of the navigation bar.
     public static let destructiveAction: ToolbarItemPlacement
 
-    /// The item is placed in the leading edge of the navigation bar. Applies
-    /// to iOS, iPadOS, tvOS, and Mac Catalyst.
+    /// Places the item in the leading edge of the navigation bar.
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public static let navigationBarLeading: ToolbarItemPlacement
 
-    /// The item is placed in the trailing edge of the navigation bar. Applies
-    /// to iOS, iPadOS, tvOS, and Mac Catalyst.
+    /// Places the item in the trailing edge of the navigation bar.
     @available(macOS, unavailable)
     @available(watchOS, unavailable)
     public static let navigationBarTrailing: ToolbarItemPlacement
 
-    /// The item is placed in the bottom toolbar. Applies to iOS, iPadOS, and
-    /// Mac Catalyst.
+    /// Places the item in the bottom toolbar.
     @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -16756,7 +18308,7 @@ extension Transaction {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body
 }
 
@@ -16771,7 +18323,7 @@ extension Transaction {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -16870,12 +18422,14 @@ open class UIHostingController<Content> : UIViewController where Content : View 
     /// -Parameter coder: The decoder to use during initialization.
     @objc required dynamic public init?(coder aDecoder: NSCoder)
 
+    @objc override dynamic open func loadView()
+
     /// Notifies the view controller that its view is about to be added to a
     /// view hierarchy.
     ///
     /// SwiftUI calls this method before adding the hosting controller's root
     /// view to the view hierarchy. You can override this method to perform
-    /// custom tasks asssociated with the appearance of the view. If you
+    /// custom tasks associated with the appearance of the view. If you
     /// override this method, you must call `super` at some point in your
     /// implementation.
     ///
@@ -16888,7 +18442,7 @@ open class UIHostingController<Content> : UIViewController where Content : View 
     ///
     /// SwiftUI calls this method after adding the hosting controller's root
     /// view to the view hierarchy. You can override this method to perform
-    /// custom tasks asssociated with the appearance of the view. If you
+    /// custom tasks associated with the appearance of the view. If you
     /// override this method, you must call `super` at some point in your
     /// implementation.
     ///
@@ -16901,13 +18455,15 @@ open class UIHostingController<Content> : UIViewController where Content : View 
     ///
     /// SwiftUI calls this method before removing the hosting controller's root
     /// view from the view hierarchy. You can override this method to perform
-    /// custom tasks asssociated with the disappearance of the view. If you
+    /// custom tasks associated with the disappearance of the view. If you
     /// override this method, you must call `super` at some point in your
     /// implementation.
     ///
     /// - Parameter animated: If `true`, the view is being removed
     ///   using an animation.
     @objc override dynamic open func viewWillDisappear(_ animated: Bool)
+
+    @objc override dynamic open func viewDidDisappear(_ animated: Bool)
 
     @objc override dynamic open func viewWillLayoutSubviews()
 
@@ -17337,15 +18893,6 @@ public struct UIViewRepresentableContext<Representable> where Representable : UI
 
     public static let bottomTrailing: UnitPoint
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -17370,6 +18917,15 @@ public struct UIViewRepresentableContext<Representable> where Representable : UI
     ///   - lhs: A value to compare.
     ///   - rhs: Another value to compare.
     public static func == (a: UnitPoint, b: UnitPoint) -> Bool
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -17405,15 +18961,6 @@ public enum UserInterfaceSizeClass {
     ///   - rhs: Another value to compare.
     public static func == (a: UserInterfaceSizeClass, b: UserInterfaceSizeClass) -> Bool
 
-    /// The hash value.
-    ///
-    /// Hash values are not guaranteed to be equal across different executions of
-    /// your program. Do not save hash values to use during a future execution.
-    ///
-    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-    public var hashValue: Int { get }
-
     /// Hashes the essential components of this value by feeding them into the
     /// given hasher.
     ///
@@ -17428,6 +18975,15 @@ public enum UserInterfaceSizeClass {
     /// - Parameter hasher: The hasher to use when combining the components
     ///   of this instance.
     public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
 }
 
 extension UserInterfaceSizeClass {
@@ -17498,7 +19054,7 @@ extension UserInterfaceSizeClass : Hashable {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -17563,7 +19119,7 @@ extension VerticalAlignment {
 /// A type that represents part of your app's user interface and provides
 /// modifiers that you use to configure views.
 ///
-/// You create custom views by declaring types that conform to the ``View``
+/// You create custom views by declaring types that conform to the `View`
 /// protocol. Implement the required ``View/body-swift.property`` computed
 /// property to provide the content for your custom view.
 ///
@@ -17575,76 +19131,51 @@ extension VerticalAlignment {
 ///
 /// Assemble the view's body by combining one or more of the primitive views
 /// provided by SwiftUI, like the ``Text`` instance in the example above, plus
-/// other custom views that you define, into a hierarchy of views.
+/// other custom views that you define, into a hierarchy of views. For more
+/// information about creating custom views, see <doc:Declaring-a-Custom-View>.
 ///
-/// The ``View`` protocol provides a large set of modifiers, defined as protocol
-/// methods with default implementations, that you use to position and configure
-/// views in the layout of your app. Modifiers typically work by wrapping the
+/// The `View` protocol provides a set of modifiers — protocol
+/// methods with default implementations — that you use to configure
+/// views in the layout of your app. Modifiers work by wrapping the
 /// view instance on which you call them in another view with the specified
-/// characteristics. For example, adding the ``View/opacity(_:)`` modifier to a
+/// characteristics, as described in <doc:Configuring-Views>.
+/// For example, adding the ``View/opacity(_:)`` modifier to a
 /// text view returns a new view with some amount of transparency:
 ///
 ///     Text("Hello, World!")
 ///         .opacity(0.5) // Display partially transparent text.
 ///
-/// The effects of a modifier typically propagate to any child views that don't
-/// explicitly override the modifier. For example, a ``VStack`` instance on its
-/// own acts only to vertically stack other views, and has no text to display.
-/// Therefore, a ``View/font(_:)`` modifier that you apply to the stack has no
-/// effect on the stack itself. Yet the font modifier does apply to any of the
-/// stack's child views, some of which might display text. On the other hand,
-/// you can locally override the stack's modifier by adding another to a
-/// specific child view:
-///
-///     VStack {
-///         Text("Title")
-///             .font(.headline) // Override the font of this one view.
-///         Text("First body line.")
-///         Text("Second body line.")
-///     }
-///     .font(.body) // Set a default for text in the stack.
-///
-/// You commonly chain modifiers, each wrapping the result of the previous one.
-/// For example, you can wrap a text view in an invisible box with a given width
-/// using the ``View/frame(width:height:alignment:)`` modifier to influence its
-/// layout, and then use the ``View/border(_:width:)`` modifier to draw an
-/// outline around that:
-///
-///     Text("Title")
-///         .frame(width: 100)
-///         .border(Color.gray)
-///
-/// The order in which you apply modifiers matters. For example, the border that
-/// results from the above code outlines the full width of the frame.
-///
-/// ![A screenshot of a text view displaying the string "Title", outlined by a
-/// gray rectangle that's wider than the string it encloses, leaving empty space
-/// inside the rectangle on either side of the string. A caption reads, "Apply
-/// the frame first."](SwiftUI-View-1.png)
-///
-/// If you instead apply the border first, it outlines the text view, which
-/// never takes more space than it needs to render its contents.
-///
-///     Text("Title")
-///         .border(Color.gray) // Apply the border first this time.
-///         .frame(width: 100)
-///
-/// Wrapping that view in another invisible one with a fixed 100 point width
-/// affects the layout of the composite view, but has no effect on the border.
-///
-/// ![A screenshot of a text view displaying the string "Title", outlined by a
-/// gray rectangle that hugs the text. A caption reads, "Apply the border
-/// first."](SwiftUI-View-2.png)
+/// The complete list of default modifiers provides a large set of controls
+/// for managing views.
+/// For example, you can fine tune <doc:View-Layout>,
+/// add <doc:View-Accessibility> information,
+/// and respond to <doc:View-Input-and-Events>.
+/// You can also collect groups of default modifiers into new,
+/// custom view modifiers for easy reuse.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public protocol View {
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     associatedtype Body : View
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     @ViewBuilder var body: Self.Body { get }
 }
 
@@ -17666,23 +19197,109 @@ extension View {
     /// Presents a sheet using the given item as a data source
     /// for the sheet's content.
     ///
+    /// Use this method when you need to present a modal view with content
+    /// from a custom data source. The example below shows a custom data source
+    /// `InventoryItem` that the `content` closure uses to populate the display
+    /// the action sheet shows to the user:
+    ///
+    ///     struct ShowPartDetail: View {
+    ///         @State var sheetDetail: InventoryItem?
+    ///         var body: some View {
+    ///             Button("Show Part Details") {
+    ///                 sheetDetail = InventoryItem(
+    ///                     id: "0123456789",
+    ///                     partNumber: "Z-1234A",
+    ///                     quantity: 100,
+    ///                     name: "Widget")
+    ///             }
+    ///             .sheet(item: $sheetDetail,
+    ///                    onDismiss: didDismiss) { detail in
+    ///                 VStack(alignment: .leading, spacing: 20) {
+    ///                     Text("Part Number: \(detail.partNumber)")
+    ///                     Text("Name: \(detail.name)")
+    ///                     Text("Quantity On-Hand: \(detail.quantity)")
+    ///                 }
+    ///                 .onTapGesture {
+    ///                     sheetDetail = nil
+    ///                 }
+    ///             }
+    ///         }
+    ///
+    ///         func didDismiss() {
+    ///             // Handle the dismissing action.
+    ///         }
+    ///     }
+    ///
+    ///     struct InventoryItem: Identifiable {
+    ///         var id: String
+    ///         let partNumber: String
+    ///         let quantity: Int
+    ///         let name: String
+    ///     }
+    ///
+    /// ![A view showing a custom structure acting as a data source, providing
+    /// data to a modal sheet.](SwiftUI-View-SheetItemContent.png)
+    ///
     /// - Parameters:
     ///   - item: A binding to an optional source of truth for the sheet.
-    ///     When representing a non-`nil` item, the system uses `content` to
-    ///     create a sheet representation of the item.
-    ///     If the identity changes, the system dismisses a
-    ///     currently-presented sheet and replaces it with a new sheet.
-    ///   - onDismiss: A closure executed when the sheet dismisses.
+    ///     When `item` is non-`nil`, the system passes the item's content to
+    ///     the modifier's closure. You display this content in a sheet that you
+    ///     create that the system displays to the user. If `item` changes,
+    ///     the system dismisses the sheet and replaces it with a new one
+    ///     using the same process.
+    ///   - onDismiss: The closure to execute when dismissing the sheet.
     ///   - content: A closure returning the content of the sheet.
     public func sheet<Item, Content>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping (Item) -> Content) -> some View where Item : Identifiable, Content : View
 
 
-    /// Presents a sheet when a given condition is true.
+    /// Presents a sheet when a binding to a Boolean value that you
+    /// provide is true.
+    ///
+    /// Use this method when you want to present a modal view to the
+    /// user when a Boolean value you provide is true. The example
+    /// below displays a modal view of the mockup for a software license
+    /// agreement when the user toggles the `isShowingSheet` variable by
+    /// clicking or tapping on the "Show License Agreement" button:
+    ///
+    ///     struct ShowLicenseAgreement: View {
+    ///         @State private var isShowingSheet = false
+    ///         var body: some View {
+    ///             Button(action: {
+    ///                 isShowingSheet.toggle()
+    ///             }) {
+    ///                 Text("Show License Agreement")
+    ///             }
+    ///             .sheet(isPresented: $isShowingSheet,
+    ///                    onDismiss: didDismiss) {
+    ///                 VStack {
+    ///                     Text("License Agreement")
+    ///                         .font(.title)
+    ///                         .padding(50)
+    ///                     Text("""
+    ///                             Terms and conditions go here.
+    ///                         """)
+    ///                         .padding(50)
+    ///                     Button("Dismiss",
+    ///                            action: { isShowingSheet.toggle() })
+    ///                 }
+    ///             }
+    ///         }
+    ///
+    ///         func didDismiss() {
+    ///             // Handle the dismissing action.
+    ///         }
+    ///     }
+    ///
+    /// ![A screenshot of a full-screen modal sheet showing the mockup of a
+    /// software license agreement with a Dismiss
+    /// button.](SwiftUI-View-SheetIsPresentingContent.png)
     ///
     /// - Parameters:
-    ///   - isPresented: A binding to whether the sheet is presented.
-    ///   - onDismiss: A closure executed when the sheet dismisses.
-    ///   - content: A closure returning the content of the sheet.
+    ///   - isPresented: A binding to a Boolean value that determines whether
+    ///     to present the sheet that you create in the modifier's
+    ///     `content` closure.
+    ///   - onDismiss: The closure to execute when dismissing the sheet.
+    ///   - content: A closure that returns the content of the sheet.
     public func sheet<Content>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) -> some View where Content : View
 
 }
@@ -17692,26 +19309,103 @@ extension View {
 extension View {
 
     /// Presents a modal view that covers as much of the screen as
-    /// possible using the given item as a data source for the sheet's content.
+    /// possible using the binding you provide as a data source for the
+    /// sheet's content.
+    ///
+    /// Use this method to display a modal view that covers as much of the
+    /// screen as possible. In the example below a custom structure —
+    /// `CoverData` — provides data for the full-screen view to display in the
+    /// `content` closure when the user clicks or taps the
+    /// "Present Full-Screen Cover With Data" button:
+    ///
+    ///     struct FullScreenCoverItemOnDismissContent: View {
+    ///         @State var coverData: CoverData?
+    ///         var body: some View {
+    ///             Button("Present Full-Screen Cover With Data") {
+    ///                 coverData = CoverData(body: "Custom Data")
+    ///             }
+    ///             .fullScreenCover(item: $coverData,
+    ///                              onDismiss: didDismiss) { details in
+    ///                 VStack(spacing: 20) {
+    ///                     Text("\(details.body)")
+    ///                 }
+    ///                 .onTapGesture {
+    ///                     coverData = nil
+    ///                 }
+    ///             }
+    ///         }
+    ///
+    ///         func didDismiss() {
+    ///             // Handle the dismissing action.
+    ///         }
+    ///
+    ///     }
+    ///
+    ///     struct CoverData: Identifiable {
+    ///         var id: String {
+    ///             return body
+    ///         }
+    ///         let body: String
+    ///     }
+    ///
+    /// ![A full-screen modal view that shows Custom
+    /// Content.](SwiftUI-FullScreenCoverItemOnDismissContent.png)
     ///
     /// - Parameters:
-    ///   - item: A binding to an optional source of truth for the cover
-    ///     modal view. When representing a non-nil item, the system uses
-    ///     `content` to create a modal representation of the item.
-    ///     If the identity of `item` changes, the system will dismiss a
-    ///     currently-presented modal view and replace it by a new modal view.
-    ///   - onDismiss: A closure executed when the modal view dismisses.
+    ///   - item: A binding to an optional source of truth for the sheet.
+    ///     When `item` is non-`nil`, the system passes the contents to
+    ///     the modifier's closure. You display this content in a sheet that you
+    ///     create that the system displays to the user. If `item` changes,
+    ///     the system dismisses the currently displayed sheet and replaces
+    ///     it with a new one using the same process.
+    ///   - onDismiss: The closure to execute when dismissing the modal view.
     ///   - content: A closure returning the content of the modal view.
     public func fullScreenCover<Item, Content>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping (Item) -> Content) -> some View where Item : Identifiable, Content : View
 
 
     /// Presents a modal view that covers as much of the screen as
-    /// possible when a given condition is true.
+    /// possible when binding to a Boolean value you provide is true.
     ///
+    /// Use this method to show a modal view that covers as much of the screen
+    /// as possible. The example below displays a custom view when the user
+    /// toggles the value of the `isPresenting` binding:
+    ///
+    ///     struct FullScreenCoverPresentedOnDismiss: View {
+    ///         @State private var isPresenting = false
+    ///         var body: some View {
+    ///             Button("Present Full-Screen Cover") {
+    ///                 isPresenting.toggle()
+    ///             }
+    ///             .fullScreenCover(isPresented: $isPresenting,
+    ///                              onDismiss: didDismiss) {
+    ///                 VStack {
+    ///                     Text("A full-screen modal view.")
+    ///                         .font(.title)
+    ///                     Text("Tap to Dismiss")
+    ///                 }
+    ///                 .onTapGesture {
+    ///                     isPresenting.toggle()
+    ///                 }
+    ///                 .foregroundColor(.white)
+    ///                 .frame(maxWidth: .infinity,
+    ///                        maxHeight: .infinity)
+    ///                 .background(Color.blue)
+    ///                 .ignoresSafeArea(edges: .all)
+    ///             }
+    ///         }
+    ///
+    ///         func didDismiss() {
+    ///             // Handle the dismissing action.
+    ///         }
+    ///     }
+    ///
+    /// ![A full-screen modal view with the text A full-screen modal view
+    /// and Tap to Dismiss.](SwiftUI-FullScreenCoverIsPresented.png)
     /// - Parameters:
-    ///   - isPresented: A binding to whether the modal view is presented.
-    ///   - onDismiss: A closure executed when the modal view dismisses.
-    ///   - content: A closure returning the content of the modal view.
+    ///   - isPresented: A binding to a Boolean value that determines whether
+    ///     to present the sheet.
+    ///   - onDismiss: The closure to execute when dismissing the modal view.
+    ///   - content: A closure that returns the content of the modal view.
     public func fullScreenCover<Content>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) -> some View where Content : View
 
 }
@@ -18422,7 +20116,7 @@ extension View {
 
     /// Constrains this view's dimensions to the aspect ratio of the given size.
     ///
-    /// Use `aspectRatio(_:contentMode:)` to contstrain a view's dimentsions to
+    /// Use `aspectRatio(_:contentMode:)` to constrain a view's dimensions to
     /// an aspect ratio specified by a
     /// <doc://com.apple.documentation/documentation/CoreGraphics/CGSize>.
     ///
@@ -19045,13 +20739,55 @@ extension View {
     /// Presents an action sheet using the given item as a data source for the
     /// sheet's content.
     ///
+    /// Use this method when you need to populate the fields of an action sheet
+    /// with content from a data source. The example below shows a custom data
+    /// source, `FileDetails`, that provides data to populate the action sheet:
+    ///
+    ///     struct FileDetails: Identifiable {
+    ///         var id: String { name }
+    ///         let name: String
+    ///         let fileType: UTType
+    ///     }
+    ///     struct ConfirmFileImport: View {
+    ///         @State var sheetDetail: FileDetails?
+    ///         var body: some View {
+    ///             Button("Show Action Sheet") {
+    ///                 sheetDetail = FileDetails(name: "MyImageFile.png",
+    ///                                           fileType: .png)
+    ///             }
+    ///             .actionSheet(item: $sheetDetail) { detail in
+    ///                 ActionSheet(
+    ///                     title: Text("File Import"),
+    ///                     message: Text("""
+    ///                              Import \(detail.name)?
+    ///                              File Type: \(detail.fileType.description)
+    ///                              """),
+    ///                     buttons: [
+    ///                         .destructive(Text("Import"),
+    ///                                      action: importFile),
+    ///                         .cancel()
+    ///                     ])
+    ///             }
+    ///         }
+    ///
+    ///         func importFile() {
+    ///             // Handle import action.
+    ///         }
+    ///     }
+    ///
+    /// ![A screenshot showing an action sheet populated using a custom data
+    /// source that describes a file and file
+    /// format.](SwiftUI-View-ActionSheetItemContent.png)
+    ///
     /// - Parameters:
     ///   - item: A binding to an optional source of truth for the action
-    ///     sheet. When representing a non-`nil` item, the system uses
-    ///     `content` to create an action sheet representation of the item.
-    ///     If the identity changes, the system dismisses a currently-presented
-    ///     action sheet and replace it with a new one.
-    ///   - content: A closure returning the action sheet to present.
+    ///     sheet. When `item` is non-`nil`, the system passes
+    ///     the contents to the modifier's closure. You use this content
+    ///     to populate the fields of an action sheet that you create that the
+    ///     system displays to the user. If `item` changes, the system
+    ///     dismisses the currently displayed action sheet and replaces it
+    ///     with a new one using the same process.
+    ///   - content: A closure returning the ``ActionSheet`` you create.
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     @available(macOS, unavailable)
     public func actionSheet<T>(item: Binding<T?>, content: (T) -> ActionSheet) -> some View where T : Identifiable
@@ -19059,9 +20795,48 @@ extension View {
 
     /// Presents an action sheet when a given condition is true.
     ///
+    /// In the example below, a button conditionally presents an action sheet
+    /// depending upon the value of a bound Boolean variable. When the Boolean
+    /// value is set to `true`, the system displays an action sheet with both
+    /// destructive and default actions:
+    ///
+    ///     struct ConfirmEraseItems: View {
+    ///         @State private var isShowingSheet = false
+    ///         var body: some View {
+    ///             Button("Show Action Sheet", action: {
+    ///                 isShowingSheet = true
+    ///             })
+    ///             .actionSheet(isPresented: $isShowingSheet) {
+    ///                 ActionSheet(
+    ///                     title: Text("Permanently erase the items in the Trash?"),
+    ///                     message: Text("You can't undo this action."),
+    ///                     buttons:[
+    ///                         .destructive(Text("Empty Trash"),
+    ///                                      action: emptyTrashAction),
+    ///                         .cancel()
+    ///                     ]
+    ///                 )}
+    ///         }
+    ///
+    ///         func emptyTrashAction() {
+    ///             // Handle empty trash action.
+    ///         }
+    ///     }
+    ///
+    /// ![An action sheet with a title and message showing the use of default
+    /// and destructive button
+    /// types.](SwiftUI-View-ActionSheetisPresentedContent.png)
+    ///
+    /// > Note: In regular size classes in iOS, the system renders alert sheets
+    ///    as a popover that the user dismisses by tapping anywhere outside the
+    ///    popover, rather than displaying the default dismiss button.
+    ///
     /// - Parameters:
-    ///   - isPresented: A binding to whether the action sheet should be
-    ///     shown.
+    ///   - isPresented: A binding to a Boolean value that determines whether
+    ///     to present the action sheet that you create in the modifier's
+    ///     `content` closure. When the user presses or taps the sheet's default
+    ///     action button the system sets this value to `false` dismissing
+    ///     the sheet.
     ///   - content: A closure returning the `ActionSheet` to present.
     @available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     @available(macOS, unavailable)
@@ -19783,7 +21558,7 @@ extension View {
     /// defines many possible effects.
     ///
     /// In the example below, the two overlapping rectangles have a
-    /// ``BlendMode\colorBurn`` effect applied, which effectively removes the
+    /// ``BlendMode/colorBurn`` effect applied, which effectively removes the
     /// non-overlapping portion of the second image:
     ///
     ///     HStack {
@@ -20408,16 +22183,54 @@ extension View {
     /// Presents a popover using the given item as a data source for the
     /// popover's content.
     ///
+    /// Use this method when you need to present a popover with content
+    /// from a custom data source. The two examples below use data in
+    /// the `PopoverModel` structures to populate the views in the `content`
+    /// closures that the popovers display to the user:
+    ///
+    ///     struct PopoverDemo: View {
+    ///         @State var popover: PopoverModel?
+    ///
+    ///         var body: some View {
+    ///             VStack(spacing: 150) {
+    ///                 Button("First Popover", action: {
+    ///                     popover = PopoverModel(body: "Custom message #1.")
+    ///                 })
+    ///                 .popover(item: $popover) { detail in
+    ///                     Text("\(detail.body)")
+    ///                 }
+    ///
+    ///                 Button("Second Popover", action: {
+    ///                     popover = PopoverModel(body: "Custom message #2.")
+    ///                 })
+    ///                 .popover(item: $popover) { detail in
+    ///                     Text("\(detail.body)")
+    ///                 }
+    ///             }
+    ///         }
+    ///
+    ///         struct PopoverModel: Identifiable {
+    ///             var id: String { body }
+    ///             let body: String
+    ///         }
+    ///     }
+    ///
+    /// ![A screenshot of a popover that says Custom Popover Detail
+    /// hovering over a Show Popover
+    /// button.](SwiftUI-View-PopoverItemContent.png)
+    ///
     /// - Parameters:
     ///   - item: A binding to an optional source of truth for the popover.
-    ///     When representing a non-`nil` item, the system uses `content` to
-    ///     create a popover representation of the item.
-    ///     If the identity changes, the system dismisses a
-    ///     currently-presented popover and replace it by a new popover.
-    ///   - attachmentAnchor: The positioning anchor which defines where the
-    ///     popover is attached.
-    ///   - arrowEdge: The edge of the `attachmentAnchor` where the popover's
-    ///     arrow is located.
+    ///     When `item` is non-`nil`, the system passes the contents to
+    ///     the modifier's closure. You use this content to populate the fields
+    ///     of a popover that you create that the system displays to the user.
+    ///     If `item` changes, the system dismisses the currently presented
+    ///     popover and replaces it with a new popover using the same process.
+    ///   - attachmentAnchor: The positioning anchor that defines the
+    ///     attachment point of the popover in macOS. The default is
+    ///     ``Anchor/Source/bounds``. iOS ignores this parameter.
+    ///   - arrowEdge: The edge of the `attachmentAnchor` that defines the
+    ///     location of the popover's arrow. The default is ``Edge/top``.
     ///   - content: A closure returning the content of the popover.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -20426,12 +22239,44 @@ extension View {
 
     /// Presents a popover when a given condition is true.
     ///
+    /// Use this method to show a popover whose contents are a SwiftUI view
+    /// that you provide when a bound Boolean variable is `true`. In the
+    /// example below, a popover displays whenever the user toggles
+    /// the `isShowingPopover` state variable by pressing the
+    /// "Show Popover" button:
+    ///
+    ///     struct PopoverView: View {
+    ///         @State private var isShowingPopover = false
+    ///         var body: some View {
+    ///             Button("Show Popover", action: {
+    ///                 self.isShowingPopover = true
+    ///             })
+    ///             .popover(isPresented: $isShowingPopover) {
+    ///                 PopoverView()
+    ///             }
+    ///         }
+    ///     }
+    ///
+    ///     struct PopoverView: View {
+    ///         var body: some View {
+    ///             Text("Popover Content")
+    ///                 .padding()
+    ///         }
+    ///     }
+    ///
+    /// ![A screenshot showing a popover that says Popover Content hovering
+    /// over a Show Popover
+    /// button.](SwiftUI-View-PopverIspresentedContent.png)
+    ///
     /// - Parameters:
-    ///   - isPresented: A binding to whether the popover is presented.
-    ///   - attachmentAnchor: The positioning anchor which defines where the
-    ///     popover is attached.
-    ///   - arrowEdge: The edge of the `attachmentAnchor` where the popover's
-    ///     arrow is located.
+    ///   - isPresented: A binding to a Boolean value that determines whether
+    ///     to present the popover content that you return from the modifier's
+    ///     `content` closure.
+    ///   - attachmentAnchor: The positioning anchor that defines the
+    ///     attachment point of the popover in macOS. The default is
+    ///     ``Anchor/Source/bounds``. iOS ignores this parameter.
+    ///   - arrowEdge: The edge of the `attachmentAnchor` that defines the
+    ///     location of the popover's arrow. The default is ``Edge/top``.
     ///   - content: A closure returning the content of the popover.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
@@ -20750,34 +22595,35 @@ extension View {
 
     /// Hides the labels of any controls contained within this view.
     ///
-    /// Use `labelsHidden()` when it would not be appropriate to show a
-    /// label near controls in the context of your user interface.
-    ///
-    /// Although the labels are not visually laid out alongside the controls,
-    /// the control's label text is still often required, because it is used
-    /// for other purposes including accessibility. This example shows two
-    /// controls where the first control’s label is hidden.
-    ///
-    /// In the example below, one of the toggles has its label hidden:
+    /// Use this modifier when you want to omit a label from one or more
+    /// controls in your user interface. For example, the first ``Toggle`` in
+    /// the following example hides its label:
     ///
     ///     VStack {
     ///         Toggle(isOn: $toggle1) {
-    ///             Text("Toggle1")
+    ///             Text("Toggle 1")
     ///         }
     ///         .labelsHidden()
     ///
     ///         Toggle(isOn: $toggle2) {
-    ///             Text("Toggle2")
+    ///             Text("Toggle 2")
     ///         }
     ///     }
     ///
-    /// ![A screenshot showing a view with two toggle controls where one label
-    ///   is visible and the other label is hidden.](SwiftUI-Vew-labelsHidden.png)
+    /// The ``VStack`` in the example above centers the first toggle's control
+    /// element in the available space, while it centers the second toggle's
+    /// combined label and control element:
     ///
-    /// > Note: This modifier does not work for all labels. It applies to
-    ///   labels that are external/separate from the rest of the control's
-    ///   interface like `Toggle`, but not to controls like a bordered button
-    ///   where the label is inside the button's border.
+    /// ![A screenshot showing a view with two toggle controls where one label
+    ///   is visible and the other label is hidden.](View-labelsHidden-1.png)
+    ///
+    /// Always provide a label for controls, even when you hide the label,
+    /// because SwiftUI uses labels for other purposes, including accessibility.
+    ///
+    /// > Note: This modifier doesn't work for all labels. It applies to
+    ///   labels that are separate from the rest of the control's interface,
+    ///   like they are for ``Toggle``, but not to controls like a bordered
+    ///   button where the label is inside the button's border.
     public func labelsHidden() -> some View
 
 }
@@ -21022,15 +22868,15 @@ extension View {
 
     /// Sets the title and display mode in the navigation bar for this view.
     ///
-    /// Use `navigationBarTitle(_:, displayMode)` to set the title of the
+    /// Use `navigationBarTitle(_:displayMode:)` to set the title of the
     /// navigation bar for this view and specify a display mode for the
     /// title from one of the `NavigationBarItem.Title.DisplayMode`
     /// styles. This modifier only takes effect when this view is inside of and
     /// visible within a `NavigationView`.
     ///
-    /// In the example below, `navigationBarTitle(_:, displayMode)` uses a
+    /// In the example below, `navigationBarTitle(_:displayMode:)` uses a
     /// string to provide a title for the navigation bar. Setting the title's
-    /// `displaymode` to `.inline` places the navigation bar title within the
+    /// `displayMode` to `.inline` places the navigation bar title within the
     /// bounds of the navigation bar.
     ///
     /// In the example below, text for the navigation bar title is provided using
@@ -21224,7 +23070,7 @@ extension View {
     /// line in the ``Text`` element to the 2 lines that fit within the view's
     /// bounds:
     ///
-    ///     Text("This is a long string that demonstrates the effect of SwuiftUI's lineLimit(:_) operator.")
+    ///     Text("This is a long string that demonstrates the effect of SwiftUI's lineLimit(:_) operator.")
     ///      .frame(width: 200, height: 200, alignment: .leading)
     ///      .lineLimit(2)
     ///
@@ -21373,8 +23219,61 @@ extension View {
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
 
-    /// Populates the toolbar or navigation bar with items
-    /// whose content is the specified views.
+    /// Populates the toolbar or navigation bar with the views you provide.
+    ///
+    /// Use this modifier to add content to the toolbar. The toolbar modifier
+    /// expects a collection of toolbar items that you can provide either by
+    /// supplying a collection of views with each view wrapped in a
+    /// ``ToolbarItem``, or by providing a collection of views as a
+    /// ``ToolbarItemGroup``. The example below adds views to using a toolbar
+    /// item group to support text editing features:
+    ///
+    ///     struct StructToolbarItemGroupView: View {
+    ///         @State private var text = ""
+    ///         @State private var bold = false
+    ///         @State private var italic = false
+    ///         @State private var fontSize = 12.0
+    ///
+    ///         var displayFont: Font {
+    ///             let font = Font.system(size: CGFloat(fontSize),
+    ///                                    weight: bold == true ? .bold : .regular)
+    ///             return italic == true ? font.italic() : font
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             VStack {
+    ///                 TextEditor(text: $text)
+    ///                     .font(displayFont)
+    ///                     .toolbar {
+    ///                         ToolbarItemGroup {
+    ///                             Slider(
+    ///                                 value: $fontSize,
+    ///                                 in: 8...120,
+    ///                                 minimumValueLabel:
+    ///                                     Text("A").font(.system(size: 8)),
+    ///                                 maximumValueLabel:
+    ///                                     Text("A").font(.system(size: 16))
+    ///                             ) {
+    ///                                 Text("Font Size (\(Int(fontSize)))")
+    ///                             }
+    ///                             .frame(width: 150)
+    ///                             Toggle(isOn: $bold) {
+    ///                                 Image(systemName: "bold")
+    ///                             }
+    ///                             Toggle(isOn: $italic) {
+    ///                                 Image(systemName: "italic")
+    ///                             }
+    ///                         }
+    ///                     }
+    ///             }
+    ///             .navigationTitle("My Note")
+    ///         }
+    ///     }
+    ///
+    /// ![A window showing a font size selector, and toggles for bold, italic.
+    ///   and underlined text styling installed in the toolbar to
+    ///   support text editing in
+    ///   macOS.](SwiftUI-View-Styling-ToolbarContent.png)
     ///
     /// - Parameter content: The views representing the content of the toolbar.
     public func toolbar<Content>(@ViewBuilder content: () -> Content) -> some View where Content : View
@@ -21382,12 +23281,168 @@ extension View {
 
     /// Populates the toolbar or navigation bar with the specified items.
     ///
-    /// - Parameter items: The items representing the content of the toolbar.
+    /// Use this method to populate a toolbar with a collection of views that
+    /// you provide to a toolbar view builder.
+    ///
+    /// The toolbar modifier expects a collection of toolbar items which you can
+    /// provide either by supplying a collection of views with each view
+    /// wrapped in a ``ToolbarItem``, or by providing a collection of views as
+    /// a ``ToolbarItemGroup``. The example below uses a collection of
+    /// ``ToolbarItem`` views to create a macOS toolbar that supports text
+    /// editing features:
+    ///
+    ///     struct StructToolbarItemGroupView: View {
+    ///         @State private var text = ""
+    ///         @State private var bold = false
+    ///         @State private var italic = false
+    ///         @State private var fontSize = 12.0
+    ///
+    ///         var displayFont: Font {
+    ///             let font = Font.system(size: CGFloat(fontSize),
+    ///                                    weight: bold == true ? .bold : .regular)
+    ///             return italic == true ? font.italic() : font
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             VStack {
+    ///                 TextEditor(text: $text)
+    ///                     .font(displayFont)
+    ///                     .toolbar {
+    ///                         ToolbarItemGroup {
+    ///                             Slider(
+    ///                                 value: $fontSize,
+    ///                                 in: 8...120,
+    ///                                 minimumValueLabel:
+    ///                                     Text("A").font(.system(size: 8)),
+    ///                                 maximumValueLabel:
+    ///                                     Text("A").font(.system(size: 16))
+    ///                             ) {
+    ///                                 Text("Font Size (\(Int(fontSize)))")
+    ///                             }
+    ///                             .frame(width: 150)
+    ///                             Toggle(isOn: $bold) {
+    ///                                 Image(systemName: "bold")
+    ///                             }
+    ///                             Toggle(isOn: $italic) {
+    ///                                 Image(systemName: "italic")
+    ///                             }
+    ///                         }
+    ///                     }
+    ///             }
+    ///             .navigationTitle("My Note")
+    ///         }
+    ///     }
+    ///
+    /// ![A window showing a font size selector, and toggles for bold, italic.
+    ///   and underlined text styling installed in the toolbar to
+    ///   support text editing in
+    ///   macOS.](SwiftUI-View-Styling-ToolbarContent.png)
+    ///
+    /// Although it's not mandatory, wrapping a related group of toolbar
+    /// items together in a `ToobarItemGroup` provides a one-to-one mapping
+    ///  between controls and toolbar items which results in the correct layout
+    /// and spacing on each platform.
+    /// For design guidance on toolbars for macOS apps, see macOS Human
+    /// Interface Guidelines >
+    /// [Toolbars](https://developer.apple.com/design/human-interface-guidelines/macos/windows-and-views/toolbars/).
+    /// For design guidance on toolbars for iOS apps, see iOS Human Interface Guidelines >
+    /// [Toolbars](https://developer.apple.com/design/human-interface-guidelines/ios/bars/toolbars/).
+    ///
+    /// - Parameter content: The items representing the content of the toolbar.
     public func toolbar<Content>(@ToolbarContentBuilder content: () -> Content) -> some View where Content : ToolbarContent
 
 
     /// Populates the toolbar or navigation bar with the specified items,
     /// allowing for user customization.
+    ///
+    /// Use this modifier when you want to allow the user to customize the
+    /// components and layout of elements in the toolbar. The toolbar modifier
+    /// expects a collection of toolbar items which you can provide either by
+    /// supplying a collection views with each view wrapped in a
+    /// ``ToolbarItem``, or by providing a collection of views as a
+    /// ``ToolbarItemGroup``.
+    ///
+    /// > Note: You can write a single toolbar that displays in both
+    ///   macOS and iOS, but only macOS apps support toolbar customization.
+    ///
+    /// The example below creates a view that represents each
+    /// ``ToolbarItem`` along with an ID that uniquely identifies the toolbar
+    /// item to the customization editor:
+    ///
+    ///     struct ToolsEditorView: View {
+    ///         @State private var text = ""
+    ///         @State private var bold = false
+    ///         @State private var italic = false
+    ///         @State private var fontSize = 12.0
+    ///
+    ///         var displayFont: Font {
+    ///             let font = Font.system(size: CGFloat(fontSize),
+    ///                                    weight: bold == true ? .bold : .regular)
+    ///             return italic == true ? font.italic() : font
+    ///         }
+    ///
+    ///         var body: some View {
+    ///             VStack {
+    ///                 TextEditor(text: $text)
+    ///                     .font(displayFont)
+    ///                     .toolbar(id: "editingtools") {
+    ///                         ToolbarItem(id: "sizeSelector") {
+    ///                             Slider(
+    ///                                 value: $fontSize,
+    ///                                 in: 8...120,
+    ///                                 minimumValueLabel:
+    ///                                     Text("A").font(.system(size: 8)),
+    ///                                 maximumValueLabel:
+    ///                                     Text("A").font(.system(size: 16))
+    ///                             ) {
+    ///                                 Text("Font Size (\(Int(fontSize)))")
+    ///                             }
+    ///                             .frame(width: 150)
+    ///                         }
+    ///                         ToolbarItem(id: "bold") {
+    ///                             Toggle(isOn: $bold) {
+    ///                                 Image(systemName: "bold")
+    ///                             }
+    ///                         }
+    ///                         ToolbarItem(id: "italic") {
+    ///                             Toggle(isOn: $italic) {
+    ///                                 Image(systemName: "italic")
+    ///                             }
+    ///                         }
+    ///
+    ///                     }
+    ///             }
+    ///             .navigationTitle("My Note")
+    ///         }
+    ///     }
+    ///
+    /// ![A window showing the macOS toolbar customization
+    ///   editor.](SwiftUI-View-Styling-ToolbarCustomization.png)
+    ///
+    /// In macOS you can enable menu support for toolbar customization by
+    /// adding a ``ToolbarCommands`` instance to a scene using the
+    /// ``Scene/commands(content:)`` scene modifier:
+    ///
+    ///     @main
+    ///     struct ToolbarContent_macOSApp: App {
+    ///         var body: some Scene {
+    ///             WindowGroup {
+    ///                 ToolsEditorView()
+    ///                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    ///             }
+    ///             .commands {
+    ///                 ToolbarCommands()
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// When you add the toolbar commands, the system adds a menu command to
+    /// your app's top level menu to provide toolbar customization support.
+    /// This is in addition to the ability to Control-click on the
+    /// toolbar to open the toolbar customization editor.
+    ///
+    /// ![A screenshot of the toolbar editor support for the macOS view
+    /// menu.](SwiftUI-View-Styling-ToolbarCustomizationMenu.png)
     ///
     /// - Parameters:
     ///   - id: A unique identifier for this toolbar.
@@ -22699,12 +24754,12 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Supplies an `ObservableObject` to a view subhierachy.
+    /// Supplies an `ObservableObject` to a view subhierarchy.
     ///
     /// The object can be read by any child by using `EnvironmentObject`.
     ///
     /// - Parameter object: the object to store and make available to
-    ///     the view's subhiearchy.
+    ///     the view's subhierarchy.
     @inlinable public func environmentObject<T>(_ object: T) -> some View where T : ObservableObject
 
 }
@@ -22714,20 +24769,82 @@ extension View {
 
     /// Presents an alert to the user.
     ///
+    /// Use this method when you need to show an alert that contains
+    /// information from a binding to an optional data source that you provide.
+    /// The example below shows a custom data source `FileInfo` whose
+    /// properties configure the alert's `message` field:
+    ///
+    ///     struct FileInfo: Identifiable {
+    ///         var id: String { name }
+    ///         let name: String
+    ///         let fileType: UTType
+    ///     }
+    ///
+    ///     struct ConfirmImportAlert: View {
+    ///         @State var alertDetails: FileInfo?
+    ///         var body: some View {
+    ///             Button("Show Alert") {
+    ///                 alertDetails = FileInfo(name: "MyImageFile.png",
+    ///                                         fileType: .png)
+    ///             }
+    ///             .alert(item: $alertDetails) { details in
+    ///                 Alert(title: Text("Import Complete"),
+    ///                       message: Text("""
+    ///                         Imported \(details.name) \n File
+    ///                         type: \(details.fileType.description).
+    ///                         """),
+    ///                       dismissButton: .default(Text("Dismiss")))
+    ///             }
+    ///         }
+    ///     }
+    ///
+    ///
+    /// ![An alert showing information from a data source that describes the
+    /// result of a file import process. The alert displays the name of the
+    /// file imported, MyImageFile.png and its file type, the PNG image
+    /// file format along with a default OK button for dismissing the
+    /// alert.](SwiftUI-View-AlertItemContent.png)
+    ///
     /// - Parameters:
     ///   - item: A binding to an optional source of truth for the alert.
-    ///     When representing a non-`nil` item, the system uses `content` to
-    ///     create an alert representation of the item.
-    ///     If the identity changes, the system dismisses a
-    ///     currently-presented alert and replace it by a new alert.
+    ///     if `item` is non-`nil`, the system passes the contents to
+    ///     the modifier's closure. You use this content to populate the fields
+    ///     of an alert that you create that the system displays to the user.
+    ///     If `item` changes, the system dismisses the currently displayed
+    ///     alert and replaces it with a new one using the same process.
     ///   - content: A closure returning the alert to present.
     public func alert<Item>(item: Binding<Item?>, content: (Item) -> Alert) -> some View where Item : Identifiable
 
 
     /// Presents an alert to the user.
     ///
+    /// Use this method when you need to show an alert to the user. The example
+    /// below displays an alert that is shown when the user toggles a
+    /// Boolean value that controls the presentation of the alert:
+    ///
+    ///     struct OrderCompleteAlert: View {
+    ///         @State private var isPresented = false
+    ///         var body: some View {
+    ///             Button("Show Alert", action: {
+    ///                 isPresented = true
+    ///             })
+    ///             .alert(isPresented: $isPresented) {
+    ///                 Alert(title: Text("Order Complete"),
+    ///                       message: Text("Thank you for shopping with us."),
+    ///                       dismissButton: .default(Text("OK")))
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// ![An alert whose title reads Order Complete, with the
+    /// message, Thank you for shopping with us placed underneath. The alert
+    /// also includes an OK button for dismissing the
+    /// alert.](SwiftUI-View-AlertIsPresentedContent.png)
     /// - Parameters:
-    ///   - isPresented: A binding to whether the alert should be shown.
+    ///   - isPresented: A binding to a Boolean value that determines whether
+    ///     to present the alert that you create in the modifier's `content` closure. When the
+    ///      user presses or taps OK the system sets `isPresented` to `false`
+    ///     which dismisses the alert.
     ///   - content: A closure returning the alert to present.
     public func alert(isPresented: Binding<Bool>, content: () -> Alert) -> some View
 
@@ -22904,7 +25021,7 @@ extension View {
 ///     }
 ///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-@_functionBuilder public struct ViewBuilder {
+@resultBuilder public struct ViewBuilder {
 
     /// Builds an empty view from a block containing no statements.
     public static func buildBlock() -> EmptyView
@@ -23088,7 +25205,7 @@ public protocol ViewModifier {
     ///
     /// `content` is a proxy for the view that will have the modifier
     /// represented by `Self` applied to it.
-    func body(content: Self.Content) -> Self.Body
+    @ViewBuilder func body(content: Self.Content) -> Self.Body
 
     /// The content view type passed to `body()`.
     typealias Content
@@ -23279,9 +25396,9 @@ public protocol WidgetBundle {
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-@_functionBuilder public struct WidgetBundleBuilder {
+@resultBuilder public struct WidgetBundleBuilder {
 
-    /// Builds an empty Widget from an block containing no statements, `{ }`.
+    /// Builds an empty Widget from a block containing no statements, `{ }`.
     public static func buildBlock() -> some Widget
 
 
@@ -23504,6 +25621,58 @@ public struct WindowGroup<Content> : Scene where Content : View {
 }
 
 /// A view that overlays its children, aligning them in both axes.
+///
+/// The `ZStack` assigns each successive child view a higher z-axis value than
+/// the one before it, meaning later children appear "on top" of earlier ones.
+///
+/// The following example creates a `ZStack` of 100 x 100 point ``Rectangle``
+/// views filled with one of six colors, offsetting each successive child view
+/// by 10 points so they don't completely overlap:
+///
+///     let colors: [Color] =
+///         [.red, .orange, .yellow, .green, .blue, .purple]
+///
+///     var body: some View {
+///         ZStack {
+///             ForEach(0..<colors.count) {
+///                 Rectangle()
+///                     .fill(colors[$0])
+///                     .frame(width: 100, height: 100)
+///                     .offset(x: CGFloat($0) * 10.0,
+///                             y: CGFloat($0) * 10.0)
+///             }
+///         }
+///     }
+///
+/// ![Six squares of different colors, stacked atop each other, with a 10-point
+/// offset in both the x and y axes for each layer so they can be
+/// seen.](SwiftUI-ZStack-offset-rectangles.png)
+///
+/// The `ZStack` uses an ``Alignment`` to set the x- and y-axis coordinates of
+/// each child, defaulting to a ``Alignment/center`` alignment. In the following
+/// example, the `ZStack` uses a ``Alignment/bottomLeading`` alignment to lay
+/// out two children, a red 100 x 50 point rectangle below, and a blue 50 x 100
+/// point rectangle on top. Because of the alignment value, both rectangles
+/// share a bottom-left corner with the `ZStack` (in locales where left is the
+/// leading side).
+///
+///     var body: some View {
+///         ZStack(alignment: .bottomLeading) {
+///             Rectangle()
+///                 .fill(Color.red)
+///                 .frame(width: 100, height: 50)
+///             Rectangle()
+///                 .fill(Color.blue)
+///                 .frame(width:50, height: 100)
+///         }
+///         .border(Color.green, width: 1)
+///     }
+///
+/// ![A green 100 by 100 square containing two overlapping rectangles: on the
+/// bottom, a red 100 by 50 rectangle, and atop it, a blue 50 by 100 rectangle.
+/// The rectangles share their bottom left point with the containing green
+/// square.](SwiftUI-ZStack-alignment.png)
+///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct ZStack<Content> : View where Content : View {
 
@@ -23511,14 +25680,14 @@ public struct WindowGroup<Content> : Scene where Content : View {
     ///
     /// - Parameters:
     ///   - alignment: The guide for aligning the subviews in this stack on both
-    ///     axis.
+    ///     the x- and y-axes.
     ///   - content: A view builder that creates the content of this stack.
     @inlinable public init(alignment: Alignment = .center, @ViewBuilder content: () -> Content)
 
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 }
 
@@ -23556,10 +25725,24 @@ extension Never {
     /// The type of view representing the body of this view.
     ///
     /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required `body` property.
+    /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
 
     /// The content and behavior of the view.
+    ///
+    /// When you implement a custom view, you must implement a computed
+    /// `body` property to provide the content for your view. Return a view
+    /// that's composed of primitive views that SwiftUI provides, plus other
+    /// composite views that you've already defined:
+    ///
+    ///     struct MyView: View {
+    ///         var body: some View {
+    ///             Text("Hello, World!")
+    ///         }
+    ///     }
+    ///
+    /// For more information about composing views and a view hierarchy,
+    /// see <doc:Declaring-a-Custom-View>.
     public var body: Never { get }
 }
 
@@ -23609,15 +25792,6 @@ extension NSUserActivity {
         ///   - rhs: Another value to compare.
         public static func == (a: NSUserActivity.TypedPayloadError, b: NSUserActivity.TypedPayloadError) -> Bool
 
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-
         /// Hashes the essential components of this value by feeding them into the
         /// given hasher.
         ///
@@ -23632,6 +25806,15 @@ extension NSUserActivity {
         /// - Parameter hasher: The hasher to use when combining the components
         ///   of this instance.
         public func hash(into hasher: inout Hasher)
+
+        /// The hash value.
+        ///
+        /// Hash values are not guaranteed to be equal across different executions of
+        /// your program. Do not save hash values to use during a future execution.
+        ///
+        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+        public var hashValue: Int { get }
     }
 
     /// Given a Codable Swift type, return an instance decoded from the
