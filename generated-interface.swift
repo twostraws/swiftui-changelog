@@ -1,4 +1,4 @@
-// Xcode 13.0b1
+// Xcode 13.0b2
 
 import Accessibility
 import Combine
@@ -14,6 +14,68 @@ import _Concurrency
 import os
 import os.log
 import os.signpost
+
+/// A type to generate an `AXChartDescriptor` object that you use to provide
+/// information about a chart and its data for an accessible experience
+/// in VoiceOver or other assistive technologies.
+///
+/// Note that you may use the `@Environment` property wrapper inside the
+/// implementation of your `AXChartDescriptorRepresentable`, in which case you
+/// should implement `updateChartDescriptor`, which will be called when the
+/// `Environment` changes.
+///
+/// For example, to provide accessibility for a view that represents a chart,
+/// you would first declare your chart descriptor representable type:
+///
+///    struct MyChartDescriptorRepresentable: AXChartDescriptorRepresentable {
+///        func makeChartDescriptor() -> AXChartDescriptor {
+///            // build and return your AXChartDescriptor here
+///        }
+///
+///        func updateChartDescriptor(_ descriptor: AXChartDescriptor) {
+///            // update your chart descriptor with any new values
+///        }
+///    }
+///
+/// Then, provide an instance of your `AXChartDescriptorRepresentable` type to
+/// your view using the `accessibilityChartDescriptor` modifier:
+///
+///    var body: some View {
+///        MyChartView()
+///            .accessibilityChartDescriptor(MyChartDescriptorRepresentable())
+///    }
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+public protocol AXChartDescriptorRepresentable {
+
+    /// Create the `AXChartDescriptor` for this view, and return it.
+    ///
+    /// This will be called once per identity of your `View`. It will not be run
+    /// again unless the identity of your `View` changes. If you need to
+    /// update the `AXChartDescriptor` based on changes in your `View`, or in
+    /// the `Environment`, implement `updateChartDescriptor`.
+    /// This method will only be called if / when accessibility needs the
+    /// `AXChartDescriptor` of your view, for VoiceOver.
+    func makeChartDescriptor() -> AXChartDescriptor
+
+    /// Update the existing `AXChartDescriptor` for your view, based on changes
+    /// in your view or in the `Environment`.
+    ///
+    /// This will be called as needed, when accessibility needs your
+    /// `AXChartDescriptor` for VoiceOver. It will only be called if the inputs
+    /// to your views, or a relevant part of the `Environment`, have changed.
+    func updateChartDescriptor(_ descriptor: AXChartDescriptor)
+}
+
+extension AXChartDescriptorRepresentable {
+
+    /// Update the existing `AXChartDescriptor` for your view, based on changes
+    /// in your view or in the `Environment`.
+    ///
+    /// This will be called as needed, when accessibility needs your
+    /// `AXChartDescriptor` for VoiceOver. It will only be called if the inputs
+    /// to your views, or a relevant part of the `Environment`, have changed.
+    public func updateChartDescriptor(_ descriptor: AXChartDescriptor)
+}
 
 /// The structure that defines the kinds of available accessibility actions.
 ///
@@ -94,6 +156,7 @@ extension AccessibilityAdjustmentDirection : Equatable {
 extension AccessibilityAdjustmentDirection : Hashable {
 }
 
+/// A view modifier that adds accessibility properties to the view
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct AccessibilityAttachmentModifier : ViewModifier {
 
@@ -3624,12 +3687,6 @@ public struct BorderedButtonStyle : PrimitiveButtonStyle {
     /// Creates a bordered button style.
     public init()
 
-    /// Creates a bordered button style with a tint color.
-    @available(macOS, unavailable)
-    @available(tvOS, unavailable)
-    @available(watchOS, introduced: 7.0, deprecated: 100000.0, message: "Use ``View/tint(_)`` instead.")
-    public init(tint: Color)
-
     /// Creates a view that represents the body of a button.
     ///
     /// The system calls this method for each ``Button`` instance in a view
@@ -3977,59 +4034,6 @@ extension Button where Label == Text {
     public init<S>(_ title: S, role: ButtonRole?, action: @escaping () -> Void) where S : StringProtocol
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension Button {
-
-    /// Creates a button that displays a custom label.
-    ///
-    /// - Parameters:
-    ///   - role: An optional semantic role describing the button. A value of
-    ///     `nil` means that the Button has no assigned role.
-    ///     The default value is `nil`.
-    ///   - action: The action to perform when the user triggers the button.
-    ///   - label: A view that describes the purpose of the button's `action`.
-    public init(role: ButtonRole?, action: @escaping () async -> Void, @ViewBuilder label: () -> Label)
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension Button where Label == Text {
-
-    /// Creates a button that generates its label from a localized string key.
-    ///
-    /// This initializer creates a ``Text`` view on your behalf, and treats the
-    /// localized key similar to ``Text/init(_:tableName:bundle:comment:)``. See
-    /// ``Text`` for more information about localizing strings.
-    ///
-    /// To initialize a button with a string variable, use
-    /// `Button.init(_:role:action:)` instead.
-    ///
-    /// - Parameters:
-    ///   - titleKey: The key for the button's localized title, that describes
-    ///     the purpose of the button's `action`.
-    ///   - role: An optional semantic role describing the button. A value of
-    ///     `nil` means that the Button has no assigned role.
-    ///     The default value is `nil`.
-    ///   - action: The action to perform when the user triggers the button.
-    public init(_ titleKey: LocalizedStringKey, role: ButtonRole?, action: @escaping () async -> Void)
-
-    /// Creates a button that generates its label from a string.
-    ///
-    /// This initializer creates a ``Text`` view on your behalf, and treats the
-    /// title similar to ``Text/init(_:)-9d1g4``. See ``Text`` for more
-    /// information about localizing strings.
-    ///
-    /// To initialize a button with a localized string key, use
-    /// `Button.init(_:role:action:)` instead.
-    ///
-    /// - Parameters:
-    ///   - title: A string that describes the purpose of the button's `action`.
-    ///   - role: An optional semantic role describing the button. A value of
-    ///     `nil` means that the Button has no assigned role.
-    ///     The default value is `nil`.
-    ///   - action: The action to perform when the user triggers the button.
-    public init<S>(_ title: S, role: ButtonRole?, action: @escaping () async -> Void) where S : StringProtocol
-}
-
 /// A value that describes the purpose of a button.
 ///
 /// A button role provides a description of a button's purpose.  For example,
@@ -4136,7 +4140,7 @@ public struct ButtonStyleConfiguration {
     ///         func makeBody(configuration: Configuration) -> some View {
     ///             configuration.label
     ///                 .font(
-    ///                     configuration.role == .cancel ?  .title2.bold() : .title2)
+    ///                     configuration.role == .cancel ? .title2.bold() : .title2)
     ///                 .foregroundColor(
     ///                     configuration.role == .destructive ? Color.red : nil)
     ///         }
@@ -4808,34 +4812,18 @@ extension Color {
     /// A color that reflects the accent color of the system or app.
     ///
     /// The accent color is a broad theme color applied to
-    /// views and controls. You set the accent color for a view and its
-    /// children by applying the ``View/accentColor(_:)`` modifier
-    /// to that view. If you haven't set an explicit value in a given context,
-    /// SwiftUI uses the default application or system accent color instead.
+    /// views and controls. You can set it at the application level by specifying
+    /// an accent color in your app's asset catalog.
     ///
     /// > Note: In macOS, SwiftUI applies customization of the accent color
     /// only if the user chooses Multicolor under General > Accent color
     /// in System Preferences.
     ///
-    /// Use the `accentColor` property to obtain the
-    /// accent color within the current context:
+    /// The following code renders a ``Text`` view using the app's accent color:
     ///
-    ///     VStack(spacing: 20) {
-    ///         Text("Default Accent Color")
-    ///             .foregroundStyle(Color.accentColor)
-    ///         Group {
-    ///             Text("Overridden Accent Color")
-    ///                 .foregroundStyle(Color.accentColor)
-    ///         }
-    ///         .accentColor(.red)
-    ///     }
+    ///     Text("Accent Color")
+    ///         .foregroundStyle(Color.accentColor)
     ///
-    /// The first ``Text`` view in the example above appears in the default
-    /// system accent color, while the second appears in the customized red
-    /// accent color applied to the enclosing ``Group``:
-    ///
-    /// ![A screenshot of two text views arranged vertically, with the upper
-    ///   text in blue letters, and the lower text in red.](Color-accentColor)
     public static var accentColor: Color { get }
 }
 
@@ -6274,6 +6262,9 @@ public struct ControlGroupStyleConfiguration {
 @available(watchOS, unavailable)
 public enum ControlSize : CaseIterable {
 
+    /// A control version that is minimally sized.
+    case mini
+
     /// A control version that is proportionally smaller size for space-constrained views.
     case small
 
@@ -7011,6 +7002,21 @@ public struct DefaultToggleStyle : ToggleStyle {
     public typealias Body = some View
 }
 
+/// Disables text selection by the user.
+///
+/// Do not use this type directly. Instead, use ``TextSelectability/disabled``.
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct DisabledTextSelectability : TextSelectability {
+
+    /// Whether text allows selection or not.
+    ///
+    /// This should produce a constant value that is not affected by global
+    /// state.
+    public static let allowsSelection: Bool
+}
+
 /// A view that shows or hides another content view, based on the state of a
 /// disclosure control.
 ///
@@ -7167,6 +7173,14 @@ public struct DismissAction {
     ///
     /// Use this method to attempt to dismiss a presentation. This function
     /// is used when you call the function ``dismiss()``.
+    public func callAsFunction()
+}
+
+/// Provides functionality for dismissing a search interaction.
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+public struct DismissSearchAction {
+
+    /// Requests the current view hierarchy to end searching.
     public func callAsFunction()
 }
 
@@ -8598,6 +8612,21 @@ extension EmptyView : Sendable {
 extension EmptyWidgetConfiguration : Sendable {
 }
 
+/// Enables text selection by the user.
+///
+/// Do not use this type directly. Instead, use ``TextSelectability/enabled``.
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public struct EnabledTextSelectability : TextSelectability {
+
+    /// Whether text allows selection or not.
+    ///
+    /// This should produce a constant value that is not affected by global
+    /// state.
+    public static let allowsSelection: Bool
+}
+
 /// A property wrapper that reads a value from a view's environment.
 ///
 /// Use the `Environment` property wrapper to read a value
@@ -8915,8 +8944,7 @@ extension EnvironmentValues {
     ///
     /// When the value is `nil`, SwiftUI uses the system default. The default
     /// value is `nil`.
-    @available(iOS 13.0, macOS 10.15, tvOS 13.0, *)
-    @available(watchOS, unavailable)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 8.0, *)
     public var disableAutocorrection: Bool?
 }
 
@@ -9068,7 +9096,7 @@ extension EnvironmentValues {
 
     /// The size of a pixel on the screen.
     ///
-    /// This value is equal to `1` divided by
+    /// This value is usually equal to `1` divided by
     /// ``EnvironmentValues/displayScale``.
     public var pixelLength: CGFloat { get }
 
@@ -9086,30 +9114,6 @@ extension EnvironmentValues {
 
     /// The current time zone that views should use when handling dates.
     public var timeZone: TimeZone
-
-    /// The color scheme of this environment.
-    ///
-    /// When writing custom drawing code that depends on the current color
-    /// scheme, you should also consider the
-    /// ``EnvironmentValues/colorSchemeContrast`` property. You can specify
-    /// images and colors in asset catalogs according to either the
-    /// ``ColorScheme/light`` or ``ColorScheme/dark`` color scheme, as well as
-    /// standard or increased contrast. The correct image or color displays
-    /// automatically for the current environment.
-    ///
-    /// You only need to check `colorScheme` and
-    /// ``EnvironmentValues/colorSchemeContrast`` for custom drawing if the
-    /// differences go beyond images and colors.
-    ///
-    /// Setting the `colorScheme` environment value directly is an advanced use
-    /// case, as it changes the color scheme of the contained views but *not* of
-    /// the container. Instead, consider using the
-    /// ``View/preferredColorScheme(_:)`` modifier, which propagates to the
-    /// presentation containing the view.
-    public var colorScheme: ColorScheme
-
-    /// The contrast associated with the color scheme of this environment.
-    public var colorSchemeContrast: ColorSchemeContrast { get }
 }
 
 @available(iOS 13.0, *)
@@ -9242,6 +9246,58 @@ extension EnvironmentValues {
     ///
     @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public var isSearching: Bool
+
+    /// Asks the system to dismiss the current search interaction.
+    ///
+    /// When able, this will cause ``EnvironmentValues/isSearching`` to
+    /// become false, any search text to be cleared, and the search field to
+    /// lose focus.
+    ///
+    ///     NavigationView {
+    ///         MyList()
+    ///            .searchable(text: $text)
+    ///     }
+    ///
+    ///     struct MyList: View {
+    ///         @State private var result: SearchResult? = nil
+    ///
+    ///         var body: some View {
+    ///             MainList()
+    ///                 .overlay {
+    ///                     ResultList(results) { result in
+    ///                         Button {
+    ///                             self.result = result
+    ///                         } label: {
+    ///                             ResultLabel(result)
+    ///                         }
+    ///                     }
+    ///                     .sheet(item: $result) { result in
+    ///                         NavigationView {
+    ///                              DetailView(result: result)
+    ///                     }
+    ///                 }
+    ///         }
+    ///     }
+    ///
+    ///     struct DetailView: View {
+    ///         var searchResult: SearchResult
+    ///
+    ///         @Environment(\.dismiss) private var dismiss
+    ///         @Environment(\.dismissSearch) private var dismissSearch
+    ///
+    ///         var body: some View {
+    ///             DetailContent()
+    ///                 .toolbar {
+    ///                     Button("Add") {
+    ///                         add(result: searchResult)
+    ///                         dismiss()
+    ///                         dismissSearch()
+    ///                 }
+    ///         }
+    ///     }
+    ///
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public var dismissSearch: DismissSearchAction { get }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
@@ -9382,8 +9438,38 @@ extension EnvironmentValues {
 
     /// A binding to the current presentation mode of the view associated with
     /// this environment.
-    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use isPresented or dismiss")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Use isPresented or dismiss")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Use isPresented or dismiss")
+    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Use isPresented or dismiss")
     public var presentationMode: Binding<PresentationMode> { get }
+}
+
+extension EnvironmentValues {
+
+    /// The color scheme of this environment.
+    ///
+    /// When writing custom drawing code that depends on the current color
+    /// scheme, you should also consider the
+    /// ``EnvironmentValues/colorSchemeContrast`` property. You can specify
+    /// images and colors in asset catalogs according to either the
+    /// ``ColorScheme/light`` or ``ColorScheme/dark`` color scheme, as well as
+    /// standard or increased contrast. The correct image or color displays
+    /// automatically for the current environment.
+    ///
+    /// You only need to check `colorScheme` and
+    /// ``EnvironmentValues/colorSchemeContrast`` for custom drawing if the
+    /// differences go beyond images and colors.
+    ///
+    /// Setting the `colorScheme` environment value directly is an advanced use
+    /// case, as it changes the color scheme of the contained views but *not* of
+    /// the container. Instead, consider using the
+    /// ``View/preferredColorScheme(_:)`` modifier, which propagates to the
+    /// presentation containing the view.
+    public var colorScheme: ColorScheme
+
+    /// The contrast associated with the color scheme of this environment.
+    public var colorSchemeContrast: ColorSchemeContrast { get }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
@@ -10755,13 +10841,56 @@ public struct ForEach<Data, ID, Content> where Data : RandomAccessCollection, ID
 extension ForEach : DynamicViewContent where Content : View {
 }
 
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension ForEach : AccessibilityRotorContent where Content : AccessibilityRotorContent {
+
+    /// The internal content of this `AccessibilityRotorContent`.
+    public var body: Never { get }
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension ForEach where ID == Data.Element.ID, Content : AccessibilityRotorContent, Data.Element : Identifiable {
+
+    /// Creates an instance that generates Rotor content by combining, in order,
+    /// individual Rotor content for each element in the data given to this
+    /// `ForEach`.
+    ///
+    /// It's important that the `id` of a data element doesn't change unless you
+    /// replace the data element with a new data element that has a new
+    /// identity.
+    ///
+    /// - Parameters:
+    ///   - data: The identified data that the ``ForEach`` instance uses to
+    ///     create views dynamically.
+    ///   - content: The result builder that generates Rotor content for each
+    ///     data element.
+    public init(_ data: Data, @AccessibilityRotorContentBuilder content: @escaping (Data.Element) -> Content)
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension ForEach where Content : AccessibilityRotorContent {
+
+    /// Creates an instance that generates Rotor content by combining, in order,
+    /// individual Rotor content for each element in the data given to this
+    /// `ForEach`.
+    ///
+    /// It's important that the `id` of a data element doesn't change, unless
+    /// SwiftUI considers the data element to have been replaced with a new data
+    /// element that has a new identity.
+    ///
+    /// - Parameters:
+    ///   - data: The data that the ``ForEach`` instance uses to create views
+    ///     dynamically.
+    ///   - id: The key path to the provided data's identifier.
+    ///   - content: The result builder that generates Rotor content for each
+    ///     data element.
+    public init(_ data: Data, id: KeyPath<Data.Element, ID>, @AccessibilityRotorContentBuilder content: @escaping (Data.Element) -> Content)
+}
+
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ForEach : View where Content : View {
 
-    /// The type of view representing the body of this view.
-    ///
-    /// When you create a custom view, Swift infers this type from your
-    /// implementation of the required ``View/body-swift.property`` property.
+    /// The type for the internal content of this `AccessibilityRotorContent`.
     public typealias Body = Never
 }
 
@@ -16172,7 +16301,7 @@ extension ListStyle where Self == PlainListStyle {
 /// a `String` variable to these initializers avoids localization, which is
 /// usually appropriate when the variable contains a user-provided value.
 ///
-/// As a rule of thumb, use a string literal argument when you want
+/// As a general rule, use a string literal argument when you want
 /// localization, and a string variable argument when you don't. In the case
 /// where you want to localize the value of a string variable, use the string to
 /// create a new `LocalizedStringKey` instance.
@@ -16331,6 +16460,15 @@ extension ListStyle where Self == PlainListStyle {
         ///   - formatter: A formatter to convert `subject` to a string
         ///     representation.
         public mutating func appendInterpolation<Subject>(_ subject: Subject, formatter: Formatter? = nil) where Subject : NSObject
+
+        /// Appends the interpolation of `F.FormatInput` using a `FormatStyle`.
+        ///
+        /// - Parameters:
+        ///   - input: The input to provide to the format style.
+        ///   - format: The specific `FormatStyle` to use to convert the input
+        ///   into a string.
+        @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+        public mutating func appendInterpolation<F>(_ input: F.FormatInput, format: F) where F : FormatStyle, F.FormatInput : Equatable, F.FormatOutput == String
 
         /// Appends a type, convertible to a string by using a default format
         /// specifier, to a string interpolation.
@@ -17457,13 +17595,6 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
     public func accessibilityLabel(_ label: Text) -> ModifiedContent<Content, Modifier>
 
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
-    /// you can provide the current volume setting, like "60%", using accessibilityValue().
-    public func accessibilityValue(_ valueDescription: Text) -> ModifiedContent<Content, Modifier>
-
     /// Communicates to the user what happens after performing the view's
     /// action.
     ///
@@ -17508,20 +17639,6 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     /// Don't include text in the label that repeats information that users already have. For example,
     /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
     public func accessibilityLabel<S>(_ label: S) -> ModifiedContent<Content, Modifier> where S : StringProtocol
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
-    /// you can provide the current volume setting, like "60%", using accessibilityValue().
-    public func accessibilityValue(_ valueKey: LocalizedStringKey) -> ModifiedContent<Content, Modifier>
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
-    /// you can provide the current volume setting, like "60%", using accessibilityValue().
-    public func accessibilityValue<S>(_ value: S) -> ModifiedContent<Content, Modifier> where S : StringProtocol
 
     /// Communicates to the user what happens after performing the view's
     /// action.
@@ -17578,17 +17695,6 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
     @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
     public func accessibility(label: Text) -> ModifiedContent<Content, Modifier>
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
-    /// you can provide the current volume setting, like "60%", using accessibility(value:).
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    public func accessibility(value: Text) -> ModifiedContent<Content, Modifier>
 
     /// Communicates to the user what happens after performing the view's
     /// action.
@@ -17753,7 +17859,7 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     ///
     /// - Parameter value: The accessibility content type from the available
     /// ``AccessibilityTextContentType`` options.
-    public func accessibilityTextContentType(_ value: AccessibilityTextContentType) -> ModifiedContent<Content, Modifier>
+    public func accessibilityTextContentType(_ textContentType: AccessibilityTextContentType) -> ModifiedContent<Content, Modifier>
 
     /// Set the level of this heading.
     ///
@@ -17767,6 +17873,49 @@ extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
     /// - Parameter level: The heading level to associate with this element
     ///   from the available ``AccessibilityHeadingLevel`` levels.
     public func accessibilityHeading(_ level: AccessibilityHeadingLevel) -> ModifiedContent<Content, Modifier>
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ valueDescription: Text) -> ModifiedContent<Content, Modifier>
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ valueKey: LocalizedStringKey) -> ModifiedContent<Content, Modifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue<S>(_ value: S) -> ModifiedContent<Content, Modifier> where S : StringProtocol
+}
+
+extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
+    /// you can provide the current volume setting, like "60%", using accessibility(value:).
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    public func accessibility(value: Text) -> ModifiedContent<Content, Modifier>
 }
 
 /// A dynamic property type that allows access to a namespace defined
@@ -19611,7 +19760,10 @@ public struct PreferredColorSchemeKey : PreferenceKey {
 }
 
 /// An indication whether a view is currently presented by another view.
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Use EnvironmentValues.isPresented or EnvironmentValues.dismiss")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Use EnvironmentValues.isPresented or EnvironmentValues.dismiss")
+@available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Use EnvironmentValues.isPresented or EnvironmentValues.dismiss")
+@available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Use EnvironmentValues.isPresented or EnvironmentValues.dismiss")
 public struct PresentationMode {
 
     /// Indicates whether a view is currently presented.
@@ -20113,11 +20265,11 @@ public struct PrimitiveButtonStyleConfiguration {
     ///                     configuration.trigger()
     ///                 }
     ///                 .font(
-    ///                     configuration.role == .cancel ?  .title2.bold() : .title2)
+    ///                     configuration.role == .cancel ? .title2.bold() : .title2)
     ///                 .foregroundColor(
     ///                     configuration.role == .destructive ? Color.red : nil)
-    ///        }
-    ///    }
+    ///         }
+    ///     }
     ///
     /// You can create one of each button using this style to see the effect:
     ///
@@ -22441,10 +22593,6 @@ extension SectionedFetchRequest where Result : NSManagedObject {
     ///   - animation: The animation used for any changes to the fetched
     ///     results.
     public init(sectionIdentifier: KeyPath<Result, SectionIdentifier>, sortDescriptors: [NSSortDescriptor], predicate: NSPredicate? = nil, animation: Animation? = nil)
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension SectionedFetchRequest where Result : NSManagedObject {
 
     /// Creates an instance by defining a fetch request based on the parameters.
     ///
@@ -25522,8 +25670,6 @@ public struct SubmitTriggers : OptionSet {
     ///         text: $viewModel.searchText,
     ///         placement: .sidebar
     ///     ) {
-    ///         SearchResultsView()
-    ///     } suggestions: {
     ///         SuggestionsView()
     ///     }
     ///     .onSubmit(of: .search) {
@@ -26276,17 +26422,35 @@ extension Text {
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Text {
 
-    /// Creates a text view that displays the formatted representation of a value.
+    /// Creates a text view that displays the formatted representation
+    /// of a value.
     ///
     /// Use this initializer to create a text view that will format `subject`
     /// using `formatter`.
     public init<Subject>(_ subject: Subject, formatter: Formatter) where Subject : ReferenceConvertible
 
-    /// Creates a text view that displays the formatted representation of a value.
+    /// Creates a text view that displays the formatted representation
+    /// of a value.
     ///
     /// Use this initializer to create a text view that will format `subject`
     /// using `formatter`.
     public init<Subject>(_ subject: Subject, formatter: Formatter) where Subject : NSObject
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension Text {
+
+    /// Creates a text view that displays the formatted representation of a
+    /// value.
+    ///
+    /// Use this initializer to create a text view that will format `input`
+    /// using `format`.
+    ///
+    /// - Parameters:
+    ///   - input: The input to provide to the format style.
+    ///   - format: The specific `FormatStyle` to use to convert the input
+    ///   into a string.
+    public init<F>(_ input: F.FormatInput, format: F) where F : FormatStyle, F.FormatInput : Equatable, F.FormatOutput == String
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -26463,8 +26627,7 @@ extension Text {
     ///
     /// - Parameter value: A Boolean value that determines if VoiceOver speaks
     ///   changes to text immediately or enqueues them behind existing speech.
-    ///   Defaults to `true`, causing announcements to interrupt existing
-    ///   speech.
+    ///   Defaults to `true`.
     public func speechAnnouncementsQueued(_ value: Bool = true) -> Text
 
     /// Sets an International Phonetic Alphabet representation of the text to use when
@@ -26950,31 +27113,26 @@ extension Text {
 
     /// Creates a text view that displays styled attributed content.
     ///
-    /// Use this initializer to display styled text according to
-    /// attributes provided in the attributed content.
+    /// Use this initializer to style text according to its attributes,
+    /// which take precedence over styles added by view modifiers.
+    /// For example, the attributed text in the following example appears in blue:
     ///
-    /// Attributes of the attributed content take precedence over
-    /// styles added by view modifiers.
+    ///     var content: AttributedString {
+    ///         var attributedString = AttributedString("Blue text")
+    ///         attributedString.foregroundColor = .blue
+    ///         return attributedString
+    ///     }
     ///
-    /// In the example below the text created with
-    /// an attributed string will have blue foreground color.
-    ///
-    ///    var content: AttributedString {
-    ///        var attributedString = AttributedString("Blue text")
-    ///        attributedString.foregroundColor = .blue
-    ///        return attributedString
-    ///    }
-    ///
-    ///    var body: some View {
-    ///        VStack {
-    ///            Text(content)
-    ///            Text("Red text")
-    ///        }
-    ///        .foregroundColor(.red)
-    ///   }
+    ///     var body: some View {
+    ///         VStack {
+    ///             Text(content)
+    ///             Text("Red text")
+    ///         }
+    ///         .foregroundColor(.red)
+    ///     }
     ///
     /// - Parameters:
-    ///   - attributedContent: content to be displayed,
+    ///   - attributedContent: The content to be displayed,
     ///     styled according to its attributes.
     public init(_ attributedContent: AttributedString)
 }
@@ -27769,6 +27927,62 @@ public struct TextFormattingCommands : Commands {
     /// implementation of the required ``SwiftUI/Commands/body-swift.property``
     /// property.
     public typealias Body = some Commands
+}
+
+/// A type that describes the ability to select text.
+///
+/// To configure whether text selection is enabled or not, use the
+/// ``View/textSelection(_:)`` modifier.
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+public protocol TextSelectability {
+
+    /// Whether text allows selection or not.
+    ///
+    /// This should produce a constant value that is not affected by global
+    /// state.
+    static var allowsSelection: Bool { get }
+}
+
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension TextSelectability where Self == EnabledTextSelectability {
+
+    /// Enables text selection by the user.
+    ///
+    /// Enabling text selection allows the user to perform actions on the text
+    /// content, such as copy and paste. Selection should be enabled in cases
+    /// where those operations are useful, such as detailed information on
+    /// content or error descriptions.
+    ///
+    ///     VStack {
+    ///         Text("Event Invite")
+    ///         Text(invite.date.formatted())
+    ///             .textSelection(.enabled)
+    ///     }
+    ///
+    public static var enabled: EnabledTextSelectability { get }
+}
+
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension TextSelectability where Self == DisabledTextSelectability {
+
+    /// Disables text selection by the user.
+    ///
+    /// Apply this to views that should never be selectable by the user, even
+    /// if contained within an overall context that allows text selection.
+    ///
+    ///     content // potentially Text
+    ///        .textSelection(.disabled)
+    ///        .padding()
+    ///        .contentShape(Rectangle())
+    ///        .gesture(someGesture)
+    ///
+    public static var disabled: DisabledTextSelectability { get }
 }
 
 /// A type that provides a sequence of dates for use as a schedule.
@@ -30358,8 +30572,7 @@ extension View {
     ///
     /// - Parameter enabled: A Boolean value that indicates whether
     ///   autocorrection is disabled for this view.
-    @available(iOS 13.0, macOS 10.15, tvOS 13.0, *)
-    @available(watchOS, unavailable)
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 8.0, *)
     public func disableAutocorrection(_ disable: Bool?) -> some View
 
 }
@@ -34154,7 +34367,7 @@ extension View {
     /// - Parameters:
     ///   - regions: the kinds of rectangles removed from the safe area
     ///     that should be ignored (i.e. added back to the safe area
-    ///     of the new child view.
+    ///     of the new child view).
     ///   - edges: the edges of the view that may be outset, any edges
     ///     not in this set will be unchanged, even if that edge is
     ///     abutting a safe area listed in `regions`.
@@ -34271,8 +34484,8 @@ extension View {
     /// uses this value when the view is selected to replace the
     /// partial text being currently edited of the associated search field.
     ///
-    /// On tvOS, the string that you provide to the ``View/searchCompletion(_:)``
-    /// modifier will be used when displaying the associated suggestion and when
+    /// On tvOS, the string that you provide to the this modifier will
+    /// be used when displaying the associated suggestion and when
     /// replacing the partial text of the search field.
     ///
     ///     SearchPlaceholderView()
@@ -34931,7 +35144,7 @@ extension View {
     ///             Text(" Button")
     ///         }
     ///         HStack {
-    ///             Text(" Slider").accentColor(Color.green)
+    ///             Text(" Slider").tint(.green)
     ///             Slider(value: $sliderValue, in: -100...100, step: 0.1)
     ///         }
     ///     }.preferredColorScheme(.dark)
@@ -36705,23 +36918,6 @@ extension View {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
-    /// Sets this view's color scheme.
-    ///
-    /// Use `colorScheme(_:)` to set the color scheme for the view to which you
-    /// apply it and any subviews. If you want to set the color scheme for all
-    /// views in the presentation, use ``View/preferredColorScheme(_:)``
-    /// instead.
-    ///
-    /// - Parameter colorScheme: The color scheme for this view.
-    ///
-    /// - Returns: A view that sets this view's color scheme.
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
-    @available(watchOS, introduced: 6.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
-    @inlinable public func colorScheme(_ colorScheme: ColorScheme) -> some View
-
-
     /// Scales images within the view according to one of the relative sizes
     /// available including small, medium, and large images sizes.
     ///
@@ -37122,6 +37318,54 @@ extension View {
 
 }
 
+extension View {
+
+    /// Adds a descriptor to a View that represents a chart to make
+    /// the chart's contents accessible to all users.
+    ///
+    /// Use this method to provide information about your chart view
+    /// to allow VoiceOver and other assistive technology users to
+    /// perceive and interact with your chart and its data.
+    ///
+    /// This may be applied to any View that represents a chart,
+    /// including Image and custom-rendered chart views.
+    ///
+    /// The `accessibilityChartDescriptor` modifier can be applied to -any-
+    /// view representing a chart, the simplest case being just an image of
+    /// a chart. The implementation details of the view aren't important,
+    /// only the fact that it represents a chart, and that the provided
+    /// chart descriptor accurately describes the content of the chart.
+    ///
+    /// - Parameter chartDescriptor: The ``AXChartDescriptorRepresentable``
+    ///  used to describe your chart and its data.
+    ///
+    /// Example usage:
+    ///
+    /// First define your `AXChartDescriptorRepresentable` type.
+    ///
+    ///    struct MyChartDescriptorRepresentable:
+    ///    AXChartDescriptorRepresentable {
+    ///        func makeChartDescriptor() -> AXChartDescriptor {
+    ///            // build and return your `AXChartDescriptor` here
+    ///        }
+    ///
+    ///        func updateChartDescriptor(_ descriptor: AXChartDescriptor) {
+    ///           // Update your chart descriptor with any new values, or
+    ///           // don't override if your chart doesn't have changing values.
+    ///        }
+    ///    }
+    ///
+    /// Then use the `accessibilityChartDescriptor` modifier to provide an
+    /// instance of your `AXChartDescriptorRepresentable` type to the view
+    /// representing your chart:
+    ///
+    ///    SomeChartView()
+    ///        .accessibilityChartDescriptor(MyChartDescriptorRepresentable())
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public func accessibilityChartDescriptor<R>(_ representable: R) -> some View where R : AXChartDescriptorRepresentable
+
+}
+
 @available(iOS 13.4, *)
 @available(macOS, unavailable)
 @available(tvOS, unavailable)
@@ -37205,7 +37449,7 @@ extension View {
     ///     match value. If you set the state value programmatically to the matching value, then
     ///     accessibility focus moves to the accessibility element of the modified view. SwiftUI sets
     ///     the value to `nil` if accessibility focus leaves the accessibility element associated with the
-    ///     modified view, and programatically setting the value to `nil` dismisses focus automatically.
+    ///     modified view, and programmatically setting the value to `nil` dismisses focus automatically.
     ///   - value: The value to match against when determining whether the
     ///     binding should change.
     /// - Returns: The modified view.
@@ -37406,7 +37650,7 @@ extension View {
     ///             viewModel.login()
     ///         }
     ///
-    /// You can use the  ``View.submitScope(_:)`` modifier to stop a submit
+    /// You can use the ``View/submitScope(_:)`` modifier to stop a submit
     /// trigger from a control from propagating higher up in the view hierarchy
     /// to higher ``View.onSubmit(of:_)`` modifiers.
     ///
@@ -37612,6 +37856,41 @@ extension View {
 
 }
 
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension View {
+
+    /// Changes whether text in this view is allowed to be selected by the
+    /// user.
+    ///
+    /// Enabling text selection allows the user to perform actions on the text
+    /// content, such as copy and paste. Enable selection in cases
+    /// where those operations are useful, like detailed information on
+    /// content or error descriptions.
+    ///
+    /// You can apply this method to an individual text view or to a
+    /// container of text views, as shown in the below example:
+    ///
+    ///     VStack {
+    ///         Text("Event Invite")
+    ///         Text(invite.date.formatted())
+    ///             .textSelection(.enabled)
+    ///
+    ///         List(invite.recipients) { recipient in
+    ///             VStack {
+    ///                 Text(recipient.name)
+    ///                 Text(recipient.email)
+    ///                     .foregroundStyle(SecondaryForegroundStyle())
+    ///             }
+    ///         }
+    ///         .textSelection(.enabled)
+    ///     }
+    ///
+    public func textSelection<S>(_ selectability: S) -> some View where S : TextSelectability
+
+}
+
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension View {
 
@@ -37672,7 +37951,7 @@ extension View {
     /// you want VoiceOver to speak a verbatim transcription of the text you provide. For example,
     /// given the text:
     ///
-    ///     Text("All the world's a stage," + 
+    ///     Text("All the world's a stage," +
     ///          "And all the men and women merely players;")
     ///          .speechAlwaysIncludesPunctuation()
     ///
@@ -37721,8 +38000,7 @@ extension View {
     ///
     /// - Parameter value: A Boolean value that determines if VoiceOver speaks
     ///   changes to text immediately or enqueues them behind existing speech.
-    ///   Defaults to `true`, causing announcements to interrupt existing
-    ///   speech.
+    ///   Defaults to `true`.
     public func speechAnnouncementsQueued(_ value: Bool = true) -> some View
 
 
@@ -37867,7 +38145,7 @@ extension View {
     /// When you set a role for a button using one of the values from the
     /// ``ButtonRole`` enumeration, SwiftUI styles the button according to
     /// its role. In the example above, the delete action appears in
-    /// ``Color/red`` because it has the ``ButtonRole/destructive`` role.
+    /// ``ShapeStyle/red`` because it has the ``ButtonRole/destructive`` role.
     /// If you want to set a different color — for example, to match the
     /// overall theme of your app's UI — add the ``View/tint(_:)``
     /// modifier to the button:
@@ -37915,6 +38193,7 @@ extension View {
     ///         The default is ``HorizontalEdge/trailing``.
     ///     - allowsFullSwipe: A Boolean value that indicates whether a full swipe
     ///         automatically performs the first action. The default is `true`.
+    ///     - content: The content of the swipe actions.
     public func swipeActions<T>(edge: HorizontalEdge = .trailing, allowsFullSwipe: Bool = true, @ViewBuilder content: () -> T) -> some View where T : View
 
 }
@@ -38500,7 +38779,7 @@ extension View {
     ///             Text("🍐").searchCompletion("pear")
     ///             Text("🍌").searchCompletion("banana")
     ///         }
-    ///         
+    ///
     /// The presentation of the suggestions depends on whether any
     /// content is provided to the `suggestions` parameter.
     ///
@@ -38545,8 +38824,10 @@ extension View {
     ///   - text: The text to display and edit in the search field.
     ///   - placement: The preferred placement of the search field within the
     ///     containing view hierarchy.
+    ///   - prompt: A `Text` representing the prompt of the search field
+    ///     which provides users with guidance on what to search for.
     @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-    public func searchable(text: Binding<String>, placement: SearchFieldPlacement = .automatic) -> some View
+    public func searchable(text: Binding<String>, placement: SearchFieldPlacement = .automatic, prompt: Text? = nil) -> some View
 
 
     /// Marks this view as searchable, which configures the display of a
@@ -38650,680 +38931,481 @@ extension View {
     ///     }
     ///
     /// - Parameters:
-    ///   - titleKey: The key for the localized title, describing the content
-    ///   being searched.
     ///   - text: The text to display and edit in the search field.
     ///   - placement: The preferred placement of the search field within the
     ///     containing view hierarchy.
+    ///   - prompt: The key for the localized prompt of the search field
+    ///     which provides users with guidance on what to search for.
     @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public func searchable(text: Binding<String>, placement: SearchFieldPlacement = .automatic, prompt: LocalizedStringKey) -> some View
+
+
+    /// Marks this view as searchable, which configures the display of a
+    /// search field.
+    ///
+    /// Use this modifier to create a user interface appropriate for searching.
+    ///
+    /// Wrapping a navigation view results in a column of the navigation
+    /// view displaying a search field. On iOS and iPadOS, the first or second
+    /// column displays the search field in a double, or triple column
+    /// navigation view respectively. On macOS, the search field is
+    /// placed in the trailing-most position of the toolbar.
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             PrimaryView()
+    ///             SecondaryView()
+    ///             Text("Select a primary and secondary item")
+    ///         }
+    ///         .searchable(text: $text)
+    ///     }
+    ///
+    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
+    /// results in that column displaying a search field.
+    ///
+    ///     struct DestinationPageView: View {
+    ///         @State private var text = ""
+    ///         var body: some View {
+    ///             Text("Destination Page")
+    ///                 .searchable(text: $text)
+    ///         }
+    ///     }
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             List {
+    ///                 NavigationLink(
+    ///                     "Destination Page",
+    ///                     destination: DestinationPageView()
+    ///                 )
+    ///             }
+    ///             Text("Select a destination")
+    ///         }
+    ///     }
+    ///
+    /// You can query the ``EnvironmentValues/isSearching`` property to
+    /// adjust the view hierarchy within the searchable modifier.
+    /// You can also provide search suggestions using the suggestions parameter
+    /// of searchable modifiers.
+    ///
+    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
+    /// to the views provided to the suggestions view. The system
+    /// uses these strings to replace the partial text being currently
+    /// edited of the associated search field. If a view has no
+    /// completion modifier, it's displayed as is.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             Text("🍎").searchCompletion("apple")
+    ///             Text("🍐").searchCompletion("pear")
+    ///             Text("🍌").searchCompletion("banana")
+    ///         }
+    /// The presentation of the suggestions depends on whether any
+    /// content is provided to the `suggestions` parameter.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             ForEach(viewModel.suggestedSearches) { suggestion in
+    ///                 Label(suggestion.title,  image: suggestion.image)
+    ///                     .searchCompletion(suggestion.text)
+    ///             }
+    ///         }
+    ///
+    /// If `viewModel.suggestedSearches` begins as an empty array, then
+    /// the suggestions aren't initially displayed. When the array
+    /// becomes populated, the suggestions are presented. Note that
+    /// the suggestions may be dismissed based on a user's action, like
+    /// moving the window of the app on macOS for example.
+    ///
+    /// > Note: On tvOS, searchable modifiers only support suggestions of type
+    /// ``Text``.
+    ///
+    /// You can associate an action to be invoked upon submission of the current
+    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
+    /// conjunction with the a searchable modifier.
+    ///
+    ///     @StateObject private var viewModel = ViewModel()
+    ///
+    ///     NavigationView {
+    ///         SidebarView()
+    ///         DetailView()
+    ///     }
+    ///     .searchable(
+    ///         text: $viewModel.searchText,
+    ///         placement: .sidebar
+    ///     ) {
+    ///         SuggestionsView()
+    ///     }
+    ///     .onSubmit(of: .search) {
+    ///         viewModel.submitCurrentSearchQuery()
+    ///     }
+    ///
+    /// - Parameters:
+    ///   - text: The text to display and edit in the search field.
+    ///   - placement: The preferred placement of the search field within the
+    ///     containing view hierarchy.
+    ///   - prompt: A string representing the prompt of the search field
+    ///     which provides users with guidance on what to search for.
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public func searchable<S>(text: Binding<String>, placement: SearchFieldPlacement = .automatic, prompt: S) -> some View where S : StringProtocol
+
+
+    /// Marks this view as searchable, which configures the display of a
+    /// search field.
+    ///
+    /// Use this modifier to create a user interface appropriate for searching.
+    ///
+    /// Wrapping a navigation view results in a column of the navigation
+    /// view displaying a search field. On iOS and iPadOS, the first or second
+    /// column displays the search field in a double, or triple column
+    /// navigation view respectively. On macOS, the search field is
+    /// placed in the trailing-most position of the toolbar.
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             PrimaryView()
+    ///             SecondaryView()
+    ///             Text("Select a primary and secondary item")
+    ///         }
+    ///         .searchable(text: $text)
+    ///     }
+    ///
+    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
+    /// results in that column displaying a search field.
+    ///
+    ///     struct DestinationPageView: View {
+    ///         @State private var text = ""
+    ///         var body: some View {
+    ///             Text("Destination Page")
+    ///                 .searchable(text: $text)
+    ///         }
+    ///     }
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             List {
+    ///                 NavigationLink(
+    ///                     "Destination Page",
+    ///                     destination: DestinationPageView()
+    ///                 )
+    ///             }
+    ///             Text("Select a destination")
+    ///         }
+    ///     }
+    ///
+    /// You can query the ``EnvironmentValues/isSearching`` property to
+    /// adjust the view hierarchy within the searchable modifier.
+    /// You can also provide search suggestions using the suggestions parameter
+    /// of searchable modifiers.
+    ///
+    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
+    /// to the views provided to the suggestions view. The system
+    /// uses these strings to replace the partial text being currently
+    /// edited of the associated search field. If a view has no
+    /// completion modifier, it's displayed as is.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             Text("🍎").searchCompletion("apple")
+    ///             Text("🍐").searchCompletion("pear")
+    ///             Text("🍌").searchCompletion("banana")
+    ///         }
+    /// The presentation of the suggestions depends on whether any
+    /// content is provided to the `suggestions` parameter.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             ForEach(viewModel.suggestedSearches) { suggestion in
+    ///                 Label(suggestion.title,  image: suggestion.image)
+    ///                     .searchCompletion(suggestion.text)
+    ///             }
+    ///         }
+    ///
+    /// If `viewModel.suggestedSearches` begins as an empty array, then
+    /// the suggestions aren't initially displayed. When the array
+    /// becomes populated, the suggestions are presented. Note that
+    /// the suggestions may be dismissed based on a user's action, like
+    /// moving the window of the app on macOS for example.
+    ///
+    /// > Note: On tvOS, searchable modifiers only support suggestions of type
+    /// ``Text``.
+    ///
+    /// You can associate an action to be invoked upon submission of the current
+    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
+    /// conjunction with the a searchable modifier.
+    ///
+    ///     @StateObject private var viewModel = ViewModel()
+    ///
+    ///     NavigationView {
+    ///         SidebarView()
+    ///         DetailView()
+    ///     }
+    ///     .searchable(
+    ///         text: $viewModel.searchText,
+    ///         placement: .sidebar
+    ///     ) {
+    ///         SuggestionsView()
+    ///     }
+    ///     .onSubmit(of: .search) {
+    ///         viewModel.submitCurrentSearchQuery()
+    ///     }
+    ///
+    /// - Parameters:
+    ///   - text: The text to display and edit in the search field.
+    ///   - placement: Where the search field should attempt to be
+    ///     placed based on the containing view hierarchy.
+    ///   - prompt: A `Text` representing the prompt of the search field
+    ///     which provides users with guidance on what to search for.
+    ///   - suggestions: A view builder that produces content that
+    ///     populates a list of suggestions.
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public func searchable<S>(text: Binding<String>, placement: SearchFieldPlacement = .automatic, prompt: Text? = nil, @ViewBuilder suggestions: () -> S) -> some View where S : View
+
+
+    /// Marks this view as searchable, which configures the display of a
+    /// search field.
+    ///
+    /// Use this modifier to create a user interface appropriate for searching.
+    ///
+    /// Wrapping a navigation view results in a column of the navigation
+    /// view displaying a search field. On iOS and iPadOS, the first or second
+    /// column displays the search field in a double, or triple column
+    /// navigation view respectively. On macOS, the search field is
+    /// placed in the trailing-most position of the toolbar.
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             PrimaryView()
+    ///             SecondaryView()
+    ///             Text("Select a primary and secondary item")
+    ///         }
+    ///         .searchable(text: $text)
+    ///     }
+    ///
+    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
+    /// results in that column displaying a search field.
+    ///
+    ///     struct DestinationPageView: View {
+    ///         @State private var text = ""
+    ///         var body: some View {
+    ///             Text("Destination Page")
+    ///                 .searchable(text: $text)
+    ///         }
+    ///     }
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             List {
+    ///                 NavigationLink(
+    ///                     "Destination Page",
+    ///                     destination: DestinationPageView()
+    ///                 )
+    ///             }
+    ///             Text("Select a destination")
+    ///         }
+    ///     }
+    ///
+    /// You can query the ``EnvironmentValues/isSearching`` property to
+    /// adjust the view hierarchy within the searchable modifier.
+    /// You can also provide search suggestions using the suggestions parameter
+    /// of searchable modifiers.
+    ///
+    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
+    /// to the views provided to the suggestions view. The system
+    /// uses these strings to replace the partial text being currently
+    /// edited of the associated search field. If a view has no
+    /// completion modifier, it's displayed as is.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             Text("🍎").searchCompletion("apple")
+    ///             Text("🍐").searchCompletion("pear")
+    ///             Text("🍌").searchCompletion("banana")
+    ///         }
+    /// The presentation of the suggestions depends on whether any
+    /// content is provided to the `suggestions` parameter.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             ForEach(viewModel.suggestedSearches) { suggestion in
+    ///                 Label(suggestion.title,  image: suggestion.image)
+    ///                     .searchCompletion(suggestion.text)
+    ///             }
+    ///         }
+    ///
+    /// If `viewModel.suggestedSearches` begins as an empty array, then
+    /// the suggestions aren't initially displayed. When the array
+    /// becomes populated, the suggestions are presented. Note that
+    /// the suggestions may be dismissed based on a user's action, like
+    /// moving the window of the app on macOS for example.
+    ///
+    /// > Note: On tvOS, searchable modifiers only support suggestions of type
+    /// ``Text``.
+    ///
+    /// You can associate an action to be invoked upon submission of the current
+    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
+    /// conjunction with the a searchable modifier.
+    ///
+    ///     @StateObject private var viewModel = ViewModel()
+    ///
+    ///     NavigationView {
+    ///         SidebarView()
+    ///         DetailView()
+    ///     }
+    ///     .searchable(
+    ///         text: $viewModel.searchText,
+    ///         placement: .sidebar
+    ///     ) {
+    ///         SuggestionsView()
+    ///     }
+    ///     .onSubmit(of: .search) {
+    ///         viewModel.submitCurrentSearchQuery()
+    ///     }
+    ///
+    /// - Parameters:
+    ///   - text: The text to display and edit in the search field.
+    ///   - placement: Where the search field should attempt to be
+    ///     placed based on the containing view hierarchy.
+    ///   - prompt: A key for the localized prompt of the search field
+    ///     which provides users with guidance on what to search for.
+    ///   - suggestions: A view builder that produces content that
+    ///     populates a list of suggestions.
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public func searchable<S>(text: Binding<String>, placement: SearchFieldPlacement = .automatic, prompt: LocalizedStringKey, @ViewBuilder suggestions: () -> S) -> some View where S : View
+
+
+    /// Marks this view as searchable, which configures the display of a
+    /// search field.
+    ///
+    /// Use this modifier to create a user interface appropriate for searching.
+    ///
+    /// Wrapping a navigation view results in a column of the navigation
+    /// view displaying a search field. On iOS and iPadOS, the first or second
+    /// column displays the search field in a double, or triple column
+    /// navigation view respectively. On macOS, the search field is
+    /// placed in the trailing-most position of the toolbar.
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             PrimaryView()
+    ///             SecondaryView()
+    ///             Text("Select a primary and secondary item")
+    ///         }
+    ///         .searchable(text: $text)
+    ///     }
+    ///
+    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
+    /// results in that column displaying a search field.
+    ///
+    ///     struct DestinationPageView: View {
+    ///         @State private var text = ""
+    ///         var body: some View {
+    ///             Text("Destination Page")
+    ///                 .searchable(text: $text)
+    ///         }
+    ///     }
+    ///
+    ///     var body: some View {
+    ///         NavigationView {
+    ///             List {
+    ///                 NavigationLink(
+    ///                     "Destination Page",
+    ///                     destination: DestinationPageView()
+    ///                 )
+    ///             }
+    ///             Text("Select a destination")
+    ///         }
+    ///     }
+    ///
+    /// You can query the ``EnvironmentValues/isSearching`` property to
+    /// adjust the view hierarchy within the searchable modifier.
+    /// You can also provide search suggestions using the suggestions parameter
+    /// of searchable modifiers.
+    ///
+    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
+    /// to the views provided to the suggestions view. The system
+    /// uses these strings to replace the partial text being currently
+    /// edited of the associated search field. If a view has no
+    /// completion modifier, it's displayed as is.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             Text("🍎").searchCompletion("apple")
+    ///             Text("🍐").searchCompletion("pear")
+    ///             Text("🍌").searchCompletion("banana")
+    ///         }
+    /// The presentation of the suggestions depends on whether any
+    /// content is provided to the `suggestions` parameter.
+    ///
+    ///     SearchPlaceholderView()
+    ///         .searchable(text: $text) {
+    ///             ForEach(viewModel.suggestedSearches) { suggestion in
+    ///                 Label(suggestion.title,  image: suggestion.image)
+    ///                     .searchCompletion(suggestion.text)
+    ///             }
+    ///         }
+    ///
+    /// If `viewModel.suggestedSearches` begins as an empty array, then
+    /// the suggestions aren't initially displayed. When the array
+    /// becomes populated, the suggestions are presented. Note that
+    /// the suggestions may be dismissed based on a user's action, like
+    /// moving the window of the app on macOS for example.
+    ///
+    /// > Note: On tvOS, searchable modifiers only support suggestions of type
+    /// ``Text``.
+    ///
+    /// You can associate an action to be invoked upon submission of the current
+    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
+    /// conjunction with the a searchable modifier.
+    ///
+    ///     @StateObject private var viewModel = ViewModel()
+    ///
+    ///     NavigationView {
+    ///         SidebarView()
+    ///         DetailView()
+    ///     }
+    ///     .searchable(
+    ///         text: $viewModel.searchText,
+    ///         placement: .sidebar
+    ///     ) {
+    ///         SuggestionsView()
+    ///     }
+    ///     .onSubmit(of: .search) {
+    ///         viewModel.submitCurrentSearchQuery()
+    ///     }
+    ///
+    /// - Parameters:
+    ///   - text: The text to display and edit in the search field.
+    ///   - placement: Where the search field should attempt to be
+    ///     placed based on the containing view hierarchy.
+    ///   - prompt: A string representing the prompt of the search field
+    ///     which provides users with guidance on what to search for.
+    ///   - suggestions: A view builder that produces content that
+    ///     populates a list of suggestions.
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    public func searchable<V, S>(text: Binding<String>, placement: SearchFieldPlacement = .automatic, prompt: S, @ViewBuilder suggestions: () -> V) -> some View where V : View, S : StringProtocol
+
+}
+
+extension View {
+
+    @available(*, deprecated, message: "Specify a prompt with the searchable modifier.")
     public func searchable(_ titleKey: LocalizedStringKey, text: Binding<String>, placement: SearchFieldPlacement = .automatic) -> some View
 
 
-    /// Marks this view as searchable, which configures the display of a
-    /// search field.
-    ///
-    /// Use this modifier to create a user interface appropriate for searching.
-    ///
-    /// Wrapping a navigation view results in a column of the navigation
-    /// view displaying a search field. On iOS and iPadOS, the first or second
-    /// column displays the search field in a double, or triple column
-    /// navigation view respectively. On macOS, the search field is
-    /// placed in the trailing-most position of the toolbar.
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             PrimaryView()
-    ///             SecondaryView()
-    ///             Text("Select a primary and secondary item")
-    ///         }
-    ///         .searchable(text: $text)
-    ///     }
-    ///
-    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
-    /// results in that column displaying a search field.
-    ///
-    ///     struct DestinationPageView: View {
-    ///         @State private var text = ""
-    ///         var body: some View {
-    ///             Text("Destination Page")
-    ///                 .searchable(text: $text)
-    ///         }
-    ///     }
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             List {
-    ///                 NavigationLink(
-    ///                     "Destination Page",
-    ///                     destination: DestinationPageView()
-    ///                 )
-    ///             }
-    ///             Text("Select a destination")
-    ///         }
-    ///     }
-    ///
-    /// You can query the ``EnvironmentValues/isSearching`` property to
-    /// adjust the view hierarchy within the searchable modifier.
-    /// You can also provide search suggestions using the suggestions parameter
-    /// of searchable modifiers.
-    ///
-    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
-    /// to the views provided to the suggestions view. The system
-    /// uses these strings to replace the partial text being currently
-    /// edited of the associated search field. If a view has no
-    /// completion modifier, it's displayed as is.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             Text("🍎").searchCompletion("apple")
-    ///             Text("🍐").searchCompletion("pear")
-    ///             Text("🍌").searchCompletion("banana")
-    ///         }
-    /// The presentation of the suggestions depends on whether any
-    /// content is provided to the `suggestions` parameter.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             ForEach(viewModel.suggestedSearches) { suggestion in
-    ///                 Label(suggestion.title,  image: suggestion.image)
-    ///                     .searchCompletion(suggestion.text)
-    ///             }
-    ///         }
-    ///
-    /// If `viewModel.suggestedSearches` begins as an empty array, then
-    /// the suggestions aren't initially displayed. When the array
-    /// becomes populated, the suggestions are presented. Note that
-    /// the suggestions may be dismissed based on a user's action, like
-    /// moving the window of the app on macOS for example.
-    ///
-    /// > Note: On tvOS, searchable modifiers only support suggestions of type
-    /// ``Text``.
-    ///
-    /// You can associate an action to be invoked upon submission of the current
-    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
-    /// conjunction with the a searchable modifier.
-    ///
-    ///     @StateObject private var viewModel = ViewModel()
-    ///
-    ///     NavigationView {
-    ///         SidebarView()
-    ///         DetailView()
-    ///     }
-    ///     .searchable(
-    ///         text: $viewModel.searchText,
-    ///         placement: .sidebar
-    ///     ) {
-    ///         SuggestionsView()
-    ///     }
-    ///     .onSubmit(of: .search) {
-    ///         viewModel.submitCurrentSearchQuery()
-    ///     }
-    ///
-    /// - Parameters:
-    ///   - title: The title of the search field, describing the content
-    ///     being searched.
-    ///   - text: The text to display and edit in the search field.
-    ///   - placement: The preferred placement of the search field within the
-    ///     containing view hierarchy.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    @available(*, deprecated, message: "Specify a prompt with the searchable modifier.")
     public func searchable<S>(_ title: S, text: Binding<String>, placement: SearchFieldPlacement = .automatic) -> some View where S : StringProtocol
 
 
-    /// Marks this view as searchable, which configures the display of a
-    /// search field.
-    ///
-    /// Use this modifier to create a user interface appropriate for searching.
-    ///
-    /// Wrapping a navigation view results in a column of the navigation
-    /// view displaying a search field. On iOS and iPadOS, the first or second
-    /// column displays the search field in a double, or triple column
-    /// navigation view respectively. On macOS, the search field is
-    /// placed in the trailing-most position of the toolbar.
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             PrimaryView()
-    ///             SecondaryView()
-    ///             Text("Select a primary and secondary item")
-    ///         }
-    ///         .searchable(text: $text)
-    ///     }
-    ///
-    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
-    /// results in that column displaying a search field.
-    ///
-    ///     struct DestinationPageView: View {
-    ///         @State private var text = ""
-    ///         var body: some View {
-    ///             Text("Destination Page")
-    ///                 .searchable(text: $text)
-    ///         }
-    ///     }
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             List {
-    ///                 NavigationLink(
-    ///                     "Destination Page",
-    ///                     destination: DestinationPageView()
-    ///                 )
-    ///             }
-    ///             Text("Select a destination")
-    ///         }
-    ///     }
-    ///
-    /// You can query the ``EnvironmentValues/isSearching`` property to
-    /// adjust the view hierarchy within the searchable modifier.
-    /// You can also provide search suggestions using the suggestions parameter
-    /// of searchable modifiers.
-    ///
-    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
-    /// to the views provided to the suggestions view. The system
-    /// uses these strings to replace the partial text being currently
-    /// edited of the associated search field. If a view has no
-    /// completion modifier, it's displayed as is.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             Text("🍎").searchCompletion("apple")
-    ///             Text("🍐").searchCompletion("pear")
-    ///             Text("🍌").searchCompletion("banana")
-    ///         }
-    /// The presentation of the suggestions depends on whether any
-    /// content is provided to the `suggestions` parameter.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             ForEach(viewModel.suggestedSearches) { suggestion in
-    ///                 Label(suggestion.title,  image: suggestion.image)
-    ///                     .searchCompletion(suggestion.text)
-    ///             }
-    ///         }
-    ///
-    /// If `viewModel.suggestedSearches` begins as an empty array, then
-    /// the suggestions aren't initially displayed. When the array
-    /// becomes populated, the suggestions are presented. Note that
-    /// the suggestions may be dismissed based on a user's action, like
-    /// moving the window of the app on macOS for example.
-    ///
-    /// > Note: On tvOS, searchable modifiers only support suggestions of type
-    /// ``Text``.
-    ///
-    /// You can associate an action to be invoked upon submission of the current
-    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
-    /// conjunction with the a searchable modifier.
-    ///
-    ///     @StateObject private var viewModel = ViewModel()
-    ///
-    ///     NavigationView {
-    ///         SidebarView()
-    ///         DetailView()
-    ///     }
-    ///     .searchable(
-    ///         text: $viewModel.searchText,
-    ///         placement: .sidebar
-    ///     ) {
-    ///         SuggestionsView()
-    ///     }
-    ///     .onSubmit(of: .search) {
-    ///         viewModel.submitCurrentSearchQuery()
-    ///     }
-    ///
-    /// - Parameters:
-    ///   - title: A text representing the title of the search field
-    ///     describing the content being searched.
-    ///   - text: The text to display and edit in the search field.
-    ///   - placement: The preferred placement of the search field within the
-    ///     containing view hierarchy.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    @available(*, deprecated, message: "Specify a prompt with the searchable modifier.")
     public func searchable(_ title: Text, text: Binding<String>, placement: SearchFieldPlacement = .automatic) -> some View
 
 
-    /// Marks this view as searchable, which configures the display of a
-    /// search field.
-    ///
-    /// Use this modifier to create a user interface appropriate for searching.
-    ///
-    /// Wrapping a navigation view results in a column of the navigation
-    /// view displaying a search field. On iOS and iPadOS, the first or second
-    /// column displays the search field in a double, or triple column
-    /// navigation view respectively. On macOS, the search field is
-    /// placed in the trailing-most position of the toolbar.
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             PrimaryView()
-    ///             SecondaryView()
-    ///             Text("Select a primary and secondary item")
-    ///         }
-    ///         .searchable(text: $text)
-    ///     }
-    ///
-    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
-    /// results in that column displaying a search field.
-    ///
-    ///     struct DestinationPageView: View {
-    ///         @State private var text = ""
-    ///         var body: some View {
-    ///             Text("Destination Page")
-    ///                 .searchable(text: $text)
-    ///         }
-    ///     }
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             List {
-    ///                 NavigationLink(
-    ///                     "Destination Page",
-    ///                     destination: DestinationPageView()
-    ///                 )
-    ///             }
-    ///             Text("Select a destination")
-    ///         }
-    ///     }
-    ///
-    /// You can query the ``EnvironmentValues/isSearching`` property to
-    /// adjust the view hierarchy within the searchable modifier.
-    /// You can also provide search suggestions using the suggestions parameter
-    /// of searchable modifiers.
-    ///
-    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
-    /// to the views provided to the suggestions view. The system
-    /// uses these strings to replace the partial text being currently
-    /// edited of the associated search field. If a view has no
-    /// completion modifier, it's displayed as is.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             Text("🍎").searchCompletion("apple")
-    ///             Text("🍐").searchCompletion("pear")
-    ///             Text("🍌").searchCompletion("banana")
-    ///         }
-    /// The presentation of the suggestions depends on whether any
-    /// content is provided to the `suggestions` parameter.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             ForEach(viewModel.suggestedSearches) { suggestion in
-    ///                 Label(suggestion.title,  image: suggestion.image)
-    ///                     .searchCompletion(suggestion.text)
-    ///             }
-    ///         }
-    ///
-    /// If `viewModel.suggestedSearches` begins as an empty array, then
-    /// the suggestions aren't initially displayed. When the array
-    /// becomes populated, the suggestions are presented. Note that
-    /// the suggestions may be dismissed based on a user's action, like
-    /// moving the window of the app on macOS for example.
-    ///
-    /// > Note: On tvOS, searchable modifiers only support suggestions of type
-    /// ``Text``.
-    ///
-    /// You can associate an action to be invoked upon submission of the current
-    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
-    /// conjunction with the a searchable modifier.
-    ///
-    ///     @StateObject private var viewModel = ViewModel()
-    ///
-    ///     NavigationView {
-    ///         SidebarView()
-    ///         DetailView()
-    ///     }
-    ///     .searchable(
-    ///         text: $viewModel.searchText,
-    ///         placement: .sidebar
-    ///     ) {
-    ///         SuggestionsView()
-    ///     }
-    ///     .onSubmit(of: .search) {
-    ///         viewModel.submitCurrentSearchQuery()
-    ///     }
-    ///
-    /// - Parameters:
-    ///   - text: The text to display and edit in the search field.
-    ///   - placement: Where the search field should attempt to be
-    ///   placed based on the containing view hierarchy.
-    ///   - results: A view builder that produces the results
-    ///   of a search to be displayed while the search field is editing.
-    ///   - suggestions: A view builder that produces content that
-    ///   populates a list of suggestions.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-    public func searchable<S>(text: Binding<String>, placement: SearchFieldPlacement = .automatic, @ViewBuilder suggestions: () -> S) -> some View where S : View
-
-
-    /// Marks this view as searchable, which configures the display of a
-    /// search field.
-    ///
-    /// Use this modifier to create a user interface appropriate for searching.
-    ///
-    /// Wrapping a navigation view results in a column of the navigation
-    /// view displaying a search field. On iOS and iPadOS, the first or second
-    /// column displays the search field in a double, or triple column
-    /// navigation view respectively. On macOS, the search field is
-    /// placed in the trailing-most position of the toolbar.
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             PrimaryView()
-    ///             SecondaryView()
-    ///             Text("Select a primary and secondary item")
-    ///         }
-    ///         .searchable(text: $text)
-    ///     }
-    ///
-    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
-    /// results in that column displaying a search field.
-    ///
-    ///     struct DestinationPageView: View {
-    ///         @State private var text = ""
-    ///         var body: some View {
-    ///             Text("Destination Page")
-    ///                 .searchable(text: $text)
-    ///         }
-    ///     }
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             List {
-    ///                 NavigationLink(
-    ///                     "Destination Page",
-    ///                     destination: DestinationPageView()
-    ///                 )
-    ///             }
-    ///             Text("Select a destination")
-    ///         }
-    ///     }
-    ///
-    /// You can query the ``EnvironmentValues/isSearching`` property to
-    /// adjust the view hierarchy within the searchable modifier.
-    /// You can also provide search suggestions using the suggestions parameter
-    /// of searchable modifiers.
-    ///
-    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
-    /// to the views provided to the suggestions view. The system
-    /// uses these strings to replace the partial text being currently
-    /// edited of the associated search field. If a view has no
-    /// completion modifier, it's displayed as is.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             Text("🍎").searchCompletion("apple")
-    ///             Text("🍐").searchCompletion("pear")
-    ///             Text("🍌").searchCompletion("banana")
-    ///         }
-    /// The presentation of the suggestions depends on whether any
-    /// content is provided to the `suggestions` parameter.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             ForEach(viewModel.suggestedSearches) { suggestion in
-    ///                 Label(suggestion.title,  image: suggestion.image)
-    ///                     .searchCompletion(suggestion.text)
-    ///             }
-    ///         }
-    ///
-    /// If `viewModel.suggestedSearches` begins as an empty array, then
-    /// the suggestions aren't initially displayed. When the array
-    /// becomes populated, the suggestions are presented. Note that
-    /// the suggestions may be dismissed based on a user's action, like
-    /// moving the window of the app on macOS for example.
-    ///
-    /// > Note: On tvOS, searchable modifiers only support suggestions of type
-    /// ``Text``.
-    ///
-    /// You can associate an action to be invoked upon submission of the current
-    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
-    /// conjunction with the a searchable modifier.
-    ///
-    ///     @StateObject private var viewModel = ViewModel()
-    ///
-    ///     NavigationView {
-    ///         SidebarView()
-    ///         DetailView()
-    ///     }
-    ///     .searchable(
-    ///         text: $viewModel.searchText,
-    ///         placement: .sidebar
-    ///     ) {
-    ///         SuggestionsView()
-    ///     }
-    ///     .onSubmit(of: .search) {
-    ///         viewModel.submitCurrentSearchQuery()
-    ///     }
-    ///
-    /// - Parameters:
-    ///   - titleKey: The key for the localized title, describing the content
-    ///     being searched.
-    ///   - text: The text to display and edit in the search field.
-    ///   - placement: Where the search field should attempt to be
-    ///     placed based on the containing view hierarchy.
-    ///   - suggestions: A view builder that produces content that
-    ///     populates a list of suggestions.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    @available(*, deprecated, message: "Specify a prompt with the searchable modifier.")
     public func searchable<S>(_ titleKey: LocalizedStringKey, text: Binding<String>, placement: SearchFieldPlacement = .automatic, @ViewBuilder suggestions: () -> S) -> some View where S : View
 
 
-    /// Marks this view as searchable, which configures the display of a
-    /// search field.
-    ///
-    /// Use this modifier to create a user interface appropriate for searching.
-    ///
-    /// Wrapping a navigation view results in a column of the navigation
-    /// view displaying a search field. On iOS and iPadOS, the first or second
-    /// column displays the search field in a double, or triple column
-    /// navigation view respectively. On macOS, the search field is
-    /// placed in the trailing-most position of the toolbar.
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             PrimaryView()
-    ///             SecondaryView()
-    ///             Text("Select a primary and secondary item")
-    ///         }
-    ///         .searchable(text: $text)
-    ///     }
-    ///
-    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
-    /// results in that column displaying a search field.
-    ///
-    ///     struct DestinationPageView: View {
-    ///         @State private var text = ""
-    ///         var body: some View {
-    ///             Text("Destination Page")
-    ///                 .searchable(text: $text)
-    ///         }
-    ///     }
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             List {
-    ///                 NavigationLink(
-    ///                     "Destination Page",
-    ///                     destination: DestinationPageView()
-    ///                 )
-    ///             }
-    ///             Text("Select a destination")
-    ///         }
-    ///     }
-    ///
-    /// You can query the ``EnvironmentValues/isSearching`` property to
-    /// adjust the view hierarchy within the searchable modifier.
-    /// You can also provide search suggestions using the suggestions parameter
-    /// of searchable modifiers.
-    ///
-    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
-    /// to the views provided to the suggestions view. The system
-    /// uses these strings to replace the partial text being currently
-    /// edited of the associated search field. If a view has no
-    /// completion modifier, it's displayed as is.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             Text("🍎").searchCompletion("apple")
-    ///             Text("🍐").searchCompletion("pear")
-    ///             Text("🍌").searchCompletion("banana")
-    ///         }
-    /// The presentation of the suggestions depends on whether any
-    /// content is provided to the `suggestions` parameter.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             ForEach(viewModel.suggestedSearches) { suggestion in
-    ///                 Label(suggestion.title,  image: suggestion.image)
-    ///                     .searchCompletion(suggestion.text)
-    ///             }
-    ///         }
-    ///
-    /// If `viewModel.suggestedSearches` begins as an empty array, then
-    /// the suggestions aren't initially displayed. When the array
-    /// becomes populated, the suggestions are presented. Note that
-    /// the suggestions may be dismissed based on a user's action, like
-    /// moving the window of the app on macOS for example.
-    ///
-    /// > Note: On tvOS, searchable modifiers only support suggestions of type
-    /// ``Text``.
-    ///
-    /// You can associate an action to be invoked upon submission of the current
-    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
-    /// conjunction with the a searchable modifier.
-    ///
-    ///     @StateObject private var viewModel = ViewModel()
-    ///
-    ///     NavigationView {
-    ///         SidebarView()
-    ///         DetailView()
-    ///     }
-    ///     .searchable(
-    ///         text: $viewModel.searchText,
-    ///         placement: .sidebar
-    ///     ) {
-    ///         SuggestionsView()
-    ///     }
-    ///     .onSubmit(of: .search) {
-    ///         viewModel.submitCurrentSearchQuery()
-    ///     }
-    ///
-    /// - Parameters:
-    ///   - title: The title of the search field, describing the content
-    ///   being searched.
-    ///   - text: The text to display and edit in the search field.
-    ///   - placement: Where the search field should attempt to be
-    ///     placed based on the containing view hierarchy.
-    ///   - suggestions: A view builder that produces content that
-    ///     populates a list of suggestions.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-    public func searchable<V, S>(_ title: S, text: Binding<String>, placement: SearchFieldPlacement = .automatic, @ViewBuilder suggestions: () -> V) -> some View where V : View, S : StringProtocol
-
-
-    /// Marks this view as searchable, which configures the display of a
-    /// search field.
-    ///
-    /// Use this modifier to create a user interface appropriate for searching.
-    ///
-    /// Wrapping a navigation view results in a column of the navigation
-    /// view displaying a search field. On iOS and iPadOS, the first or second
-    /// column displays the search field in a double, or triple column
-    /// navigation view respectively. On macOS, the search field is
-    /// placed in the trailing-most position of the toolbar.
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             PrimaryView()
-    ///             SecondaryView()
-    ///             Text("Select a primary and secondary item")
-    ///         }
-    ///         .searchable(text: $text)
-    ///     }
-    ///
-    /// On iOS, iPadOS, or watchOS, wrapping a specific column of a navigation view
-    /// results in that column displaying a search field.
-    ///
-    ///     struct DestinationPageView: View {
-    ///         @State private var text = ""
-    ///         var body: some View {
-    ///             Text("Destination Page")
-    ///                 .searchable(text: $text)
-    ///         }
-    ///     }
-    ///
-    ///     var body: some View {
-    ///         NavigationView {
-    ///             List {
-    ///                 NavigationLink(
-    ///                     "Destination Page",
-    ///                     destination: DestinationPageView()
-    ///                 )
-    ///             }
-    ///             Text("Select a destination")
-    ///         }
-    ///     }
-    ///
-    /// You can query the ``EnvironmentValues/isSearching`` property to
-    /// adjust the view hierarchy within the searchable modifier.
-    /// You can also provide search suggestions using the suggestions parameter
-    /// of searchable modifiers.
-    ///
-    /// Use the ``View/searchCompletion(_:)`` modifier to associate strings
-    /// to the views provided to the suggestions view. The system
-    /// uses these strings to replace the partial text being currently
-    /// edited of the associated search field. If a view has no
-    /// completion modifier, it's displayed as is.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             Text("🍎").searchCompletion("apple")
-    ///             Text("🍐").searchCompletion("pear")
-    ///             Text("🍌").searchCompletion("banana")
-    ///         }
-    /// The presentation of the suggestions depends on whether any
-    /// content is provided to the `suggestions` parameter.
-    ///
-    ///     SearchPlaceholderView()
-    ///         .searchable(text: $text) {
-    ///             ForEach(viewModel.suggestedSearches) { suggestion in
-    ///                 Label(suggestion.title,  image: suggestion.image)
-    ///                     .searchCompletion(suggestion.text)
-    ///             }
-    ///         }
-    ///
-    /// If `viewModel.suggestedSearches` begins as an empty array, then
-    /// the suggestions aren't initially displayed. When the array
-    /// becomes populated, the suggestions are presented. Note that
-    /// the suggestions may be dismissed based on a user's action, like
-    /// moving the window of the app on macOS for example.
-    ///
-    /// > Note: On tvOS, searchable modifiers only support suggestions of type
-    /// ``Text``.
-    ///
-    /// You can associate an action to be invoked upon submission of the current
-    /// search query by using an ``View/onSubmit(of:_:)`` modifier in
-    /// conjunction with the a searchable modifier.
-    ///
-    ///     @StateObject private var viewModel = ViewModel()
-    ///
-    ///     NavigationView {
-    ///         SidebarView()
-    ///         DetailView()
-    ///     }
-    ///     .searchable(
-    ///         text: $viewModel.searchText,
-    ///         placement: .sidebar
-    ///     ) {
-    ///         SuggestionsView()
-    ///     }
-    ///     .onSubmit(of: .search) {
-    ///         viewModel.submitCurrentSearchQuery()
-    ///     }
-    ///
-    /// - Parameters:
-    ///   - title: A text representing the title of the search field
-    ///     describing the content being searched.
-    ///   - text: The text to display and edit in the search field.
-    ///   - placement: Where the search field should attempt to be
-    ///     placed based on the containing view hierarchy.
-    ///   - suggestions: A view builder that produces content that
-    ///     populates a list of suggestions.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    @available(*, deprecated, message: "Specify a prompt with the searchable modifier.")
     public func searchable<S>(_ title: Text, text: Binding<String>, placement: SearchFieldPlacement = .automatic, @ViewBuilder suggestions: () -> S) -> some View where S : View
 
 }
@@ -39750,13 +39832,6 @@ extension View {
     /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
     public func accessibilityLabel(_ label: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
-    /// you can provide the current volume setting, like "60%", using accessibilityValue().
-    public func accessibilityValue(_ valueDescription: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
     /// Communicates to the user what happens after performing the view's
     /// action.
     ///
@@ -39776,7 +39851,7 @@ extension View {
     /// - Parameter inputLabels: An array of Text elements to use as input labels.
     public func accessibilityInputLabels(_ inputLabels: [Text]) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 
-    /// Uses the string you specifiy to identify the view.
+    /// Uses the string you specify to identify the view.
     ///
     /// Use this value for testing. It isn't visible to the user.
     public func accessibilityIdentifier(_ identifier: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
@@ -39806,20 +39881,6 @@ extension View {
     /// Don't include text in the label that repeats information that users already have. For example,
     /// don't use the label "Play button" because a button already has a trait that identifies it as a button.
     public func accessibilityLabel<S>(_ label: S) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
-    /// you can provide the current volume setting, like "60%", using accessibilityValue().
-    public func accessibilityValue(_ valueKey: LocalizedStringKey) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
-    /// you can provide the current volume setting, like "60%", using accessibilityValue().
-    public func accessibilityValue<S>(_ value: S) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
 
     /// Communicates to the user what happens after performing the view's
     /// action.
@@ -39876,17 +39937,6 @@ extension View {
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
     @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityLabel(_:)")
     public func accessibility(label: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
-
-    /// Adds a textual description of the value that the view contains.
-    ///
-    /// Use this method to describe the value represented by a view, but only if that's different than the
-    /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
-    /// you can provide the current volume setting, like "60%", using accessibility(value:).
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
-    public func accessibility(value: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 
     /// Communicates to the user what happens after performing the view's
     /// action.
@@ -40241,7 +40291,7 @@ extension View {
     ///
     ///     struct Sheet: View {
     ///         @State private var acceptedTerms = false
-    ///         
+    ///
     ///         var body: some View {
     ///             Form {
     ///                 Button("Accept Terms") {
@@ -40461,6 +40511,26 @@ extension View {
     ///     }
     ///
     public func accessibilityScrollAction(_ handler: @escaping (Edge) -> Void) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+}
+
+extension View {
+
+    /// Sets this view's color scheme.
+    ///
+    /// Use `colorScheme(_:)` to set the color scheme for the view to which you
+    /// apply it and any subviews. If you want to set the color scheme for all
+    /// views in the presentation, use ``View/preferredColorScheme(_:)``
+    /// instead.
+    ///
+    /// - Parameter colorScheme: The color scheme for this view.
+    ///
+    /// - Returns: A view that sets this view's color scheme.
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
+    @available(watchOS, introduced: 6.0, deprecated: 100000.0, renamed: "preferredColorScheme(_:)")
+    @inlinable public func colorScheme(_ colorScheme: ColorScheme) -> some View
+
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -41401,10 +41471,6 @@ extension View {
     /// - Parameter tint: The tint ``Color`` to apply.
     @inlinable public func tint(_ tint: Color?) -> some View
 
-
-    @available(*, deprecated, message: "Use version that takes optional")
-    public func tint(_ tint: Color) -> some View
-
 }
 
 @available(iOS 14.0, macOS 11.0, *)
@@ -41617,6 +41683,45 @@ extension View {
     /// - Parameter transform: A ``ProjectionTransform`` to apply to the view.
     @inlinable public func projectionEffect(_ transform: ProjectionTransform) -> some View
 
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+extension View {
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ valueDescription: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue(_ valueKey: LocalizedStringKey) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibilityLabel(),
+    /// you can provide the current volume setting, like "60%", using accessibilityValue().
+    public func accessibilityValue<S>(_ value: S) -> ModifiedContent<Self, AccessibilityAttachmentModifier> where S : StringProtocol
+}
+
+extension View {
+
+    /// Adds a textual description of the value that the view contains.
+    ///
+    /// Use this method to describe the value represented by a view, but only if that's different than the
+    /// view's label. For example, for a slider that you label as "Volume" using accessibility(label:),
+    /// you can provide the current volume setting, like "60%", using accessibility(value:).
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    @available(watchOS, introduced: 6, deprecated: 100000.0, renamed: "accessibilityValue(_:)")
+    public func accessibility(value: Text) -> ModifiedContent<Self, AccessibilityAttachmentModifier>
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -42916,28 +43021,39 @@ extension CGFloat : VectorArithmetic {
 
 extension AttributeScopes {
 
+    /// A property for accessing the attribute scopes defined by SwiftUI.
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
     public var swiftUI: AttributeScopes.SwiftUIAttributes.Type { get }
 
+    /// Attribute scopes defined by SwiftUI.
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
     public struct SwiftUIAttributes : AttributeScope {
 
+        /// A property for accessing a font attribute.
         public let font: AttributeScopes.SwiftUIAttributes.FontAttribute
 
+        /// A property for accessing a foreground color attribute.
         public let foregroundColor: AttributeScopes.SwiftUIAttributes.ForegroundColorAttribute
 
+        /// A property for accessing a background color attribute.
         public let backgroundColor: AttributeScopes.SwiftUIAttributes.BackgroundColorAttribute
 
+        /// A property for accessing a strikethrough color attribute.
         public let strikethroughColor: AttributeScopes.SwiftUIAttributes.StrikethroughColorAttribute
 
+        /// A property for accessing an underline attribute.
         public let underlineColor: AttributeScopes.SwiftUIAttributes.UnderlineColorAttribute
 
+        /// A property for accessing a kerning attribute.
         public let kern: AttributeScopes.SwiftUIAttributes.KerningAttribute
 
+        /// A property for accessing a tracking attribute.
         public let tracking: AttributeScopes.SwiftUIAttributes.TrackingAttribute
 
+        /// A property for accessing a baseline offset attribute.
         public let baselineOffset: AttributeScopes.SwiftUIAttributes.BaselineOffsetAttribute
 
+        /// A property for accessing attributes defined by the Foundation framework.
         public let foundation: AttributeScopes.FoundationAttributes
 
         public typealias DecodingConfiguration = AttributeScopeCodableConfiguration
