@@ -5,6 +5,7 @@
 
 This is a simple GitHub repository that stores the generated Swift interface for SwiftUI, as produced by various versions of Xcode. This makes it easy to see when changes were introduced and compare them over time.
 
+
 ## Version diffs
 
 Not all Xcode versions introduce SwiftUI changes, so I’ve marked in bold the ones that do.
@@ -33,6 +34,8 @@ Not all Xcode versions introduce SwiftUI changes, so I’ve marked in bold the o
 ### Xcode 13
 * **[Xcode 12.5 to 13.0b1](https://github.com/twostraws/swiftui-changelog/commit/b0bc31a06d40766eee1a71b7a4b85010a180d020)**
 * **[Xcode 13.0b1 to 13.0b2](https://github.com/twostraws/swiftui-changelog/commit/69b75897198917c42bceabca52065c8139c1c9ff)**
+* **[Xcode 13.0b2 to 13.0b3](https://github.com/twostraws/swiftui-changelog/commit/177e8c99f8064fec2daeb0660ca6cf6e6ac85d53)**
+
 
 ## Generated Swift interfaces
 
@@ -58,6 +61,8 @@ These are the raw generated Swift interfaces for each Xcode version, prefixed wi
 * [Xcode 12.5](https://github.com/twostraws/swiftui-changelog/blob/e76bb0f0dc6fdd80f7a7edcd19ab051768aa38cd/generated-interface.swift)
 * [Xcode 13.0b1](https://github.com/twostraws/swiftui-changelog/blob/b0bc31a06d40766eee1a71b7a4b85010a180d020/generated-interface.swift)
 * [Xcode 13.0b2](https://github.com/twostraws/swiftui-changelog/blob/69b75897198917c42bceabca52065c8139c1c9ff/generated-interface.swift)
+* [Xcode 13.0b3](https://github.com/twostraws/swiftui-changelog/blob/177e8c99f8064fec2daeb0660ca6cf6e6ac85d53/generated-interface.swift)
+
 
 ## About
 
