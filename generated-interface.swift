@@ -1,4 +1,4 @@
-// Xcode 13.0b2
+// Xcode 13.0b3
 
 import Accessibility
 import Combine
@@ -1270,7 +1270,7 @@ public struct AccessibilityTraits : SetAlgebra {
 
     /// The accessibility element frequently updates its label or value.
     ///
-    /// Include this trait when you want an assistive application to poll for
+    /// Use this trait when you want an assistive technology to poll for
     /// changes when it needs updated information. For example, you might use
     /// this trait to characterize the readout of a stopwatch.
     public static let updatesFrequently: AccessibilityTraits
@@ -1291,8 +1291,11 @@ public struct AccessibilityTraits : SetAlgebra {
     /// finishes reading the text within it.
     public static let causesPageTurn: AccessibilityTraits
 
-    /// The siblings of this accessibility element will be ignored by
-    /// accessibility.
+    /// The accessibility element is modal.
+    ///
+    /// Use this trait to restrict which accessibility elements an assistive
+    /// technology can navigate. When a modal accessibility element is visible,
+    /// sibling accessibility elements that are not modal are ignored.
     public static let isModal: AccessibilityTraits
 
     /// Creates an empty set.
@@ -1684,7 +1687,7 @@ public struct ActionSheet {
 /// The alert handles its own dismissal when the user taps one of the buttons in the alert, by setting
 /// the bound `isPresented` value back to `false`.
 @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "use `View.alert(title:isPresented:presenting::actions:) instead.")
-@available(macOS, introduced: 10.15, deprecated: 10000.0, message: "use `View.alert(title:isPresented:presenting::actions:) instead.")
+@available(macOS, introduced: 10.15, deprecated: 100000.0, message: "use `View.alert(title:isPresented:presenting::actions:) instead.")
 @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "use `View.alert(title:isPresented:presenting::actions:) instead.")
 @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "use `View.alert(title:isPresented:presenting::actions:) instead.")
 public struct Alert {
@@ -2030,27 +2033,28 @@ extension Angle : Sendable {
 /// with the gradient.
 ///
 /// When using an angular gradient as a shape style, you can also use
-/// ``ShapeStyle/angular(_:center:startAngle:endAngle:)``.
+/// ``ShapeStyle/angularGradient(_:center:startAngle:endAngle:)``,
+/// ``ShapeStyle/conicGradient(_:center:angle:)``, or similar methods.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct AngularGradient : ShapeStyle, View {
 
     /// Creates an angular gradient.
     public init(gradient: Gradient, center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero)
 
-    /// Creates an angular gradient that completes a full turn.
+    /// Creates an angular gradient from a collection of colors.
+    public init(colors: [Color], center: UnitPoint, startAngle: Angle, endAngle: Angle)
+
+    /// Creates an angular gradient from a collection of color stops.
+    public init(stops: [Gradient.Stop], center: UnitPoint, startAngle: Angle, endAngle: Angle)
+
+    /// Creates a conic gradient that completes a full turn.
     public init(gradient: Gradient, center: UnitPoint, angle: Angle = .zero)
 
-    /// Creates an angular gradient from a collection of colors.
-    public init(colors: [Color], center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero)
-
-    /// Creates an angular gradient from a collection of colors that completes
+    /// Creates a conic gradient from a collection of colors that completes
     /// a full turn.
     public init(colors: [Color], center: UnitPoint, angle: Angle = .zero)
 
-    /// Creates an angular gradient from a collection of color stops.
-    public init(stops: [Gradient.Stop], center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero)
-
-    /// Creates an angular gradient from a collection of color stops that
+    /// Creates a conic gradient from a collection of color stops that
     /// completes a full turn.
     public init(stops: [Gradient.Stop], center: UnitPoint, angle: Angle = .zero)
 
@@ -2374,6 +2378,10 @@ public struct AnimationTimelineSchedule : TimelineSchedule {
     ///     - minimumInterval: The minimum interval to update the schedule at.
     ///     Pass nil to let the system pick an appropriate update interval.
     ///     - paused: If the schedule should stop generating updates.
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.animation(minimumInterval:paused:)` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.animation(minimumInterval:paused:)` instead.")
+    @available(tvOS, introduced: 15.0, deprecated: 15.0, message: "Use `.animation(minimumInterval:paused:)` instead.")
+    @available(watchOS, introduced: 8.0, deprecated: 8.0, message: "Use `.animation(minimumInterval:paused:)` instead.")
     public init(minimumInterval: Double? = nil, paused: Bool = false)
 
     /// Returns entries at the frequency of the animation schedule.
@@ -2440,6 +2448,14 @@ public struct AnimationTimelineSchedule : TimelineSchedule {
 
     /// The type of gesture representing the body of `Self`.
     public typealias Body = Never
+}
+
+/// A type-erased ShapeStyle value.
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@frozen public struct AnyShapeStyle : ShapeStyle {
+
+    /// Create an instance from `style`.
+    public init<S>(_ style: S) where S : ShapeStyle
 }
 
 /// A type-erased transition.
@@ -2925,71 +2941,154 @@ extension AppStorage {
 
 /// A view that asynchronously loads and displays an image.
 ///
-/// Loading an image from a URL uses the shared URLSession.
+/// This view uses the shared
+/// <doc://com.apple.documentation/documentation/Foundation/URLSession>
+/// instance to load an image from the specified URL, and then display it.
+/// For example, you can display an icon that's stored on a server:
+///
+///     AsyncImage(url: URL(string: "https://example.com/icon.png"))
+///         .frame(width: 200, height: 200)
+///
+/// Until the image loads, the view displays a standard placeholder that
+/// fills the available space. After the load completes successfully, the view
+/// updates to display the image. In the example above, the icon is smaller
+/// than the frame, and so appears smaller than the placeholder.
+///
+/// ![A diagram that shows a grey box on the left, the SwiftUI icon on the
+/// right, and an arrow pointing from the first to the second. The icon
+/// is about half the size of the grey box.](AsyncImage-1)
+///
+/// You can specify a custom placeholder using
+/// ``init(url:scale:content:placeholder:)``. With this initializer, you can
+/// also use the `content` parameter to manipulate the loaded image.
+/// For example, you can add a modifier to make the loaded image resizable:
+///
+///     AsyncImage(url: URL(string: "https://example.com/icon.png")) { image in
+///         image.resizable()
+///     } placeholder: {
+///         ProgressView()
+///     }
+///     .frame(width: 50, height: 50)
+///
+/// For this example, SwiftUI shows a ``ProgressView`` first, and then the
+/// image scaled to fit in the specified frame:
+///
+/// ![A diagram that shows a progress view on the left, the SwiftUI icon on the
+/// right, and an arrow pointing from the first to the second.](AsyncImage-2)
+///
+/// > Important: You can't apply image-specific modifiers, like
+/// ``Image/resizable(capInsets:resizingMode:)``, directly to an `AsyncImage`.
+/// Instead, apply them to the ``Image`` instance that your `content`
+/// closure gets when defining the view's appearance.
+///
+/// To gain more control over the loading process, use the
+/// ``init(url:scale:transaction:content:)`` initializer, which takes a
+/// `content` closure that receives an ``AsyncImagePhase`` to indicate
+/// the state of the loading operation. Return a view that's appropriate
+/// for the current phase:
+///
+///     AsyncImage(url: URL(string: "https://example.com/icon.png")) { phase in
+///         if let image = phase.image {
+///             image // Displays the loaded image.
+///         } else if phase.error != nil {
+///             Color.red // Indicates an error.
+///         } else {
+///             Color.blue // Acts as a placeholder.
+///         }
+///     }
+///
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public struct AsyncImage<Content> : View where Content : View {
 
-    /// Loads and displays an image from the given URL.
+    /// Loads and displays an image from the specified URL.
     ///
-    /// When no image is available, standard placeholder content is shown.
+    /// Until the image loads, SwiftUI displays a default placeholder. When
+    /// the load operation completes successfully, SwiftUI updates the
+    /// view to show the loaded image. If the operation fails, SwiftUI
+    /// continues to display the placeholder. The following example loads
+    /// and displays an icon from an example server:
     ///
-    /// In the example below, the image from the specified URL is loaded and shown.
+    ///     AsyncImage(url: URL(string: "https://example.com/icon.png"))
     ///
-    ///     AsyncImage(url: URL(string: "https://example.com/screenshot.png"))
+    /// If you want to customize the placeholder or apply image-specific
+    /// modifiers --- like ``Image/resizable(capInsets:resizingMode:)`` ---
+    /// to the loaded image, use the ``init(url:scale:content:placeholder:)``
+    /// initializer instead.
     ///
     /// - Parameters:
-    ///   - url: The URL for the image to be shown.
-    ///   - scale: The scale to use for the image.
+    ///   - url: The URL of the image to display.
+    ///   - scale: The scale to use for the image. The default is `1`. Set a
+    ///     different value when loading images designed for higher resolution
+    ///     displays. For example, set a value of `2` for an image that you
+    ///     would name with the `@2x` suffix if stored in a file on disk.
     public init(url: URL?, scale: CGFloat = 1) where Content == Image
 
-    /// Loads and displays an image from the given URL.
+    /// Loads and displays a modifiable image from the specified URL using
+    /// a custom placeholder until the image loads.
     ///
-    /// When an image is loaded, the `image` content is shown; when no image is
-    /// available, the `placeholder` is shown.
+    /// Until the image loads, SwiftUI displays the placeholder view that
+    /// you specify. When the load operation completes successfully, SwiftUI
+    /// updates the view to show content that you specify, which you
+    /// create using the loaded image. For example, you can show a green
+    /// placeholder, followed by a tiled version of the loaded image:
     ///
-    /// In the example below, the image from the specified URL is loaded and
-    /// shown as a tiled resizable image. While it is loading, a green
-    /// placeholder is shown.
-    ///
-    ///     AsyncImage(url: URL(string: "https://example.com/tile.png")) { image in
+    ///     AsyncImage(url: URL(string: "https://example.com/icon.png")) { image in
     ///         image.resizable(resizingMode: .tile)
     ///     } placeholder: {
     ///         Color.green
     ///     }
     ///
+    /// If the load operation fails, SwiftUI continues to display the
+    /// placeholder. To be able to display a different view on a load error,
+    /// use the ``init(url:scale:transaction:content:)`` initializer instead.
+    ///
     /// - Parameters:
-    ///   - url: The URL for the image to be shown.
-    ///   - scale: The scale to use for the image.
-    ///   - content: The view to show when the image is loaded.
-    ///   - placeholder: The view to show while the image is still loading.
+    ///   - url: The URL of the image to display.
+    ///   - scale: The scale to use for the image. The default is `1`. Set a
+    ///     different value when loading images designed for higher resolution
+    ///     displays. For example, set a value of `2` for an image that you
+    ///     would name with the `@2x` suffix if stored in a file on disk.
+    ///   - content: A closure that takes the loaded image as an input, and
+    ///     returns the view to show. You can return the image directly, or
+    ///     modify it as needed before returning it.
+    ///   - placeholder: A closure that returns the view to show until the
+    ///     load operation completes successfully.
     public init<I, P>(url: URL?, scale: CGFloat = 1, @ViewBuilder content: @escaping (Image) -> I, @ViewBuilder placeholder: @escaping () -> P) where Content == _ConditionalContent<I, P>, I : View, P : View
 
-    /// Loads and displays an image from the given URL.
+    /// Loads and displays a modifiable image from the specified URL in phases.
     ///
-    /// The `content` closure determines what is shown at the different phases
-    /// of loading the image. If the specified `url` is `nil`, the phase is
-    /// ``AsyncImagePhase/empty``. To add transitions between different `URL`s,
-    /// you can apply an identifier to the ``AsyncImage``.
-    ///
-    /// In the example below, the image from the specified URL is loaded and
-    /// shown. While it is loading, a blue placeholder is shown, and if an
-    /// error occurs, a red placeholder is shown.
+    /// If you set the asynchronous image's URL to `nil`, or after you set the
+    /// URL to a value but before the load operation completes, the phase is
+    /// ``AsyncImagePhase/empty``. After the operation completes, the phase
+    /// becomes either ``AsyncImagePhase/failure(_:)`` or
+    /// ``AsyncImagePhase/success(_:)``. In the first case, the phase's
+    /// ``AsyncImagePhase/error`` value indicates the reason for failure.
+    /// In the second case, the phase's ``AsyncImagePhase/image`` property
+    /// contains the loaded image. Use the phase to drive the output of the
+    /// `content` closure, which defines the view's appearance:
     ///
     ///     AsyncImage(url: URL(string: "https://example.com/icon.png")) { phase in
     ///         if let image = phase.image {
-    ///             image
+    ///             image // Displays the loaded image.
     ///         } else if phase.error != nil {
-    ///             Color.red.frame(width: 128, height: 128)
+    ///             Color.red // Indicates an error.
     ///         } else {
-    ///             Color.blue.frame(width: 128, height: 128)
+    ///             Color.blue // Acts as a placeholder.
     ///         }
     ///     }
     ///
+    /// To add transitions when you change the URL, apply an identifier to the
+    /// ``AsyncImage``.
+    ///
     /// - Parameters:
-    ///   - url: The URL for the image to be shown.
-    ///   - scale: The scale to use for the image.
+    ///   - url: The URL of the image to display.
+    ///   - scale: The scale to use for the image. The default is `1`. Set a
+    ///     different value when loading images designed for higher resolution
+    ///     displays. For example, set a value of `2` for an image that you
+    ///     would name with the `@2x` suffix if stored in a file on disk.
     ///   - transaction: The transaction to use when the phase changes.
-    ///   - content: The view to show based on the current phase.
+    ///   - content: A closure that takes the load phase as an input, and
+    ///     returns the view to display for the specified phase.
     public init(url: URL?, scale: CGFloat = 1, transaction: Transaction = Transaction(), @ViewBuilder content: @escaping (AsyncImagePhase) -> Content)
 
     /// The content and behavior of the view.
@@ -3018,21 +3117,43 @@ public struct AsyncImage<Content> : View where Content : View {
 
 /// The current phase of the asynchronous image loading operation.
 ///
-/// This phase is used to determine what content to show during the loading
-/// process of an ``AsyncImage``.
+/// When you create an ``AsyncImage`` instance with the
+/// ``AsyncImage/init(url:scale:transaction:content:)`` initializer, you define
+/// the appearance of the view using a `content` closure. SwiftUI calls the
+/// closure with a phase value at different points during the load operation
+/// to indicate the current state. Use the phase to decide what to draw.
+/// For example, you can draw the loaded image if it exists, a view that
+/// indicates an error, or a placeholder:
+///
+///     AsyncImage(url: URL(string: "https://example.com/icon.png")) { phase in
+///         if let image = phase.image {
+///             image // Displays the loaded image.
+///         } else if phase.error != nil {
+///             Color.red // Indicates an error.
+///         } else {
+///             Color.blue // Acts as a placeholder.
+///         }
+///     }
+///
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public enum AsyncImagePhase {
 
-    /// No image has been loaded.
+    /// No image is loaded.
     case empty
 
-    /// An image has been succesfully loaded.
+    /// An image succesfully loaded.
     case success(Image)
 
     /// An image failed to load with an error.
     case failure(Error)
 
     /// The loaded image, if any.
+    ///
+    /// If this value isn't `nil`, the image load operation has finished,
+    /// and you can use the image to update the view. You can use the image
+    /// directly, or you can modify it in some way. For example, you can add
+    /// a ``Image/resizable(capInsets:resizingMode:)`` modifier to make the
+    /// image resizable.
     public var image: Image? { get }
 
     /// The error that occurred when attempting to load an image, if any.
@@ -3728,11 +3849,7 @@ extension BorderedButtonStyle {
 /// A menu style that displays a borderless button that toggles the display of
 /// the menu's contents when pressed.
 ///
-/// On macOS, the button optionally displays an arrow indicating that it presents
-/// a menu.
-///
-/// Pressing and then dragging into the contents triggers the chosen action on
-/// release.
+/// Do not use this type directly. Instead, use ``MenuStyle/borderlessButton``.
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -3865,14 +3982,14 @@ public struct BorderlessButtonStyle : PrimitiveButtonStyle {
 /// ### Styling Buttons
 ///
 /// You can customize a button's appearance using one of the standard button
-/// styles, like ``BorderedButtonStyle``, and apply the style with the
+/// styles, like ``PrimitiveButtonStyle/bordered``, and apply the style with the
 /// ``View/buttonStyle(_:)-66fbx`` modifier:
 ///
 ///     HStack {
 ///         Button("Sign In", action: signIn)
 ///         Button("Register", action: register)
 ///     }
-///     .buttonStyle(BorderedButtonStyle())
+///     .buttonStyle(.bordered)
 ///
 /// If you apply the style to a container view, as in the example above,
 /// all the buttons in the container use the style:
@@ -4178,6 +4295,8 @@ public struct ButtonStyleConfiguration {
 public struct ButtonToggleStyle : ToggleStyle {
 
     /// Creates a button toggle style.
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.button` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.button` instead.")
     public init()
 
     /// Creates a view that represents the body of a toggle.
@@ -6458,7 +6577,7 @@ public protocol CustomizableToolbarContent : ToolbarContent where Self.Body : Cu
 ///             selection: $date,
 ///             displayedComponents: [.date]
 ///         )
-///         .datePickerStyle(GraphicalDatePickerStyle())
+///         .datePickerStyle(.graphical)
 ///     }
 ///
 /// ![A SwiftUI date picker using the graphical style, with the label Start Date
@@ -6798,7 +6917,7 @@ public struct DefaultButtonStyle : PrimitiveButtonStyle {
 ///
 /// Do not use this type directly. Instead, use ``ControlGroupStyle/automatic``.
 @available(iOS, deprecated, renamed: "AutomaticControlGroupStyle")
-@available(macOS, deprecated, renamed: "AutomaticControlGroupStyle")
+@available(macOS, introduced: 12.0, deprecated: 12.0, renamed: "AutomaticControlGroupStyle")
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 public struct DefaultControlGroupStyle : ControlGroupStyle {
@@ -8304,21 +8423,11 @@ extension Ellipse : Sendable {
 ///     EllipticalGradient(gradient: .init(colors: [.red, .yellow]))
 ///
 /// When using an elliptical gradient as a shape style, you can also use
-/// ``ShapeStyle/elliptical(_:center:startRadiusFraction:endRadiusFraction:)``.
+/// ``ShapeStyle/ellipticalGradient(_:center:startRadiusFraction:endRadiusFraction:)``.
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 @frozen public struct EllipticalGradient : ShapeStyle, View {
 
     /// Creates an elliptical gradient.
-    ///
-    /// - Parameters:
-    ///  - gradient: The colors and their parametric locations.
-    ///  - center: The center of the circle, in [0, 1] coordinates.
-    ///  - startRadiusFraction: The start radius value, as a fraction
-    ///    between zero and one. Zero maps to the center point, one
-    ///    maps to the diameter of the unit circle.
-    ///  - endRadiusFraction: The end radius value, as a fraction
-    ///    between zero and one. Zero maps to the center point, one
-    ///    maps to the diameter of the unit circle.
     ///
     /// For example, an elliptical gradient centered on the top-leading
     /// corner of the view:
@@ -8329,12 +8438,8 @@ extension Ellipse : Sendable {
     ///         startRadiusFraction: 0,
     ///         endRadiusFraction: 1)
     ///
-    public init(gradient: Gradient, center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5)
-
-    /// Creates an elliptical gradient from a collection of colors.
-    ///
     /// - Parameters:
-    ///  - colors: The colors, evenly distributed throughout the gradient.
+    ///  - gradient: The colors and their parametric locations.
     ///  - center: The center of the circle, in [0, 1] coordinates.
     ///  - startRadiusFraction: The start radius value, as a fraction
     ///    between zero and one. Zero maps to the center point, one
@@ -8342,6 +8447,9 @@ extension Ellipse : Sendable {
     ///  - endRadiusFraction: The end radius value, as a fraction
     ///    between zero and one. Zero maps to the center point, one
     ///    maps to the diameter of the unit circle.
+    public init(gradient: Gradient, center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5)
+
+    /// Creates an elliptical gradient from a collection of colors.
     ///
     /// For example, an elliptical gradient centered on the top-leading
     /// corner of the view:
@@ -8352,12 +8460,8 @@ extension Ellipse : Sendable {
     ///         startRadiusFraction: 0,
     ///         endRadiusFraction: 1)
     ///
-    public init(colors: [Color], center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5)
-
-    /// Creates an elliptical gradient from a collection of color stops.
-    ///
     /// - Parameters:
-    ///  - stops: The colors and their parametric locations.
+    ///  - colors: The colors, evenly distributed throughout the gradient.
     ///  - center: The center of the circle, in [0, 1] coordinates.
     ///  - startRadiusFraction: The start radius value, as a fraction
     ///    between zero and one. Zero maps to the center point, one
@@ -8365,6 +8469,9 @@ extension Ellipse : Sendable {
     ///  - endRadiusFraction: The end radius value, as a fraction
     ///    between zero and one. Zero maps to the center point, one
     ///    maps to the diameter of the unit circle.
+    public init(colors: [Color], center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5)
+
+    /// Creates an elliptical gradient from a collection of color stops.
     ///
     /// For example, an elliptical gradient centered on the top-leading
     /// corner of the view, with some extra green area:
@@ -8379,6 +8486,15 @@ extension Ellipse : Sendable {
     ///         startRadiusFraction: 0,
     ///         endRadiusFraction: 1)
     ///
+    /// - Parameters:
+    ///  - stops: The colors and their parametric locations.
+    ///  - center: The center of the circle, in [0, 1] coordinates.
+    ///  - startRadiusFraction: The start radius value, as a fraction
+    ///    between zero and one. Zero maps to the center point, one
+    ///    maps to the diameter of the unit circle.
+    ///  - endRadiusFraction: The end radius value, as a fraction
+    ///    between zero and one. Zero maps to the center point, one
+    ///    maps to the diameter of the unit circle.
     public init(stops: [Gradient.Stop], center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5)
 
     /// The type of view representing the body of this view.
@@ -9245,7 +9361,7 @@ extension EnvironmentValues {
     ///     }
     ///
     @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-    public var isSearching: Bool
+    public var isSearching: Bool { get }
 
     /// Asks the system to dismiss the current search interaction.
     ///
@@ -9322,6 +9438,38 @@ extension EnvironmentValues {
 
     /// Opens a URL using the appropriate system service.
     public var openURL: OpenURLAction { get }
+}
+
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension EnvironmentValues {
+
+    /// The keyboard shortcut that buttons in this environment will be triggered
+    /// with.
+    ///
+    /// This is particularly useful in button styles when a button's appearance
+    /// depends on the shortcut associated with it. On macOS, for example, when
+    /// a button is bound to the Return key, it is typically drawn with a
+    /// special emphasis. This happens automatically when using the built-in
+    /// button styles, and can be implemented manually in custom styles using
+    /// this environment key:
+    ///
+    ///     private struct MyButtonStyle: ButtonStyle {
+    ///         @Environment(\.keyboardShortcut)
+    ///         private var shortcut: KeyboardShortcut?
+    ///
+    ///         func makeBody(configuration: Configuration) -> some View {
+    ///             let labelFont = Font.body
+    ///                 .weight(shortcut == .defaultAction ? .bold : .regular)
+    ///             configuration.label
+    ///                 .font(labelFont)
+    ///         }
+    ///     }
+    ///
+    /// If no keyboard shortcut has been applied to the view or its ancestor,
+    /// then the environment value will be `nil`.
+    public var keyboardShortcut: KeyboardShortcut? { get }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
@@ -9490,13 +9638,6 @@ extension EnvironmentValues {
     public var backgroundMaterial: Material?
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension EnvironmentValues {
-
-    @available(*, deprecated, message: "Use ShapeStyle.tint")
-    public var controlTint: Color?
-}
-
 /// A modifier that must resolve to a concrete modifier in an environment before
 /// use.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -9646,6 +9787,10 @@ public struct EveryMinuteTimelineSchedule : TimelineSchedule {
     ///
     /// Use the ``EveryMinuteTimelineSchedule/entries(from:mode:)`` method
     /// to get the sequence of dates.
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.everyMinute` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.everyMinute` instead.")
+    @available(tvOS, introduced: 15.0, deprecated: 15.0, message: "Use `.everyMinute` instead.")
+    @available(watchOS, introduced: 8.0, deprecated: 8.0, message: "Use `.everyMinute` instead.")
     public init()
 
     /// Provides a sequence of per-minute dates starting from a given date.
@@ -9733,17 +9878,21 @@ public struct ExplicitTimelineSchedule<Entries> : TimelineSchedule where Entries
     /// - Parameter dates: The sequence of dates at which a timeline view
     ///   updates. Use a monotonically increasing sequence of dates,
     ///   and ensure that at least one is in the future.
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.explicit(_:)` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.explicit(_:)` instead.")
+    @available(tvOS, introduced: 15.0, deprecated: 15.0, message: "Use `.explicit(_:)` instead.")
+    @available(watchOS, introduced: 8.0, deprecated: 8.0, message: "Use `.explicit(_:)` instead.")
     public init(_ dates: Entries)
 
     /// Provides the sequence of dates with which you initialized the schedule.
     ///
     /// A ``TimelineView`` that you create with a schedule calls this
     /// ``TimelineSchedule`` method to ask the schedule when to update its
-    /// content. The ``ExplicitTimelineSchedule`` implementation of this method
-    /// returns the unmodified sequence of dates that you provided when you
-    /// created the schedule with ``ExplicitTimelineSchedule/init(_:)``.
-    /// As a result, this particular implementation ignores the `startDate`
-    /// and `mode` parameters.
+    /// content. The explicit timeline schedule implementation
+    /// of this method returns the unmodified sequence of dates that you
+    /// provided when you created the schedule with
+    /// ``TimelineSchedule/explicit(_:)``. As a result, this particular
+    /// implementation ignores the `startDate` and `mode` parameters.
     ///
     /// - Parameters:
     ///   - startDate: The date from which the sequence begins. This
@@ -10199,7 +10348,7 @@ extension FillStyle : Sendable {
 /// binding is likely a programmer error.
 ///
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-@propertyWrapper public struct FocusState<Value> : DynamicProperty where Value : Hashable {
+@frozen @propertyWrapper public struct FocusState<Value> : DynamicProperty where Value : Hashable {
 
     /// A property wrapper type that can read and write a value that indicates
     /// the current focus location.
@@ -11047,7 +11196,7 @@ extension ForegroundStyle : Sendable {
 /// On macOS, a similar form renders as a vertical stack. To adhere to macOS
 /// platform conventions, this version doesn't use sections, and uses colons at
 /// the end of its labels. It also sets the picker to use
-/// ``SwiftUI/InlinePickerStyle``, which produces radio buttons on macOS.
+/// the ``PickerStyle/inline`` style, which produces radio buttons on macOS.
 ///
 ///     var body: some View {
 ///         Spacer()
@@ -11067,7 +11216,7 @@ extension ForegroundStyle : Sendable {
 ///                     Text("Medium").tag(ProfileImageSize.medium)
 ///                     Text("Small").tag(ProfileImageSize.small)
 ///                 }
-///                 .pickerStyle(InlinePickerStyle())
+///                 .pickerStyle(.inline)
 ///
 ///                 Button("Clear Image Cache") {}
 ///             }
@@ -12780,6 +12929,14 @@ public struct GraphicalDatePickerStyle : DatePickerStyle {
         public typealias RawValue = UInt32
     }
 
+    /// Returns a version of a shading resolved with the current values
+    /// of the graphics context's environment.
+    ///
+    /// Calling this function once and then drawing multiple times with
+    /// the result will often have less overhead than drawing with the
+    /// original shading multiple times.
+    public func resolve(_ shading: GraphicsContext.Shading) -> GraphicsContext.Shading
+
     /// Draws a new layer, created by drawing code that you provide, into the
     /// context.
     ///
@@ -13377,7 +13534,7 @@ public struct GroupBox<Label, Content> : View where Label : View, Content : View
     ///     group box.
     ///   - label: A ``SwiftUI/ViewBuilder` that produces a label for the group
     ///     box.
-    @available(iOS 15.0, macOS 12.0, *)
+    @available(iOS 14.0, macOS 10.15, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public init(@ViewBuilder content: () -> Content, @ViewBuilder label: () -> Label)
@@ -13599,6 +13756,15 @@ public struct GroupedListStyle : ListStyle {
     /// When you create a custom view, Swift infers this type from your
     /// implementation of the required ``View/body-swift.property`` property.
     public typealias Body = Never
+}
+
+/// A shape style that maps to one of the numbered content styles.
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@frozen public struct HierarchicalShapeStyle : ShapeStyle {
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension HierarchicalShapeStyle : Sendable {
 }
 
 /// An alignment position along the horizontal axis.
@@ -14852,6 +15018,46 @@ public struct KeyboardShortcut {
     public init(_ key: KeyEquivalent, modifiers: EventModifiers = .command, localization: KeyboardShortcut.Localization)
 }
 
+@available(iOS 15.0, macOS 12.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension KeyboardShortcut : Hashable {
+
+    /// Returns a Boolean value indicating whether two values are equal.
+    ///
+    /// Equality is the inverse of inequality. For any values `a` and `b`,
+    /// `a == b` implies that `a != b` is `false`.
+    ///
+    /// - Parameters:
+    ///   - lhs: A value to compare.
+    ///   - rhs: Another value to compare.
+    public static func == (lhs: KeyboardShortcut, rhs: KeyboardShortcut) -> Bool
+
+    /// Hashes the essential components of this value by feeding them into the
+    /// given hasher.
+    ///
+    /// Implement this method to conform to the `Hashable` protocol. The
+    /// components used for hashing must be the same as the components compared
+    /// in your type's `==` operator implementation. Call `hasher.combine(_:)`
+    /// with each of these components.
+    ///
+    /// - Important: Never call `finalize()` on `hasher`. Doing so may become a
+    ///   compile-time error in the future.
+    ///
+    /// - Parameter hasher: The hasher to use when combining the components
+    ///   of this instance.
+    public func hash(into hasher: inout Hasher)
+
+    /// The hash value.
+    ///
+    /// Hash values are not guaranteed to be equal across different executions of
+    /// your program. Do not save hash values to use during a future execution.
+    ///
+    /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
+    ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
+    public var hashValue: Int { get }
+}
+
 /// A standard label for user interface items, consisting of an icon with a
 /// title.
 ///
@@ -14870,23 +15076,23 @@ public struct KeyboardShortcut {
 /// You can also apply styles to labels in several ways. In the case of dynamic
 /// changes to the view after device rotation or change to a window size you
 /// might want to show only the text portion of the label using the
-/// ``TitleOnlyLabelStyle`` label style:
+/// ``LabelStyle/titleOnly`` label style:
 ///
 ///     Label("Lightning", systemImage: "bolt.fill")
-///         .labelStyle(TitleOnlyLabelStyle())
+///         .labelStyle(.titleOnly)
 ///
 /// Conversely, there's also an icon-only label style:
 ///
 ///     Label("Lightning", systemImage: "bolt.fill")
-///         .labelStyle(IconOnlyLabelStyle())
+///         .labelStyle(.iconOnly)
 ///
 /// Some containers might apply a different default label style, such as only
 /// showing icons within toolbars on macOS and iOS. To opt in to showing both
-/// the title and the icon, you can apply the ``TitleAndIconLabelStyle`` label
+/// the title and the icon, you can apply the ``LabelStyle/titleAndIcon`` label
 /// style:
 ///
 ///     Label("Lightning", systemImage: "bolt.fill")
-///         .labelStyle(TitleAndIconLabelStyle())
+///         .labelStyle(.titleAndIcon)
 ///
 /// You can also create a customized label style by modifying an existing
 /// style; this example adds a red border to the default label style:
@@ -14910,7 +15116,7 @@ public struct KeyboardShortcut {
 ///         Label("Snow", systemImage: "snow")
 ///         Label("Sun", systemImage: "sun.max")
 ///     }
-///     .labelStyle(IconOnlyLabelStyle())
+///     .labelStyle(.iconOnly)
 ///
 /// It's also possible to make labels using views to compose the label's icon
 /// programmatically, rather than using a pre-made image. In this example, the
@@ -15433,7 +15639,7 @@ extension LegibilityWeight {
 /// bounding rectangle of each shape filled with the gradient.
 ///
 /// When using a linear gradient as a shape style, you can also use
-/// ``ShapeStyle/linear(_:startPoint:endPoint:)``.
+/// ``ShapeStyle/linearGradient(_:startPoint:endPoint:)``.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct LinearGradient : ShapeStyle, View {
 
@@ -15821,9 +16027,9 @@ extension Link where Label == Text {
 /// SwiftUI chooses a display style for a list based on the platform and the
 /// view type in which it appears. Use the ``View/listStyle(_:)`` modifier to
 /// apply a different ``ListStyle`` to all lists within a view. For example,
-/// adding `.listStyle(InsetGroupedListStyle())` to the example shown in the
+/// adding `.listStyle(.insetGrouped)` to the example shown in the
 /// "Creating Multi-Dimensional Lists" topic applies the
-/// ``InsetGroupedListStyle``, as seen in the following screenshot.
+/// ``ListStyle/insetGrouped`` style, as seen in the following screenshot.
 ///
 /// ![A vertical list split into sections titled Major Pacific Ocean Seas,
 /// Major Atlantic Ocean Seas, etc. Each section has a different number of
@@ -16511,6 +16717,15 @@ extension ListStyle where Self == PlainListStyle {
         @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
         public mutating func appendInterpolation(_ text: Text)
 
+        /// Appends an AttributedString to a string interpolation.
+        ///
+        /// Don't call this method directly; it's used by the compiler when
+        /// interpreting string interpolations.
+        ///
+        /// - Parameter attributedString: The AttributedString to append.
+        @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+        public mutating func appendInterpolation(_ attributedString: AttributedString)
+
         /// The type that should be used for literal segments.
         public typealias StringLiteralType = String
     }
@@ -16848,7 +17063,7 @@ extension MatchedGeometryProperties : Sendable {
 /// a context-specific blend of the foreground and background colors
 /// that improves contrast. However using ``View/foregroundStyle(_:)``
 /// to set a custom foreground style --- excluding the hierarchical
-/// styles, like ``SecondaryContentStyle`` --- disables vibrancy.
+/// styles, like ``ShapeStyle/secondary`` --- disables vibrancy.
 ///
 /// > Note: A material blurs a background that's part of your app, but not
 /// what appears behind your app on the screen.
@@ -16927,7 +17142,7 @@ extension Material : ShapeStyle {
 /// a menu that adds bookmarks, with advanced options that are presented in a
 /// menu.
 ///
-///     Menu(primaryAction: addBookmark) {
+///     Menu {
 ///         Button(action: addCurrentTabToReadingList) {
 ///             Label("Add to Reading List", systemImage: "eyeglasses")
 ///         }
@@ -16939,6 +17154,8 @@ extension Material : ShapeStyle {
 ///         }
 ///     } label: {
 ///         Label("Add Bookmark", systemImage: "book")
+///     } primaryAction: {
+///         addBookmark()
 ///     }
 ///
 /// ### Styling Menus
@@ -17076,57 +17293,6 @@ extension Menu where Label == MenuStyleConfiguration.Label, Content == MenuStyle
     public init(_ configuration: MenuStyleConfiguration)
 }
 
-@available(iOS 15.0, macOS 12.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-extension Menu {
-
-    /// Creates a menu with a custom primary action and custom label.
-    ///
-    /// - Parameters:
-    ///     - primaryAction: The action to perform on primary
-    ///         interaction with the menu.
-    ///     - content: A group of menu items.
-    ///     - label: A view describing the content of the menu.
-    @available(iOS, deprecated, renamed: "Menu(content:label:primaryAction:)")
-    @available(macOS, deprecated, renamed: "Menu(content:label:primaryAction:)")
-    @available(watchOS, unavailable)
-    @available(tvOS, unavailable)
-    public init(primaryAction: @escaping () -> Void, @ViewBuilder content: () -> Content, @ViewBuilder label: () -> Label)
-
-    /// Creates a menu with a custom primary action that generates its label
-    /// from a localized string key.
-    ///
-    /// - Parameters:
-    ///     - titleKey: The key for the link's localized title, which describes
-    ///         the contents of the menu.
-    ///     - primaryAction: The action to perform on primary
-    ///         interaction with the menu.
-    ///     - content: A group of menu items.
-    @available(iOS, deprecated, renamed: "Menu(_:content:primaryAction:)")
-    @available(macOS, deprecated, renamed: "Menu(_:content:primaryAction:)")
-    @available(watchOS, unavailable)
-    @available(tvOS, unavailable)
-    public init(_ titleKey: LocalizedStringKey, primaryAction: @escaping () -> Void, @ViewBuilder content: () -> Content) where Label == Text
-
-    /// Creates a menu with a custom primary action that generates its label
-    /// from a string.
-    ///
-    /// To create the label with a localized string key, use
-    /// `Menu(_:primaryAction:content:)` instead.
-    ///
-    /// - Parameters:
-    ///     - title: A string that describes the contents of the menu.
-    ///     - primaryAction: The action to perform on primary
-    ///         interaction with the menu.
-    ///     - content: A group of menu items.
-    @available(iOS, deprecated, renamed: "Menu(_:content:primaryAction:)")
-    @available(macOS, deprecated, renamed: "Menu(_:content:primaryAction:)")
-    @available(watchOS, unavailable)
-    @available(tvOS, unavailable)
-    public init<S>(_ title: S, primaryAction: @escaping () -> Void, @ViewBuilder content: () -> Content) where Label == Text, S : StringProtocol
-}
-
 /// A picker style that presents the options as a menu when the user presses a
 /// button, or as a submenu when nested within a larger menu.
 ///
@@ -17192,6 +17358,22 @@ extension MenuStyle where Self == DefaultMenuStyle {
     /// or to a view that contains a menu, use the ``View/menuStyle(_:)``
     /// modifier.
     public static var automatic: DefaultMenuStyle { get }
+}
+
+@available(iOS 14.0, macOS 11.0, *)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
+extension MenuStyle where Self == BorderlessButtonMenuStyle {
+
+    /// A menu style that displays a borderless button that toggles the display of
+    /// the menu's contents when pressed.
+    ///
+    /// On macOS, the button optionally displays an arrow indicating that it
+    /// presents a menu.
+    ///
+    /// Pressing and then dragging into the contents triggers the chosen action on
+    /// release.
+    public static var borderlessButton: BorderlessButtonMenuStyle { get }
 }
 
 /// A configuration of a menu.
@@ -18052,6 +18234,8 @@ extension NavigationBarItem.TitleDisplayMode : Hashable {
 public struct NavigationControlGroupStyle : ControlGroupStyle {
 
     /// Creates a navigation control group style.
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.navigation` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.navigation` instead.")
     public init()
 
     /// Creates a view representing the body of a control group.
@@ -18148,7 +18332,6 @@ public struct NavigationLink<Label, Destination> : View where Label : View, Dest
     ///   - destination: A view for the navigation link to present.
     ///   - label: A view builder to produce a label describing the `destination`
     ///    to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init(@ViewBuilder destination: () -> Destination, @ViewBuilder label: () -> Label)
 
     /// Creates a navigation link that presents the destination view when active.
@@ -18158,7 +18341,6 @@ public struct NavigationLink<Label, Destination> : View where Label : View, Dest
     ///   - destination: A view for the navigation link to present.
     ///   - label: A view builder to produce a label describing the `destination`
     ///    to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init(isActive: Binding<Bool>, @ViewBuilder destination: () -> Destination, @ViewBuilder label: () -> Label)
 
     /// Creates a navigation link that presents the destination view when
@@ -18171,7 +18353,6 @@ public struct NavigationLink<Label, Destination> : View where Label : View, Dest
     ///   - destination: A view for the navigation link to present.
     ///   - label: A view builder to produce a label describing the
     ///   `destination` to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init<V>(tag: V, selection: Binding<V?>, @ViewBuilder destination: () -> Destination, @ViewBuilder label: () -> Label) where V : Hashable
 
     /// The content and behavior of the view.
@@ -18246,7 +18427,6 @@ extension NavigationLink where Label == Text {
     /// - Parameters:
     ///   - titleKey: A localized string key for creating a text label.
     ///   - destination: A view for the navigation link to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init(_ titleKey: LocalizedStringKey, @ViewBuilder destination: () -> Destination)
 
     /// Creates a navigation link that presents a destination view, with a text label
@@ -18254,7 +18434,6 @@ extension NavigationLink where Label == Text {
     /// - Parameters:
     ///   - title: A string for creating a text label.
     ///   - destination: A view for the navigation link to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init<S>(_ title: S, @ViewBuilder destination: () -> Destination) where S : StringProtocol
 
     /// Creates a navigation link that presents a destination view when active, with a
@@ -18264,7 +18443,6 @@ extension NavigationLink where Label == Text {
     ///   - isActive: A binding to a Boolean value that indicates whether
     ///   `destination` is currently presented.
     ///   - destination: A view for the navigation link to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init(_ titleKey: LocalizedStringKey, isActive: Binding<Bool>, @ViewBuilder destination: () -> Destination)
 
     /// Creates a navigation link that presents a destination view when active, with a
@@ -18274,7 +18452,6 @@ extension NavigationLink where Label == Text {
     ///   - isActive: A binding to a Boolean value that indicates whether
     ///   `destination` is currently presented.
     ///   - destination: A view for the navigation link to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init<S>(_ title: S, isActive: Binding<Bool>, @ViewBuilder destination: () -> Destination) where S : StringProtocol
 
     /// Creates a navigation link that presents a destination view when a bound
@@ -18287,7 +18464,6 @@ extension NavigationLink where Label == Text {
     ///   - selection: A bound variable that causes the link to present
     ///   `destination` when `selection` becomes equal to `tag`.
     ///   - destination: A view for the navigation link to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init<V>(_ titleKey: LocalizedStringKey, tag: V, selection: Binding<V?>, @ViewBuilder destination: () -> Destination) where V : Hashable
 
     /// Creates a navigation link that presents a destination view when a bound
@@ -18300,7 +18476,6 @@ extension NavigationLink where Label == Text {
     ///   - selection: A bound variable that causes the link to present
     ///   `destination` when `selection` becomes equal to `tag`.
     ///   - destination: A view for the navigation link to present.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public init<S, V>(_ title: S, tag: V, selection: Binding<V?>, @ViewBuilder destination: () -> Destination) where S : StringProtocol, V : Hashable
 
     /// Creates a navigation link that presents a destination view, with a text
@@ -19260,6 +19435,10 @@ public struct PeriodicTimelineSchedule : TimelineSchedule {
     /// - Parameters:
     ///   - startDate: The date on which to start the sequence.
     ///   - interval: The time interval between successive sequence entries.
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.periodic(from:by:)` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.periodic(from:by:)` instead.")
+    @available(tvOS, introduced: 15.0, deprecated: 15.0, message: "Use `.periodic(from:by:)` instead.")
+    @available(watchOS, introduced: 8.0, deprecated: 8.0, message: "Use `.periodic(from:by:)` instead.")
     public init(from startDate: Date, by interval: TimeInterval)
 
     /// Provides a sequence of periodic dates starting from around a given date.
@@ -19370,12 +19549,12 @@ public struct PeriodicTimelineSchedule : TimelineSchedule {
 ///
 /// You can customize the appearance and interaction of pickers by creating
 /// styles that conform to the ``PickerStyle`` protocol. You create your own style
-/// or use one of the styles provided by SwiftUI, like ``SegmentedPickerStyle``
-/// or ``MenuPickerStyle``.
+/// or use one of the styles provided by SwiftUI, like ``PickerStyle/segmented``
+/// or ``PickerStyle/menu``.
 ///
 /// To set a specific style for all picker instances within a view, use the
 /// ``View/pickerStyle(_:)`` modifier. The following example adds a second binding
-/// type, `Topping`, and applies the ``SegmentedPickerStyle`` to two pickers:
+/// type, `Topping`, and applies the ``PickerStyle/segmented`` style to two pickers:
 ///
 ///     @State private var selectedFlavor = Flavor.chocolate
 ///     @State private var selectedTopping = Topping.nuts
@@ -19395,7 +19574,7 @@ public struct PeriodicTimelineSchedule : TimelineSchedule {
 ///         Text("Selected flavor: \(selectedFlavor.rawValue)")
 ///         Text("Selected topping: \(selectedTopping.rawValue)")
 ///     }
-///     .pickerStyle(SegmentedPickerStyle())
+///     .pickerStyle(.segmented)
 ///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Picker<Label, SelectionValue, Content> : View where Label : View, SelectionValue : Hashable, Content : View {
@@ -19424,7 +19603,7 @@ public struct Picker<Label, SelectionValue, Content> : View where Label : View, 
     public typealias Body = some View
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Picker {
 
     /// Creates a picker that displays a custom label.
@@ -20142,17 +20321,15 @@ extension PreviewProvider {
 ///
 /// Do not use this type directly. Instead, use ``ShapeStyle/primary``.
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-@frozen public struct PrimaryContentStyle {
+@available(*, deprecated, message: "use ShapeStyle.primary instead")
+@frozen public struct PrimaryContentStyle : ShapeStyle {
 
     /// Creates a primary content style instance.
     @inlinable public init()
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension PrimaryContentStyle : ShapeStyle {
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(*, deprecated, message: "use ShapeStyle.primary instead")
 extension PrimaryContentStyle : Sendable {
 }
 
@@ -20787,17 +20964,15 @@ extension Prominence : Hashable {
 ///
 /// Do not use this type directly. Instead, use ``ShapeStyle/quaternary``.
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-@frozen public struct QuaternaryContentStyle {
+@available(*, deprecated, message: "use ShapeStyle.quaternary instead")
+@frozen public struct QuaternaryContentStyle : ShapeStyle {
 
     /// Creates a quaternary content style instance.
     @inlinable public init()
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension QuaternaryContentStyle : ShapeStyle {
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(*, deprecated, message: "use ShapeStyle.quaternary instead")
 extension QuaternaryContentStyle : Sendable {
 }
 
@@ -20809,7 +20984,7 @@ extension QuaternaryContentStyle : Sendable {
 /// each shape filled with the gradient.
 ///
 /// When using a radial gradient as a shape style, you can also use
-/// ``ShapeStyle/radial(_:center:startRadius:endRadius:)``.
+/// ``ShapeStyle/radialGradient(_:center:startRadius:endRadius:)``.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @frozen public struct RadialGradient : ShapeStyle, View {
 
@@ -22339,17 +22514,15 @@ extension SearchFieldPlacement {
 ///
 /// Do not use this type directly. Instead, use ``ShapeStyle/secondary``.
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-@frozen public struct SecondaryContentStyle {
+@available(*, deprecated, message: "use ShapeStyle.secondary instead")
+@frozen public struct SecondaryContentStyle : ShapeStyle {
 
     /// Creates a secondary content style instance.
     @inlinable public init()
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension SecondaryContentStyle : ShapeStyle {
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(*, deprecated, message: "use ShapeStyle.secondary instead")
 extension SecondaryContentStyle : Sendable {
 }
 
@@ -22375,7 +22548,7 @@ extension Section : View where Parent : View, Content : View, Footer : View {
     public var internalBody: some View { get }
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent : View, Content : View, Footer : View {
 
     /// Creates a section with a header, footer, and the provided section
@@ -22388,7 +22561,7 @@ extension Section where Parent : View, Content : View, Footer : View {
     public init(@ViewBuilder content: () -> Content, @ViewBuilder header: () -> Parent, @ViewBuilder footer: () -> Footer)
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent == EmptyView, Content : View, Footer : View {
 
     /// Creates a section with a footer and the provided section content.
@@ -22398,7 +22571,7 @@ extension Section where Parent == EmptyView, Content : View, Footer : View {
     public init(@ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer)
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Section where Parent : View, Content : View, Footer == EmptyView {
 
     /// Creates a section with a header and the provided section content.
@@ -22976,7 +23149,8 @@ public struct SegmentedPickerStyle : PickerStyle {
 public struct SelectionShapeStyle : ShapeStyle {
 
     /// Creates a selection shape style.
-    @available(macOS 12.0, *)
+    @available(iOS, introduced: 15.0, deprecated: 15.0, message: "Use `.selection` instead.")
+    @available(macOS, introduced: 12.0, deprecated: 12.0, message: "Use `.selection` instead.")
     public init()
 }
 
@@ -23257,17 +23431,6 @@ extension Shape {
     /// create a composite shape, you can provide an override of this property
     /// to return another value, if appropriate.
     @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-    @available(*, deprecated, message: "use static method")
-    public var role: ShapeRole { get }
-
-    /// An indication of how to style a shape.
-    ///
-    /// SwiftUI looks at a shape's role when deciding how to apply a
-    /// ``ShapeStyle`` at render time. The ``Shape`` protocol provides a
-    /// default implementation with a value of ``ShapeRole/fill``. If you
-    /// create a composite shape, you can provide an override of this property
-    /// to return another value, if appropriate.
-    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     public static var role: ShapeRole { get }
 }
 
@@ -23431,11 +23594,12 @@ extension ShapeRole : Hashable {
 ///
 /// You don't use the `ShapeStyle` protocol directly. Instead, use one of
 /// the concrete styles that SwiftUI defines. To indicate a specific color
-/// or pattern, you can use ``Color`` or ``ImagePaint``, or one of the gradient
-/// types, like ``RadialGradient``.
+/// or pattern, you can use ``Color`` or the style returned by
+/// ``ShapeStyle/image(_:sourceRect:scale:)``, or one of the gradient
+/// types, like the one returned by ``ShapeStyle/radial(_:center:startRadius:endRadius:)``.
 /// To set a color that's appropriate for a given context on a given
-/// platform, use one of the semantic styles, like ``BackgroundStyle`` or
-/// ``PrimaryContentStyle``.
+/// platform, use one of the semantic styles, like ``ShapeStyle/background`` or
+/// ``ShapeStyle/primary``.
 ///
 /// You can use a shape style by:
 /// * Filling a shape with a style with the ``Shape/fill(_:style:)`` modifier:
@@ -23451,8 +23615,8 @@ extension ShapeRole : Hashable {
 ///             endAngle: .degrees(90),
 ///             clockwise: false)
 ///     }
-///     .fill(RadialGradient(
-///         gradient: Gradient(colors: [.yellow, .red]),
+///     .fill(.radial(
+///         Gradient(colors: [.yellow, .red]),
 ///         center: .topLeading,
 ///         startRadius: 15,
 ///         endRadius: 80))
@@ -23466,7 +23630,7 @@ extension ShapeRole : Hashable {
 ///
 ///     ```
 ///     RoundedRectangle(cornerRadius: 10)
-///         .stroke(Color.mint, lineWidth: 10)
+///         .stroke(.mint, lineWidth: 10)
 ///         .frame(width: 200, height: 50)
 ///     ```
 ///
@@ -23481,7 +23645,7 @@ extension ShapeRole : Hashable {
 ///             .font(.title)
 ///         Text("Secondary")
 ///             .font(.caption)
-///             .foregroundStyle(SecondaryContentStyle())
+///             .foregroundStyle(.secondary)
 ///     }
 ///     ```
 ///
@@ -23568,7 +23732,7 @@ extension ShapeStyle {
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension ShapeStyle where Self == PrimaryContentStyle {
+extension ShapeStyle where Self == HierarchicalShapeStyle {
 
     /// A shape style that maps to the first level of the current content style.
     ///
@@ -23579,11 +23743,7 @@ extension ShapeStyle where Self == PrimaryContentStyle {
     /// to the ``View/foregroundStyle(_:)`` modifier.
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static var primary: PrimaryContentStyle { get }
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension ShapeStyle where Self == SecondaryContentStyle {
+    public static var primary: HierarchicalShapeStyle { get }
 
     /// A shape style that maps to the second level of the current content style.
     ///
@@ -23594,11 +23754,7 @@ extension ShapeStyle where Self == SecondaryContentStyle {
     /// to the ``View/foregroundStyle(_:)`` modifier.
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static var secondary: SecondaryContentStyle { get }
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension ShapeStyle where Self == TertiaryContentStyle {
+    public static var secondary: HierarchicalShapeStyle { get }
 
     /// A shape style that maps to the third level of the current content
     /// style.
@@ -23610,11 +23766,7 @@ extension ShapeStyle where Self == TertiaryContentStyle {
     /// to the ``View/foregroundStyle(_:)`` modifier.
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static var tertiary: TertiaryContentStyle { get }
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension ShapeStyle where Self == QuaternaryContentStyle {
+    public static var tertiary: HierarchicalShapeStyle { get }
 
     /// A shape style that maps to the fourth level of the current content
     /// style.
@@ -23626,7 +23778,7 @@ extension ShapeStyle where Self == QuaternaryContentStyle {
     /// to the ``View/foregroundStyle(_:)`` modifier.
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static var quaternary: QuaternaryContentStyle { get }
+    public static var quaternary: HierarchicalShapeStyle { get }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -23769,7 +23921,7 @@ extension ShapeStyle where Self == EllipticalGradient {
     ///         .background(.ellipticalGradient(gradient))
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static func elliptical(_ gradient: Gradient, center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5) -> EllipticalGradient
+    public static func ellipticalGradient(_ gradient: Gradient, center: UnitPoint = .center, startRadiusFraction: CGFloat = 0, endRadiusFraction: CGFloat = 0.5) -> EllipticalGradient
 
     /// A radial gradient that draws an ellipse defined by a collection of
     /// colors.
@@ -23809,50 +23961,117 @@ extension ShapeStyle where Self == EllipticalGradient {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ShapeStyle where Self == AngularGradient {
 
-    /// An angular gradient.
+    /// An angular gradient, which applies the color function as the angle
+    /// changes between the start and end angles, and anchored to a relative
+    /// center point within the filled shape.
     ///
-    /// An angular gradient is also known as a "conic" gradient. This gradient
-    /// applies the color function as the angle changes, relative to a center
-    /// point and defined start and end angles. If `endAngle - startAngle > 2π`,
-    /// the gradient only draws the last complete turn. If
-    /// `endAngle - startAngle < 2π`, the gradient fills the missing area with
-    /// the colors defined by gradient locations one and zero, transitioning
-    /// between the two halfway across the missing area. The gradient maps the
-    /// unit space center point into the bounding rectangle of each shape filled
-    /// with the gradient.
+    /// An angular gradient is also known as a "conic" gradient. If
+    /// `endAngle - startAngle > 2π`, the gradient only draws the last complete
+    /// turn. If `endAngle - startAngle < 2π`, the gradient fills the missing
+    /// area with the colors defined by gradient stop locations at `0` and `1`,
+    /// transitioning between the two halfway across the missing area.
+    ///
+    /// For example, an angular gradient used as a background:
+    ///
+    ///     let gradient = Gradient(colors: [.red, .yellow])
+    ///
+    ///     ContentView()
+    ///         .background(.angularGradient(gradient))
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static func angularGradient(_ gradient: Gradient, center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero) -> AngularGradient
+    ///
+    /// - Parameters:
+    ///   - gradient: The gradient to use for filling the shape, providing the
+    ///     colors and their relative stop locations.
+    ///   - center: The relative center of the gradient, mapped from the unit
+    ///     space into the bounding rectangle of the filled shape.
+    ///   - startAngle: The angle that marks the beginning of the gradient.
+    ///   - endAngle: The angle that marks the end of the gradient.
+    public static func angularGradient(_ gradient: Gradient, center: UnitPoint, startAngle: Angle, endAngle: Angle) -> AngularGradient
 
     /// An angular gradient defined by a collection of colors.
     ///
-    /// An angular gradient is also known as a "conic" gradient. This gradient
-    /// applies the color function as the angle changes, relative to a center
-    /// point and defined start and end angles. If `endAngle - startAngle > 2π`,
-    /// the gradient only draws the last complete turn. If
-    /// `endAngle - startAngle < 2π`, the gradient fills the missing area with
-    /// the colors defined by gradient locations one and zero, transitioning
-    /// between the two halfway across the missing area. The gradient maps the
-    /// unit space center point into the bounding rectangle of each shape filled
-    /// with the gradient.
+    /// For more information on how to use angular gradients, see
+    /// ``ShapeStyle/angularGradient(_:center:startAngle:endAngle:)``.
     ///
-    /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static func angularGradient(colors: [Color], center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero) -> AngularGradient
+    /// - Parameters:
+    ///   - colors: The colors of the gradient, evenly spaced along its full
+    ///     length.
+    ///   - center: The relative center of the gradient, mapped from the unit
+    ///     space into the bounding rectangle of the filled shape.
+    ///   - startAngle: The angle that marks the beginning of the gradient.
+    ///   - endAngle: The angle that marks the end of the gradient.
+    public static func angularGradient(colors: [Color], center: UnitPoint, startAngle: Angle, endAngle: Angle) -> AngularGradient
 
     /// An angular gradient defined by a collection of color stops.
     ///
-    /// An angular gradient is also known as a "conic" gradient. This gradient
-    /// applies the color function as the angle changes, relative to a center
-    /// point and defined start and end angles. If `endAngle - startAngle > 2π`,
-    /// the gradient only draws the last complete turn. If
-    /// `endAngle - startAngle < 2π`, the gradient fills the missing area with
-    /// the colors defined by gradient locations one and zero, transitioning
-    /// between the two halfway across the missing area. The gradient maps the
-    /// unit space center point into the bounding rectangle of each shape filled
-    /// with the gradient.
+    /// For more information on how to use angular gradients, see
+    /// ``ShapeStyle/angularGradient(_:center:startAngle:endAngle:)``.
+    ///
+    /// - Parameters:
+    ///   - stops: The color stops of the gradient, defining each component
+    ///     color and their relative location along the gradient's full length.
+    ///   - center: The relative center of the gradient, mapped from the unit
+    ///     space into the bounding rectangle of the filled shape.
+    ///   - startAngle: The angle that marks the beginning of the gradient.
+    ///   - endAngle: The angle that marks the end of the gradient.
+    public static func angularGradient(stops: [Gradient.Stop], center: UnitPoint, startAngle: Angle, endAngle: Angle) -> AngularGradient
+}
+
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+extension ShapeStyle where Self == AngularGradient {
+
+    /// A conic gradient that completes a full turn, optionally starting from
+    /// a given angle and anchored to a relative center point within the filled
+    /// shape.
+    ///
+    /// For example, a conic gradient used as a background:
+    ///
+    ///     let gradient = Gradient(colors: [.red, .yellow])
+    ///
+    ///     ContentView()
+    ///         .background(.conicGradient(gradient))
     ///
     /// For information about how to use shape styles, see ``ShapeStyle``.
-    public static func angularGradient(stops: [Gradient.Stop], center: UnitPoint, startAngle: Angle = .zero, endAngle: Angle = .zero) -> AngularGradient
+    ///
+    /// - Parameters:
+    ///   - gradient: The gradient to use for filling the shape, providing the
+    ///     colors and their relative stop locations.
+    ///   - center: The relative center of the gradient, mapped from the unit
+    ///     space into the bounding rectangle of the filled shape.
+    ///   - angle: The angle to offset the beginning of the gradient's full
+    ///     turn.
+    public static func conicGradient(_ gradient: Gradient, center: UnitPoint, angle: Angle = .zero) -> AngularGradient
+
+    /// A conic gradient defined by a collection of colors that completes a full
+    /// turn.
+    ///
+    /// For more information on how to use angular gradients, see
+    /// ``ShapeStyle/conicGradient(_:center:angle:)``.
+    ///
+    /// - Parameters:
+    ///   - colors: The colors of the gradient, evenly spaced along its full
+    ///     length.
+    ///   - center: The relative center of the gradient, mapped from the unit
+    ///     space into the bounding rectangle of the filled shape.
+    ///   - angle: The angle to offset the beginning of the gradient's full
+    ///     turn.
+    public static func conicGradient(colors: [Color], center: UnitPoint, angle: Angle = .zero) -> AngularGradient
+
+    /// A conic gradient defined by a collection of color stops that completes a
+    /// full turn.
+    ///
+    /// For more information on how to use angular gradients, see
+    /// ``ShapeStyle/conicGradient(_:center:angle:)``.
+    ///
+    /// - Parameters:
+    ///   - stops: The color stops of the gradient, defining each component
+    ///     color and their relative location along the gradient's full length.
+    ///   - center: The relative center of the gradient, mapped from the unit
+    ///     space into the bounding rectangle of the filled shape.
+    ///   - angle: The angle to offset the beginning of the gradient's full
+    ///     turn.
+    public static func conicGradient(stops: [Gradient.Stop], center: UnitPoint, angle: Angle = .zero) -> AngularGradient
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
@@ -24201,7 +24420,7 @@ public struct Slider<Label, ValueLabel> : View where Label : View, ValueLabel : 
     public typealias Body = some View
 }
 
-@available(iOS 15.0, macOS 12.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 extension Slider {
 
@@ -24253,7 +24472,7 @@ extension Slider {
     public init<V>(value: Binding<V>, in bounds: ClosedRange<V>, step: V.Stride = 1, @ViewBuilder label: () -> Label, @ViewBuilder minimumValueLabel: () -> ValueLabel, @ViewBuilder maximumValueLabel: () -> ValueLabel, onEditingChanged: @escaping (Bool) -> Void = { _ in }) where V : BinaryFloatingPoint, V.Stride : BinaryFloatingPoint
 }
 
-@available(iOS 15.0, macOS 12.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, *)
 @available(tvOS, unavailable)
 extension Slider where ValueLabel == EmptyView {
 
@@ -24929,7 +25148,6 @@ public struct Stepper<Label> : View where Label : View {
     ///       or decrement buttons on a `Stepper` which causes the execution
     ///       of the `onEditingChanged` closure at the start and end of
     ///       the gesture.
-    @available(iOS 15.0, macOS 12.0, *)
     public init(@ViewBuilder label: () -> Label, onIncrement: (() -> Void)?, onDecrement: (() -> Void)?, onEditingChanged: @escaping (Bool) -> Void = { _ in })
 
     /// The content and behavior of the view.
@@ -24956,7 +25174,7 @@ public struct Stepper<Label> : View where Label : View {
     public typealias Body = some View
 }
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 13.0, macOS 10.15, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension Stepper {
@@ -26258,17 +26476,15 @@ public struct TapGesture : Gesture {
 ///
 /// Do not use this type directly. Instead, use ``ShapeStyle/tertiary``.
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-@frozen public struct TertiaryContentStyle {
+@available(*, deprecated, message: "use ShapeStyle.tertiary instead")
+@frozen public struct TertiaryContentStyle : ShapeStyle {
 
     /// Creates a tertiary content style instance.
     @inlinable public init()
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension TertiaryContentStyle : ShapeStyle {
-}
-
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(*, deprecated, message: "use ShapeStyle.tertiary instead")
 extension TertiaryContentStyle : Sendable {
 }
 
@@ -26629,35 +26845,6 @@ extension Text {
     ///   changes to text immediately or enqueues them behind existing speech.
     ///   Defaults to `true`.
     public func speechAnnouncementsQueued(_ value: Bool = true) -> Text
-
-    /// Sets an International Phonetic Alphabet representation of the text to use when
-    /// pronouncing strings.
-    ///
-    /// Use this modifier to specify the pronunciation of words that have the same spelling
-    /// but different sounds. For example, consider the different pronunciations of the word
-    /// "live" in the following two sentences:
-    ///
-    ///  - "Anne wants to live on Main Street."
-    ///  - "Maria wants to go to the live concert."
-    ///
-    /// In the first sentence, “live” rhymes with "give."  In the second, it rhymes with "hive".
-    /// The code below shows how to compose these two sentences using a series
-    /// of ``Text`` views that use the  `speechPhoneticRepresentation(_:)` modifier
-    /// where you want VoiceOver to produce a specific pronunciation:
-    ///
-    ///     Text(“Anne wants to “) +
-    ///     Text(“live”)
-    ///         . speechPhoneticRepresentation(“lɪv”) +
-    ///     Text(“ on Main Street.”)
-    ///
-    ///     Text(“Maria wants to go to the“)+
-    ///     Text(“live”)
-    ///         . speechPhoneticRepresentation(“laɪv”) +
-    ///     Text(“ concert.”)
-    ///
-    /// - Parameter value: A string that uses the International Phonetic Alphabet to represent how
-    ///   the system should pronounce the text.
-    public func speechPhoneticRepresentation(_ value: String) -> Text
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -27489,7 +27676,7 @@ public struct TextEditor : View {
 /// can customize the appearance and interaction of text fields using the
 /// ``View/textFieldStyle(_:)`` modifier, passing in an instance of
 /// ``TextFieldStyle``. The following example applies the
-/// ``RoundedBorderTextFieldStyle`` to both text fields within a ``VStack``.
+/// ``TextFieldStyle/roundedBorder`` style to both text fields within a ``VStack``.
 ///
 ///     @State private var givenName: String = ""
 ///     @State private var familyName: String = ""
@@ -27505,7 +27692,7 @@ public struct TextEditor : View {
 ///                 text: $familyName)
 ///                 .disableAutocorrection(true)
 ///         }
-///         .textFieldStyle(RoundedBorderTextFieldStyle())
+///         .textFieldStyle(.roundedBorder)
 ///     }
 /// ![Two vertically-stacked text fields, with the prompt text Given Name and
 /// Family Name, both with rounded
@@ -27606,10 +27793,10 @@ extension TextField where Label == Text {
     ///   - onCommit: An action to perform when the user performs an action
     ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
     public init(_ titleKey: LocalizedStringKey, text: Binding<String>, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {})
 
     /// Creates a text field with a text label generated from a title string.
@@ -27625,10 +27812,10 @@ extension TextField where Label == Text {
     ///   - onCommit: An action to perform when the user performs an action
     ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:text:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
     public init<S>(_ title: S, text: Binding<String>, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {}) where S : StringProtocol
 }
 
@@ -27839,10 +28026,10 @@ extension TextField where Label == Text {
     ///   - onCommit: An action to perform when the user performs an action
     ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter..")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
     public init<T>(_ titleKey: LocalizedStringKey, value: Binding<T>, formatter: Formatter, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {})
 
     /// Create an instance which binds over an arbitrary type, `T`.
@@ -27862,10 +28049,10 @@ extension TextField where Label == Text {
     ///   - onCommit: An action to perform when the user performs an action
     ///     (for example, when the user presses the Return key) while the text
     ///     field has focus.
-    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
-    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use View.onFocus(_:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
+    @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "Renamed TextField.init(_:value:formatter:onEditingChanged:). Use View.onSubmit(of:_:) for functionality previously provided by the onCommit parameter. Use FocusState<T> and View.focused(_:equals:) for functionality previously provided by the onEditingChanged parameter.")
     public init<S, T>(_ title: S, value: Binding<T>, formatter: Formatter, onEditingChanged: @escaping (Bool) -> Void = { _ in }, onCommit: @escaping () -> Void = {}) where S : StringProtocol
 }
 
@@ -27992,9 +28179,9 @@ extension TextSelectability where Self == DisabledTextSelectability {
 /// a sequence of dates. Use a timeline schedule type when you initialize
 /// a ``TimelineView``. For example, you can create a timeline view that
 /// updates every second, starting from some `startDate`, using a
-/// ``PeriodicTimelineSchedule``:
+/// periodic schedule returned by ``TimelineSchedule/periodic(from:by:)``:
 ///
-///     TimelineView(PeriodicTimelineSchedule(from: startDate, by: 1.0)) { context in
+///     TimelineView(.periodic(from: startDate, by: 1.0)) { context in
 ///         // View content goes here.
 ///     }
 ///
@@ -28023,9 +28210,9 @@ public protocol TimelineSchedule {
     /// when to update its content. The method returns a sequence of dates in
     /// increasing order that represent points in time when the timeline view
     /// should update. Types that conform to the ``TimelineSchedule`` protocol,
-    /// like ``PeriodicTimelineSchedule``, or a custom schedule that you define,
-    /// implement a custom version of this method to implement a particular
-    /// kind of schedule.
+    /// like the one returned by ``TimelineSchedule/periodic(from:by:)``, or a custom schedule that
+    /// you define, implement a custom version of this method to implement a
+    /// particular kind of schedule.
     ///
     /// One or more dates in the sequence might be before the given
     /// `startDate`, in which case the timeline view performs its first
@@ -28044,7 +28231,7 @@ public protocol TimelineSchedule {
     ///     func entries(
     ///         from startDate: Date, mode: TimelineScheduleMode
     ///     ) -> PeriodicTimelineSchedule {
-    ///         PeriodicTimelineSchedule(
+    ///         .periodic(
     ///             from: startDate, by: (mode == .lowFrequency ? 60.0 : 1.0)
     ///         )
     ///     }
@@ -28240,7 +28427,7 @@ extension TimelineScheduleMode : Hashable {
 /// it redraws the content it contains at scheduled points in time.
 /// For example, you can update the face of an analog timer once per second:
 ///
-///     TimelineView(PeriodicTimelineSchedule(from: startDate, by: 1)) { context in
+///     TimelineView(.periodic(from: startDate, by: 1)) { context in
 ///         AnalogTimerView(date: context.date)
 ///     }
 ///
@@ -28255,7 +28442,7 @@ extension TimelineScheduleMode : Hashable {
 /// can use the cadence to decide when it's appropriate to display the
 /// timer's second hand:
 ///
-///     TimelineView(PeriodicTimelineSchedule(from: startDate, by: 1.0)) { context in
+///     TimelineView(.periodic(from: startDate, by: 1.0)) { context in
 ///         AnalogTimerView(
 ///             date: context.date,
 ///             showSeconds: context.cadence <= .seconds)
@@ -28268,11 +28455,11 @@ extension TimelineScheduleMode : Hashable {
 ///
 /// You can define a custom schedule by creating a type that conforms to the
 /// ``TimelineSchedule`` protocol, or use one of the built-in schedule types:
-/// * Use an ``EveryMinuteTimelineSchedule`` to update at the beginning of
-///   each minute.
-/// * Use a ``PeriodicTimelineSchedule`` to update periodically with a custom
-///   start time and interval between updates.
-/// * Use an ``ExplicitTimelineSchedule`` when you need a finite number, or
+/// * Use an ``TimelineSchedule/everyMinute`` schedule to update at the
+///   beginning of each minute.
+/// * Use a ``TimelineSchedule/periodic(from:by:)`` schedule to update
+///   periodically with a custom start time and interval between updates.
+/// * Use an ``TimelineSchedule/explicit(_:)`` schedule when you need a finite number, or
 ///   irregular set of updates.
 ///
 /// For a schedule containing only dates in the past,
@@ -28369,9 +28556,9 @@ public struct TimelineView<Schedule, Content> where Schedule : TimelineSchedule 
         ///
         /// The first time a ``TimelineView`` closure receives this date, it
         /// might be in the past. For example, if you create an
-        /// ``EveryMinuteTimelineSchedule`` at `10:09:55`, the schedule
-        /// creates entries `10:09:00`, `10:10:00`, `10:11:00`, and so on.
-        /// In response, the timeline view performs an initial update
+        /// ``TimelineSchedule/everyMinute`` schedule at `10:09:55`, the
+        /// schedule creates entries `10:09:00`, `10:10:00`, `10:11:00`, and so
+        /// on. In response, the timeline view performs an initial update
         /// immediately, at `10:09:55`, but the context contains the `10:09:00`
         /// date entry. Subsequent entries arrive at their corresponding times.
         public let date: Date
@@ -28410,7 +28597,7 @@ extension TimelineView : View where Content : View {
     ///   - schedule: A schedule that produces a sequence of dates that
     ///     indicate the instances when the view should update.
     ///     Use a type that conforms to ``TimelineSchedule``, like
-    ///     ``EveryMinuteTimelineSchedule``, or a custom timeline schedule
+    ///     ``TimelineSchedule/everyMinute``, or a custom timeline schedule
     ///     that you define.
     ///   - content: A closure that generates view content at the moments
     ///     indicated by the schedule. The closure takes an input of type
@@ -28517,7 +28704,7 @@ public struct TitleOnlyLabelStyle : LabelStyle {
 ///         Toggle("Vibrate on Ring", isOn: $vibrateOnRing)
 ///         Toggle("Vibrate on Silent", isOn: $vibrateOnSilent)
 ///     }
-///     .toggleStyle(SwitchToggleStyle())
+///     .toggleStyle(.switch)
 ///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Toggle<Label> : View where Label : View {
@@ -30520,7 +30707,7 @@ extension View {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 14.0, *)
 extension View {
 
     /// Adds an action to perform when this view recognizes a long press
@@ -30872,7 +31059,7 @@ extension View {
     ///         Button("Sign In", action: signIn)
     ///         Button("Register", action: register)
     ///     }
-    ///     .buttonStyle(BorderedButtonStyle())
+    ///     .buttonStyle(.bordered)
     ///
     public func buttonStyle<S>(_ style: S) -> some View where S : PrimitiveButtonStyle
 
@@ -32004,7 +32191,7 @@ extension View {
     ///             content
     ///                 .padding()
     ///                 .containerShape(shape)
-    ///                 .background(shape.fill(BackgroundStyle()))
+    ///                 .background(shape.fill(.background))
     ///         }
     ///         var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 20) }
     ///     }
@@ -32303,7 +32490,7 @@ extension View {
     ///         Button("Sign In", action: signIn)
     ///         Button("Register", action: register)
     ///     }
-    ///     .buttonStyle(BorderedButtonStyle())
+    ///     .buttonStyle(.bordered)
     ///
     public func buttonStyle<S>(_ style: S) -> some View where S : ButtonStyle
 
@@ -33027,7 +33214,7 @@ extension View {
     /// In the following example, the button appears with increased prominence:
     ///
     ///     Button("Button") {}
-    ///         .buttonStyle(BorderedButtonStyle())
+    ///         .buttonStyle(.bordered)
     ///         .tint(.blue)
     ///         .controlProminence(.increased)
     ///
@@ -33046,7 +33233,7 @@ extension View {
     ///         }
     ///         .headerProminence(.increased)
     ///     }
-    ///     .listStyle(InsetGroupedListStyle())
+    ///     .listStyle(.insetGrouped)
     ///
     /// - Parameter prominence: The prominence to apply.
     public func headerProminence(_ prominence: Prominence) -> some View
@@ -33090,35 +33277,6 @@ extension View {
     ///
     /// - Parameter visibility: The menu indicator visibility to apply.
     @inlinable public func menuIndicator(_ visibility: Visibility) -> some View
-
-
-    /// Sets the menu indicator visibility for controls within this view.
-    ///
-    /// Use this modifier to override the default menu indicator
-    /// visibility for controls in this view. For example, the code below
-    /// creates a menu without an indicator:
-    ///
-    ///     Menu {
-    ///         ForEach(history , id: \.self) { historyItem in
-    ///             Button(historyItem.title) {
-    ///                 self.openURL(historyItem.url)
-    ///             }
-    ///         }
-    ///     } label: {
-    ///         Label("Back", systemImage: "chevron.backward")
-    ///             .labelStyle(.iconOnly)
-    ///     } primaryAction: {
-    ///         if let last = history.last {
-    ///             self.openURL(last.url)
-    ///         }
-    ///     }
-    ///     .menuIndicatorVisibility(.hidden)
-    ///
-    /// - Parameter menuIndicatorVisibility: The menu indicator visibility to
-    ///   apply.
-    @available(iOS, deprecated: 15.0, renamed: "menuIndicator(_:)")
-    @available(macOS, deprecated: 12.0, renamed: "menuIndicator(_:)")
-    @inlinable public func menuIndicatorVisibility(_ menuIndicatorVisibility: Visibility) -> some View
 
 }
 
@@ -36087,16 +36245,17 @@ extension View {
     /// Presents an alert when an error is present.
     ///
     /// In the example below, a button conditionally presents an alert depending
-    /// upon the value of a bound error. When the error value isn't `nil`,
-    /// the system presents an alert with an "OK" action.
+    /// upon the value of an error. When the error value isn't `nil`, the system
+    /// presents an alert with an "OK" action.
     ///
     /// The title of the alert is inferred from the error's `errorDescription`.
     ///
     ///     struct TicketPurchaseView: View {
     ///         @Binding var error: TicketPurchaseError?
+    ///         @State var showAlert = false
     ///         var body: some View {
     ///             TicketForm(error: $error)
-    ///                 .alert(error: $error) {
+    ///                 .alert(isPresented: $showAlert, error: error) {
     ///                     Button("OK") {
     ///                         // Handle acknowledgement.
     ///                     }
@@ -36139,16 +36298,17 @@ extension View {
     /// Presents an alert with a message when an error is present.
     ///
     /// In the example below, a button conditionally presents an alert depending
-    /// upon the value of a bound error. When the error value isn't `nil`,
-    /// the system presents an alert with an "OK" action.
+    /// upon the value of an error. When the error value isn't `nil`, the system
+    /// presents an alert with an "OK" action.
     ///
     /// The title of the alert is inferred from the error's `errorDescription`.
     ///
     ///     struct TicketPurchaseView: View {
     ///         @Binding var error: TicketPurchaseError?
+    ///         @State var showAlert = false
     ///         var body: some View {
     ///             TicketForm(error: $error)
-    ///                 .alert(error: $error) {
+    ///                 .alert(isPresented: $showAlert, error: error) {
     ///                     Button("OK") {
     ///                         // Handle acknowledgement.
     ///                     }
@@ -36278,42 +36438,6 @@ extension View {
     public func listRowSeparator(_ visibility: Visibility, edges: VerticalEdge.Set = .all) -> some View
 
 
-    /// Sets the display mode for the separator associated with this specific row.
-    ///
-    /// Separators can be presented above and below a row. You can specify to
-    /// which edge this preference should apply.
-    ///
-    /// This modifier expresses a preference to the containing ``List``. The list
-    /// style is the final arbiter of the separator visibility.
-    ///
-    /// The following example shows a simple grouped list whose row separators
-    /// are hidden:
-    ///
-    ///     List {
-    ///         ForEach(garage.cars) { car in
-    ///             Text(car.model)
-    ///                 .listRowSeparatorVisibility(.hidden)
-    ///         }
-    ///     }
-    ///     .listStyle(.grouped)
-    ///
-    /// To change the color of a row separators, use
-    /// ``View/listRowSeparatorTint(_:edges:)``.
-    /// To hide or change the tint color for a section separators, use
-    /// ``View/listSectionSeparator(_:edges:)`` and
-    /// ``View/listSectionSeparatorTint(_:edges:)``.
-    ///
-    /// - Parameters:
-    ///     - visibility: The visibility of this row's separators.
-    ///     - edges: The set of row edges for which this preference applies.
-    ///         The list style might already decide to not display separators for
-    ///         some edges, typically the top edge. The default is
-    ///         ``VerticalEdge/Set/all``.
-    ///
-    @available(iOS, deprecated: 15.0, renamed: "listRowSeparator(_:edges:)")
-    public func listRowSeparatorVisibility(_ visibility: Visibility, edges: VerticalEdge.Set = .all) -> some View
-
-
     /// Sets the tint color associated with a row.
     ///
     /// Separators can be presented above and below a row. You can specify to
@@ -36393,46 +36517,6 @@ extension View {
     ///         some edges. The default is ``VerticalEdge/Set/all``.
     ///
     public func listSectionSeparator(_ visibility: Visibility, edges: VerticalEdge.Set = .all) -> some View
-
-
-    /// Sets whether to hide the separator associated with a list section.
-    ///
-    /// Separators can be presented above and below a section. You can specify to
-    /// which edge this preference should apply.
-    ///
-    /// This modifier expresses a preference to the containing ``List``. The list
-    /// style is the final arbiter of the separator visibility.
-    ///
-    /// The following example shows a simple grouped list whose bottom
-    /// sections separator are hidden:
-    ///
-    ///     List {
-    ///         ForEach(garage) { garage in
-    ///             Section(header: Text(garage.location)) {
-    ///                 ForEach(garage.cars) { car in
-    ///                     Text(car.model)
-    ///                         .listRowSeparatorTint(car.brandColor)
-    ///                 }
-    ///             }
-    ///             .listSectionSeparatorVisibility(.hidden, edges: .bottom)
-    ///         }
-    ///     }
-    ///     .listStyle(.grouped)
-    ///
-    /// To change the visibility and tint color for a row separator, use
-    /// ``View/listRowSeparator(_:edges:)`` and
-    /// ``View/listRowSeparatorTint(_:edges:)``.
-    /// To set the tint color for a section separator, use
-    /// ``View/listSectionSeparatorTint(_:edges:)``.
-    ///
-    /// - Parameters:
-    ///     - visibility: The visibility of this section's separators.
-    ///     - edges: The set of row edges for which the preference applies.
-    ///         The list style might already decide to not display separators for
-    ///         some edges. The default is ``VerticalEdge/Set/all``.
-    ///
-    @available(iOS, deprecated: 15.0, renamed: "listSectionSeparator(_:edges:)")
-    public func listSectionSeparatorVisibility(_ visibility: Visibility, edges: VerticalEdge.Set = .all) -> some View
 
 
     /// Sets the tint color associated with a section.
@@ -36908,7 +36992,7 @@ extension View {
     ///         Toggle("Vibrate on Ring", isOn: $vibrateOnRing)
     ///         Toggle("Vibrate on Silent", isOn: $vibrateOnSilent)
     ///     }
-    ///     .toggleStyle(SwitchToggleStyle())
+    ///     .toggleStyle(.switch)
     ///
     /// - Parameter style: The style to set.
     public func toggleStyle<S>(_ style: S) -> some View where S : ToggleStyle
@@ -37618,7 +37702,7 @@ extension View {
     ///   - id: The identifier, often derived from the identifier of
     ///     the data being displayed by the view.
     ///   - namespace: The namespace in which defines the `id`. New
-    ///     namespaces are created by adding an `@Namespace()` variable
+    ///     namespaces are created by adding an `@Namespace` variable
     ///     to a ``View`` type and reading its value in the view's body
     ///     method.
     ///   - properties: The properties to copy from the source view.
@@ -37755,7 +37839,7 @@ extension View {
     /// Pink, and Orange, with Purple selected. The right column presents a
     /// detail view that shows a purple square.](View-navigationViewStyle-1)
     ///
-    /// You can apply ``StackNavigationViewStyle`` to force
+    /// You can apply the ``NavigationViewStyle/stack`` style to force
     /// single-column stack navigation in these environments:
     ///
     ///     NavigationView {
@@ -37822,9 +37906,9 @@ extension View {
     /// Controls that detect this action can change their appearance and provide
     /// a way for the user to execute a refresh.
     ///
-    /// When you apply this modifier on iOS and iPadOS to a scrollable view like
-    /// ``List``, the view provides a standard way for the
-    /// user to refresh the content. When the user drags the top of the scrollable
+    /// When you apply this modifier on iOS and iPadOS to a ``List``, the list
+    /// provides a standard way for the user to refresh the content.
+    /// When the user drags the top of the scrollable
     /// content area downward, the view reveals a refresh control and executes
     /// the provided action. Use an `await` expression inside the action to
     /// refresh your data. The refresh indicator remains visible for the
@@ -37887,6 +37971,7 @@ extension View {
     ///         .textSelection(.enabled)
     ///     }
     ///
+    /// Text selection is not supported inside ``Button`` views on iOS.
     public func textSelection<S>(_ selectability: S) -> some View where S : TextSelectability
 
 }
@@ -38002,36 +38087,6 @@ extension View {
     ///   changes to text immediately or enqueues them behind existing speech.
     ///   Defaults to `true`.
     public func speechAnnouncementsQueued(_ value: Bool = true) -> some View
-
-
-    /// Sets an International Phonetic Alphabet representation of the text to use when
-    /// pronouncing strings.
-    ///
-    /// Use this modifier to specify the pronunciation of words that have the same spelling
-    /// but different sounds. For example, consider the different pronunciations of the word
-    /// "live" in the following two sentences:
-    ///
-    ///  - "Anne wants to live on Main Street."
-    ///  - "Maria wants to go to the live concert."
-    ///
-    /// In the first sentence, “live” rhymes with "give."  In the second, it rhymes with "hive".
-    /// The code below shows how to compose these two sentences using a series
-    /// of ``Text`` views that use the  `speechPhoneticRepresentation(_:)` modifier
-    /// where you want VoiceOver to produce a specific pronunciation:
-    ///
-    ///     Text(“Anne wants to “) +
-    ///     Text(“live”)
-    ///         . speechPhoneticRepresentation(“lɪv”) +
-    ///     Text(“ on Main Street.”)
-    ///
-    ///     Text(“Maria wants to go to the“)+
-    ///     Text(“live”)
-    ///         . speechPhoneticRepresentation(“laɪv”) +
-    ///     Text(“ concert.”)
-    ///
-    /// - Parameter value: A string that uses the International Phonetic Alphabet to represent how
-    ///   the system should pronounce the text.
-    public func speechPhoneticRepresentation(_ value: String) -> some View
 
 }
 
@@ -38316,7 +38371,10 @@ extension View {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+@available(iOS, introduced: 15.0, deprecated: 15.0, message: "onFocus(_:) will be removed from a future seed. Use FocusState<T> and View.focused(_:equals:) to update view state as focus changes. Use View.onChange(_:) to perform focus-related side-effects.")
+@available(macOS, introduced: 12.0, deprecated: 12.0, message: "onFocus(_:) will be removed from a future seed. Use FocusState<T> and View.focused(_:equals:) to update view state as focus changes. Use View.onChange(_:) to perform focus-related side-effects.")
+@available(tvOS, introduced: 15.0, deprecated: 15.0, message: "onFocus(_:) will be removed from a future seed. Use FocusState<T> and View.focused(_:equals:) to update view state as focus changes. Use View.onChange(_:) to perform focus-related side-effects.")
+@available(watchOS, introduced: 8.0, deprecated: 8.0, message: "onFocus(_:) will be removed from a future seed. Use FocusState<T> and View.focused(_:equals:) to update view state as focus changes. Use View.onChange(_:) to perform focus-related side-effects.")
 extension View {
 
     /// Adds an action to perform whenever the modified view hierarchy gains or
@@ -40088,7 +40146,7 @@ extension View {
     /// "circular" style:
     ///
     ///     ProgressView()
-    ///         .progressViewStyle(CircularProgressViewStyle())
+    ///         .progressViewStyle(.circular)
     ///
     /// - Parameter style: The progress view style to use for this view.
     public func progressViewStyle<S>(_ style: S) -> some View where S : ProgressViewStyle
@@ -40811,83 +40869,6 @@ extension View {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
-extension View {
-
-    /// Sets a background material for the view.
-    ///
-    /// Use this method to blur the background of a view by adding a material.
-    /// For example, you can place the ``Material/regular`` material below a
-    /// padded ``Label``:
-    ///
-    ///     ZStack {
-    ///         Color.teal
-    ///         Label("Flag", systemImage: "flag.fill")
-    ///             .padding()
-    ///             .backgroundMaterial(.regular)
-    ///     }
-    ///
-    /// The region covered by the material appears blurred:
-    ///
-    /// ![A screenshot of a label composed of a flag symbol and the word flag on
-    /// a teal background. A small rectangular area directly behind the label
-    /// is blurred.](View-backgroundMaterial-1)
-    ///
-    /// The material background can extend into the
-    /// ``SafeAreaRegions/container`` safe area region.
-    /// SwiftUI renders the foreground elements of a view with
-    /// a material background vibrantly, unless you set a custom
-    /// foreground style or color with ``View/foregroundStyle(_:)`` or
-    /// ``View/foregroundColor(_:)``, respectively. However, you can use
-    /// the hierarchical styles, like ``SecondaryContentStyle``, without
-    /// disabling vibrancy.
-    ///
-    /// If you want to provide a shape for the material,
-    /// use ``View/backgroundMaterial(_:in:)`` instead.
-    /// For more information about how materials behave, see ``Material``.
-    ///
-    /// - Parameters:
-    ///     - material: A material effect to use when rendering the background.
-    ///
-    /// - Returns: A view that uses the given `material` for its background.
-    @available(*, deprecated, renamed: "background(_:)")
-    public func backgroundMaterial(_ material: Material) -> some View
-
-
-    /// Sets a background material for the view, clipped to a shape.
-    ///
-    /// This modifier behaves like ``View/backgroundMaterial(_:)``, except that
-    /// it clips the background material to the given shape.
-    /// For example, you can place the ``Material/regular`` material below a
-    /// padded ``Label``:
-    ///
-    ///     ZStack {
-    ///         Color.teal
-    ///         Label("Flag", systemImage: "flag.fill")
-    ///             .padding()
-    ///             .backgroundMaterial(.regular, in: RoundedRectangle(cornerRadius: 8))
-    ///     }
-    ///
-    /// The shaped region covered by the material appears blurred:
-    ///
-    /// ![A screenshot of a label composed of a flag symbol and the word flag on
-    /// a teal background. A small rectangular area directly behind the label
-    /// is blurred. The blurred rectangle has rounded
-    /// corners.](View-backgroundMaterial-2)
-    ///
-    /// For more information about how materials behave, see ``Material``.
-    ///
-    /// - Parameters:
-    ///     - material: A material effect to use when rendering the background.
-    ///     - shape: A shape that acts as a mask for the material effect.
-    ///
-    /// - Returns: A view that uses the given `material` clipped to a specific
-    ///     `shape` for its background.
-    @available(*, deprecated, renamed: "background(_:in:)")
-    public func backgroundMaterial<S>(_ material: Material, in shape: S) -> some View where S : Shape
-
-}
-
 @available(iOS 14.0, macOS 11.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -41251,7 +41232,7 @@ extension View {
     ///         RoundedRectangle(cornerRadius: 5)
     ///             .frame(width: 40, height: 20)
     ///     }
-    ///     .foregroundStyle(Color.teal)
+    ///     .foregroundStyle(.teal)
     ///
     /// The example above creates a row of ``ShapeStyle/teal`` foreground
     /// elements:
@@ -41260,8 +41241,9 @@ extension View {
     /// rectangle.](View-foregroundStyle-1)
     ///
     /// You can use any style that conforms to the ``ShapeStyle`` protocol,
-    /// like the ``Color`` in the example above, or the gradient returned by
-    /// ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)`` shown below:
+    /// like the ``ShapeStyle/teal`` color in the example above, or the
+    /// ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)`` gradient
+    /// shown below:
     ///
     ///     Text("Gradient Text")
     ///         .font(.largeTitle)
@@ -41286,7 +41268,7 @@ extension View {
     /// can have different light and dark appearances, while some styles
     /// also vary by platform.
     ///
-    /// Hierarchical foreground styles like ``SecondaryContentStyle``
+    /// Hierarchical foreground styles like ``ShapeStyle/secondary``
     /// don't impose a style of their own, but instead modify other styles.
     /// In particular, they modify the primary
     /// level of the current foreground style to the degree given by
@@ -41300,7 +41282,7 @@ extension View {
     ///     VStack(alignment: .leading) {
     ///         Label("Primary", systemImage: "1.square.fill")
     ///         Label("Secondary", systemImage: "2.square.fill")
-    ///             .foregroundStyle(SecondaryContentStyle())
+    ///             .foregroundStyle(.secondary)
     ///     }
     ///
     /// ![A screenshot of two labels with the text primary and secondary.
@@ -41313,9 +41295,9 @@ extension View {
     ///     VStack(alignment: .leading) {
     ///         Label("Primary", systemImage: "1.square.fill")
     ///         Label("Secondary", systemImage: "2.square.fill")
-    ///             .foregroundStyle(SecondaryContentStyle())
+    ///             .foregroundStyle(.secondary)
     ///     }
-    ///     .foregroundStyle(Color.blue)
+    ///     .foregroundStyle(.blue)
     ///
     /// ![A screenshot of two labels with the text primary and secondary.
     /// The first appears in a brighter shade than the
@@ -41330,10 +41312,11 @@ extension View {
     ///
     /// - Parameter style: The color or pattern to use when filling in the
     ///   foreground elements. To indicate a specific value, use ``Color`` or
-    ///   ``ImagePaint``, or one of the gradient types returned by a method like
-    ///   ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)``.
-    ///   To set a style that’s relative to the containing view's style,
-    ///   use one of the semantic styles, like ``PrimaryContentStyle``.
+    ///   ``ShapeStyle/image(_:sourceRect:scale:)``, or one of the gradient
+    ///   types, like
+    ///   ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)``. To set a
+    ///   style that’s relative to the containing view's style, use one of the
+    ///   semantic styles, like ``ShapeStyle/primary``.
     ///
     /// - Returns: A view that uses the given foreground style.
     @inlinable public func foregroundStyle<S>(_ style: S) -> some View where S : ShapeStyle
@@ -41353,11 +41336,11 @@ extension View {
     /// - Parameters:
     ///   - primary: The primary color or pattern to use when filling in
     ///     the foreground elements. To indicate a specific value, use ``Color``
-    ///     or ``ImagePaint``, or one of the gradient types returned by a method
-    ///     like ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)``.
-    ///     To set a style that's relative to the containing
-    ///     view's style, use one of the semantic styles, like
-    ///     ``PrimaryContentStyle``.
+    ///     or ``ShapeStyle/image(_:sourceRect:scale:)``, or one of the gradient
+    ///     types, like
+    ///     ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)``. To set a
+    ///     style that’s relative to the containing view's style, use one of the
+    ///     semantic styles, like ``ShapeStyle/primary``.
     ///   - secondary: The secondary color or pattern to use when
     ///     filling in the foreground elements.
     ///
@@ -41379,11 +41362,11 @@ extension View {
     /// - Parameters:
     ///   - primary: The primary color or pattern to use when filling in
     ///     the foreground elements. To indicate a specific value, use ``Color``
-    ///     or ``ImagePaint``, or one of the gradient types returned by a method
-    ///     like ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)``.
-    ///     To set a style that’s relative to the containing
-    ///     view's style, use one of the semantic styles, like
-    ///     ``PrimaryContentStyle``.
+    ///     or ``ShapeStyle/image(_:sourceRect:scale:)``, or one of the gradient
+    ///     types, like
+    ///     ``ShapeStyle/linearGradient(colors:startPoint:endPoint:)``. To set a
+    ///     style that’s relative to the containing view's style, use one of the
+    ///     semantic styles, like ``ShapeStyle/primary``.
     ///   - secondary: The secondary color or pattern to use when
     ///     filling in the foreground elements.
     ///   - tertiary: The tertiary color or pattern to use when
@@ -41876,7 +41859,7 @@ extension View {
     ///     alert and replaces it with a new one using the same process.
     ///   - content: A closure returning the alert to present.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
-    @available(macOS, introduced: 10.15, deprecated: 10000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
     public func alert<Item>(item: Binding<Item?>, content: (Item) -> Alert) -> some View where Item : Identifiable
@@ -41913,7 +41896,7 @@ extension View {
     ///     which dismisses the alert.
     ///   - content: A closure returning the alert to present.
     @available(iOS, introduced: 13.0, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
-    @available(macOS, introduced: 10.15, deprecated: 10000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
+    @available(macOS, introduced: 10.15, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
     @available(tvOS, introduced: 13.0, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
     @available(watchOS, introduced: 6.0, deprecated: 100000.0, message: "use `alert(title:isPresented:presenting::actions:) instead.")
     public func alert(isPresented: Binding<Bool>, content: () -> Alert) -> some View
@@ -43052,6 +43035,9 @@ extension AttributeScopes {
 
         /// A property for accessing a baseline offset attribute.
         public let baselineOffset: AttributeScopes.SwiftUIAttributes.BaselineOffsetAttribute
+
+        /// A property for accessing attributes defined by the Accessibility framework.
+        public let accessibility: AttributeScopes.AccessibilityAttributes
 
         /// A property for accessing attributes defined by the Foundation framework.
         public let foundation: AttributeScopes.FoundationAttributes
